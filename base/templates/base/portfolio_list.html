@@ -1,0 +1,20 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block main %}
+    <div class="swiper portfolio">
+        <div class="swiper-wrapper">
+            {% for object in object_list %}
+                <div class="swiper-slide">
+                    <div class="card">
+                        <a href="{% url 'base:portfolio_detail' object.slug %}"><h1 class="card-title"
+                        >{{ object.title }}</h1></a>
+                        <img src="{{ object.featured_photo.url }}" alt="{{ object.alt }}">
+                        <a href="{% url 'base:portfolio_detail' object.slug %}" class="btn btn-card">Read more... </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+    </div>
+{% endblock %}

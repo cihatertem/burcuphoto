@@ -1,0 +1,17 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block main %}
+    <section class="hero">
+        <div class="greeting">
+            <h1><em>Welcome!</em></h1>
+            <p>Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for
+                previewing layouts and visual mockups.</p>
+            <a href="{% url 'base:portfolio' %}" class="btn btn-greeting">Explore <span class="arrow">&#8594;</span></a>
+        </div>
+
+        <div class="hero-photo">
+            <img src="{% static 'images/burcu.png' %}" alt="Burcu Atak's photo">
+        </div>
+    </section>
+{% endblock %}

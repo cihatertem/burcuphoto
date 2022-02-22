@@ -1,0 +1,34 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block main %}
+    <h1 class="contact-title">Touch Me...</h1>
+    <div class="card-box">
+        <section class="media-card">
+            <h2>Other Mediums</h2>
+            <div class="socials">
+                <a href="https://www.twitter.com" target="_blank"><img class="social-icon" src=
+                        "{% static 'icons/social-twitter.svg' %}"> </a>
+                <a href="https://www.facebook.com" target="_blank"><img class="social-icon"
+                                                                        src="{% static 'icons/social-facebook.svg' %}"></a>
+                <a href="https://www.instagram.com" target="_blank"><img class="social-icon"
+                                                                         src="{% static 'icons/social-instagram.svg' %}"></a>
+                <a href="https://www.linkedin.com" target="_blank"><img class="social-icon"
+                                                                        src="{% static 'icons/social-linkedin.svg' %}"></a>
+            </div>
+        </section>
+
+        <section class="email-card">
+            <h2>Email Me...</h2>
+            <form method="POST" class="form-group" id="email-form">
+                {% csrf_token %}
+                <label for="name">Your Name:</label>
+                <input type="text" name="name" id="name">
+                <label for="email">Your Email:</label>
+                <input type="email" name="email" id="email" placeholder="  example@mail.com">
+                <label for="message">Your Message:</label>
+                <textarea rows="10" name="message" id="message"></textarea>
+                <input class="btn btn-submit" type="submit" value="Send">
+            </form>
+        </section>
+    </div>
+{% endblock %}

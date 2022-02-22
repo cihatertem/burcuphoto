@@ -1,0 +1,7 @@
+/.env
+/images/
+/venv/
+/.idea/
+/db.sqlite3
+/static/images/projects/
+/base/migrations/

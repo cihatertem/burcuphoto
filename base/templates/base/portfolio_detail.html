@@ -1,0 +1,36 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block main %}
+    <section class="project">
+        <a href="#top" class="btn btn-up">&#8679;</a>
+        <a href="{% if request.META.HTTP_REFERER %}
+        {{ request.META.HTTP_REFERER }}
+        {% else %}
+        {% url 'base:portfolio' %}
+        {% endif %} " class="btn btn-back"><span class="arrow">&#8592;</span>Back</a>
+        <h1 id="project-title" class="project-title"><em>{{ project.title }}</em></h1>
+        <div class="photo-flow">
+            {% for portfolio in project.projectportfolio_set.all %}
+                <img data-photoIndex="{{ forloop.counter }}" class="photo-flow-img" src="{{ portfolio.photo.url }}"
+                     alt="{{ portfolio.alt }}">
+            {% endfor %}
+        </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block photo_zoom %}
+
+    <div class="swiper photo-zoom">
+        <button href="" class="btn btn-swiper-close">&#10005;</button>
+        <div class="swiper-wrapper photo-zoom-wrapper">
+            {% for portfolio in project.projectportfolio_set.all %}
+                <img class="swiper-slide photo-zoom-img" src="{{ portfolio.photo.url }}"
+                     alt="{{ portfolio.alt }}">
+            {% endfor %}
+        </div>
+        <div class="swiper-button-prev zoom"></div>
+        <div class="swiper-button-next zoom"></div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,23 @@
+<header>
+    <div class="logo">
+        <a id="logo" href="{% url 'base:home' %}" class="logo">Burcu Atak | Photography</a>
+    </div>
+
+    <nav class="navbar">
+        <a href="{% url 'base:about' %}" class="nav-link">About</a>
+        <a href="{% url 'base:portfolio' %}" class="nav-link">Portfolio</a>
+        <a href="{% url 'base:contact' %}" class="nav-link">Contact</a>
+        <div class="theme-switcher">
+            <input class="theme-checkbox" type="checkbox" name="" id="checkbox">
+            <label for="checkbox" class="theme-label" id="theme-label">
+                <i class="moon"><span>&#9790;</span></i>
+                <i class="sun"><span>&#9788;</span></i>
+                <div class="ball"></div>
+            </label>
+        </div>
+    </nav>
+
+    <div class="nav-button">
+        ☰
+    </div>
+</header>

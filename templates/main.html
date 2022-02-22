@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css"/>
+    <link id="css" rel="stylesheet" href="{% static 'style/main-dark.css' %}">
+    <title>Burcu Atak | Photography</title>
+</head>
+<body>
+<p id="top"></p>
+{% include "includes/navbar.html" %}
+{% if messages %}
+    <div class="messages">
+        <button class="btn-messages">&#10005;</button>
+        {% for message in messages %}
+            <p {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+<div class="container">
+    <main>
+        {% block main %}
+
+        {% endblock %}
+    </main>
+    <footer>
+        <p> Copyright © Burcu Atak | Design by Cihat Ertem </p>
+    </footer>
+</div>
+
+{% block photo_zoom %}
+
+{% endblock %}
+
+<script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
+<script src="{% static 'script/script.js' %}"></script>
+</body>
+</html>
