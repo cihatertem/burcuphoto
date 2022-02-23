@@ -22,11 +22,11 @@
             <form method="POST" class="form-group" id="email-form">
                 {% csrf_token %}
                 <label for="name">Your Name:</label>
-                <input type="text" name="name" id="name">
+                <input type="text" name="name" id="name" required>
                 <label for="email">Your Email:</label>
-                <input type="email" name="email" id="email" placeholder="  example@mail.com">
+                <input type="email" name="email" id="email" placeholder="  example@mail.com" required>
                 <label for="message">Your Message:</label>
-                <textarea rows="10" name="message" id="message"></textarea>
+                <textarea rows="8" name="message" id="message" required></textarea>
                 <input class="btn btn-submit" type="submit" value="Send">
             </form>
         </section>

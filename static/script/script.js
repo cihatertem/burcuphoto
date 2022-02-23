@@ -126,8 +126,7 @@ const swiper1 = new Swiper('.portfolio', {
         prevEl: '.swiper-button-prev',
     },
     breakpoints: {
-        // when window width is >= 320px
-        480: {
+        576: {
             slidesPerView: 1,
         },
         786: {

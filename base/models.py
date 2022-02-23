@@ -1,6 +1,9 @@
 from django.db import models
 import uuid
-from base.utils import project_directory_path, portfolio_directory_path
+from base.utils import project_directory_path, portfolio_directory_path, photo_resizer
+from PIL import Image
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import sys
 
 
 # Create your models here.
@@ -16,6 +19,15 @@ class Project(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self):
+        image = Image.open(self.featured_photo)
+        if image.height > 780 or image.width > 780:
+            output = photo_resizer(image, 780)
+            self.featured_photo = InMemoryUploadedFile(output, 'ImageField',
+                                                       "%s.jpg" % self.featured_photo.name.split('.')[0],
+                                                       'image/jpeg', sys.getsizeof(output), None)
+        super(Project, self).save()
+
 
 class ProjectPortfolio(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
@@ -27,3 +39,12 @@ class ProjectPortfolio(models.Model):
 
     def __str__(self):
         return self.project.slug
+
+    def save(self):
+        image = Image.open(self.photo)
+        if image.height > 780 or image.width > 780:
+            output = photo_resizer(image, 780)
+            self.photo = InMemoryUploadedFile(output, 'ImageField',
+                                              "%s.jpg" % self.photo.name.split('.')[0],
+                                              'image/jpeg', sys.getsizeof(output), None)
+        super(ProjectPortfolio, self).save()

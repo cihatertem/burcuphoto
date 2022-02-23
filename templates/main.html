@@ -5,7 +5,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css"/>
+    <meta name="description" content="Burcu Atak's personal photography portfolio website"/>
+    <meta name="author" content="Burcu Atak">
+    <meta name="keywords" content="Burcu Atak, photography, fotoğraf, portfolio">
+    <link rel=" stylesheet
+    " href="https://unpkg.com/swiper@7/swiper-bundle.min.css"/>
     <link id="css" rel="stylesheet" href="{% static 'style/main-dark.css' %}">
     <title>Burcu Atak | Photography</title>
 </head>
@@ -21,6 +25,7 @@
     </div>
 {% endif %}
 <div class="container">
+    <div class="empty"></div>
     <main>
         {% block main %}
 
@@ -30,12 +35,11 @@
         <p> Copyright © Burcu Atak | Design by Cihat Ertem </p>
     </footer>
 </div>
-
 {% block photo_zoom %}
 
 {% endblock %}
 
-<script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
+<script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
 <script src="{% static 'script/script.js' %}"></script>
 </body>
 </html>
