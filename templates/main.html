@@ -8,8 +8,7 @@
     <meta name="description" content="Burcu Atak's personal photography portfolio website"/>
     <meta name="author" content="Burcu Atak">
     <meta name="keywords" content="Burcu Atak, photography, fotoğraf, portfolio">
-    <link rel=" stylesheet
-    " href="https://unpkg.com/swiper@7/swiper-bundle.min.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css"/>
     <link id="css" rel="stylesheet" href="{% static 'style/main-dark.css' %}">
     <title>Burcu Atak | Photography</title>
 </head>
@@ -32,6 +31,20 @@
         {% endblock %}
     </main>
     <footer>
+        <div class="footer-socials">
+            <a href="https://www.twitter.com" target="_blank">
+                <img class="footer-social-icon" src="{% static 'icons/social-twitter.svg' %}">
+            </a>
+            <a href="https://www.facebook.com/burcu.atak.589" target="_blank">
+                <img class="footer-social-icon" src="{% static 'icons/social-facebook.svg' %}">
+            </a>
+            <a href="https://www.instagram.com/burcu__atak/" target="_blank">
+                <img class="footer-social-icon" src="{% static 'icons/social-instagram.svg' %}">
+            </a>
+            <a href="https://www.linkedin.com/in/burcu-atak-115814232/" target="_blank">
+                <img class="footer-social-icon" src="{% static 'icons/social-linkedin.svg' %}">
+            </a>
+        </div>
         <p> Copyright © Burcu Atak | Design by Cihat Ertem </p>
     </footer>
 </div>

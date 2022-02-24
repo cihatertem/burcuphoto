@@ -8,12 +8,12 @@
             <div class="socials">
                 <a href="https://www.twitter.com" target="_blank"><img class="social-icon" src=
                         "{% static 'icons/social-twitter.svg' %}"> </a>
-                <a href="https://www.facebook.com" target="_blank"><img class="social-icon"
-                                                                        src="{% static 'icons/social-facebook.svg' %}"></a>
-                <a href="https://www.instagram.com" target="_blank"><img class="social-icon"
-                                                                         src="{% static 'icons/social-instagram.svg' %}"></a>
-                <a href="https://www.linkedin.com" target="_blank"><img class="social-icon"
-                                                                        src="{% static 'icons/social-linkedin.svg' %}"></a>
+                <a href="https://www.facebook.com/burcu.atak.589" target="_blank"><img class="social-icon"
+                                                                                       src="{% static 'icons/social-facebook.svg' %}"></a>
+                <a href="https://www.instagram.com/burcu__atak/" target="_blank"><img class="social-icon"
+                                                                                      src="{% static 'icons/social-instagram.svg' %}"></a>
+                <a href="https://www.linkedin.com/in/burcu-atak-115814232/" target="_blank"><img class="social-icon"
+                                                                                                 src="{% static 'icons/social-linkedin.svg' %}"></a>
             </div>
         </section>
 
@@ -21,12 +21,9 @@
             <h2>Email Me...</h2>
             <form method="POST" class="form-group" id="email-form">
                 {% csrf_token %}
-                <label for="name">Your Name:</label>
-                <input type="text" name="name" id="name" required>
-                <label for="email">Your Email:</label>
-                <input type="email" name="email" id="email" placeholder="  example@mail.com" required>
-                <label for="message">Your Message:</label>
-                <textarea rows="8" name="message" id="message" required></textarea>
+                <input type="text" name="name" id="name" required placeholder="Type your name...">
+                <input type="email" name="email" id="email" placeholder="example@mail.com" required>
+                <textarea rows="8" name="message" id="message" required placeholder="Your message..."></textarea>
                 <input class="btn btn-submit" type="submit" value="Send">
             </form>
         </section>

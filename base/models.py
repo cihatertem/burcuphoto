@@ -21,6 +21,7 @@ class Project(models.Model):
 
     def save(self):
         image = Image.open(self.featured_photo)
+
         if image.height > 780 or image.width > 780:
             output = photo_resizer(image, 780)
             self.featured_photo = InMemoryUploadedFile(output, 'ImageField',
@@ -42,6 +43,7 @@ class ProjectPortfolio(models.Model):
 
     def save(self):
         image = Image.open(self.photo)
+
         if image.height > 780 or image.width > 780:
             output = photo_resizer(image, 780)
             self.photo = InMemoryUploadedFile(output, 'ImageField',

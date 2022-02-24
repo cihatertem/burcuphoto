@@ -72,7 +72,7 @@ div.nav-button {
 
 header .nav-link {
     font-size: 1.3rem;
-    margin-left: 4rem;
+    margin-left: 2rem;
     display: inline-block;
     position: relative;
     color: var(--font-main);
@@ -80,8 +80,7 @@ header .nav-link {
 }
 
 header .nav-link:hover, header .logo:hover {
-    color: var(--font-main);
-    opacity: .57;
+    color: rgba(246, 188, 46, 0.57);
     transition: all .2s linear;
 }
 
@@ -93,7 +92,7 @@ header .nav-link:hover, header .logo:hover {
     height: 2px;
     bottom: 0;
     left: 0;
-    background-color: var(--font-main);
+    background-color: rgba(246, 188, 46, 0.57);
     transform-origin: bottom right;
     transition: transform 0.25s ease-out;
 }
@@ -131,9 +130,31 @@ footer {
     text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.25);
     display: flex;
     justify-content: center;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
     align-self: flex-end;
     margin-bottom: .5rem;
+}
+
+.footer-socials {
+    display: flex;
+    justify-content: space-between;
+    width: 20rem;
+    margin-top: 1rem;
+}
+
+.footer-social-icon {
+    width: 1.2rem;
+    filter: invert(87%) sepia(20%) saturate(327%) hue-rotate(334deg) brightness(109%) contrast(89%);
+    color: var(--bg-main);
+    transition: all .2s linear;
+}
+
+.footer-social-icon:hover {
+    transform: scale(150%);
+    filter: invert(99%) sepia(32%) saturate(3292%) hue-rotate(304deg) brightness(95%) contrast(116%);
+    transition: all .2s linear;
 }
 
 .btn {
@@ -414,7 +435,7 @@ section.about {
     display: flex;
     background-color: var(--bg-main);
     border-radius: 4rem;
-    padding: 2rem;
+    padding: 2.5rem;
     filter: drop-shadow(8px 5px 6px rgba(0, 0, 0, 0.25));
 }
 
@@ -426,7 +447,7 @@ section.about {
 }
 
 .about-me h1 {
-    font-size: 2.2rem;
+    font-size: 2rem;
     margin-bottom: 2rem;
     text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.25);
 }
@@ -452,7 +473,7 @@ section.about {
 
 .card-box {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
     flex-wrap: wrap;
 }
 
@@ -511,22 +532,20 @@ section.email-card h2 {
     height: 60%;
     justify-content: space-evenly;
     align-items: center;
-    margin-top: -2rem;
-}
-
-#email-form label {
-    margin: .5rem 0;
+    margin-top: -1rem;
 }
 
 #email-form #name, #email-form #email {
-    line-height: 1.5rem;
+    line-height: 1.2rem;
 }
 
 #email-form input, #email-form textarea {
-    width: 60%;
+    width: 75%;
     color: var(--bg-main);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
     border-radius: .5rem;
+    margin-bottom: 1rem;
+    padding: 0 .3rem;
 }
 
 #email-form input:focus, #email-form textarea:focus {
@@ -764,6 +783,10 @@ input.btn-submit {
         line-height: normal;
     }
 
+    footer {
+        margin-top: .5rem;
+    }
+
     footer p {
         font-size: .9rem;
     }
@@ -773,12 +796,14 @@ input.btn-submit {
     }
 
     section.media-card {
-        height: 10rem;
+        height: 8rem;
+        padding-top: 1.5rem;
         margin-bottom: 2rem;
+        justify-content: center;
     }
 
     section.media-card h2, section.media-card .socials {
-        margin: 2rem 0 0 0;
+        margin: 1rem 0 0 0;
     }
 
     section.email-card {
@@ -792,6 +817,10 @@ input.btn-submit {
     .btn-swiper-close {
         top: 3rem;
         margin-right: 2rem;
+    }
+
+    .social-icon {
+        width: 2.5rem;
     }
 }
 

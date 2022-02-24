@@ -3,9 +3,14 @@ from django.urls import path, include
 # static media urls
 from django.conf import settings
 from django.conf.urls.static import static
+#  dotenv
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 urlpatterns = [
-    path('panda/admin', admin.site.urls),
+    path(os.getenv("ADMIN_ADDRESS"), admin.site.urls),
     path('', include('base.urls', namespace='base')),
 ]
 

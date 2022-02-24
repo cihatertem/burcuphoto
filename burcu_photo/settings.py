@@ -26,7 +26,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG")
+if os.getenv("DEBUG") == "False":
+    DEBUG = False
+elif os.getenv("DEBUG") == "True":
+    DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -120,13 +123,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "static/"
+    BASE_DIR / "static/",
 ]
 
-STATIC_ROOT = BASE_DIR / "staticfiles/"
-
-MEDIA_URL = "images/"
-MEDIA_ROOT = BASE_DIR / "static/images/"
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -140,3 +141,9 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
+if os.getenv("DEBUG") == "False":
+    STATIC_ROOT = BASE_DIR / 'staticfiles/'
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
