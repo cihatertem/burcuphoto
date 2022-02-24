@@ -1,23 +1,26 @@
 {% extends 'main.html' %}
 {% load static %}
 {% block main %}
-    <div class="swiper portfolio">
-        <div class="swiper-wrapper">
-            {% for object in object_list %}
-                <div class="swiper-slide">
-                    <div class="card">
-                        <a class="title-link" href="{% url 'base:portfolio_detail' object.slug %}"><h1
-                                class="card-title"
-                        >{{ object.title }}</h1></a>
-                        <img onclick="window.location.href='{% url 'base:portfolio_detail' object.slug %}'"
-                             src="{{ object.featured_photo.url }}" alt=
-                                     "{{ object.alt }}">
-                        <a href="{% url 'base:portfolio_detail' object.slug %}" class="btn btn-card">Read more... </a>
+    {% if project_list %}
+        <div class="swiper portfolio">
+            <div class="swiper-wrapper">
+                {% for object in object_list %}
+                    <div class="swiper-slide">
+                        <div class="card">
+                            <a class="title-link" href="{% url 'base:portfolio_detail' object.slug %}"><h1
+                                    class="card-title"
+                            >{{ object.title }}</h1></a>
+                            <img onclick="window.location.href='{% url 'base:portfolio_detail' object.slug %}'"
+                                 src="{{ object.featured_photo.url }}" alt=
+                                         "{{ object.alt }}">
+                            <a href="{% url 'base:portfolio_detail' object.slug %}" class="btn btn-card">Read
+                                more... </a>
+                        </div>
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
         </div>
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
-    </div>
+    {% endif %}
 {% endblock %}
