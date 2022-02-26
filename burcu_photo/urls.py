@@ -3,6 +3,7 @@ from django.urls import path, include
 # static media urls
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 #  dotenv
 import os
 from dotenv import load_dotenv
@@ -12,6 +13,7 @@ load_dotenv()
 urlpatterns = [
     path(os.getenv("ADMIN_ADDRESS"), admin.site.urls),
     path('', include('base.urls', namespace='base')),
+    path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'))
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
