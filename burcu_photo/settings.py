@@ -31,7 +31,7 @@ if os.getenv("DEBUG") == "False":
 elif os.getenv("DEBUG") == "True":
     DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [os.getenv("AlLOWED_ONE"), os.getenv("AlLOWED_TWO")]
 
 # Application definition
 
