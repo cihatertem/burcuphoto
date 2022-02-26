@@ -7,10 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Burcu Atak's personal photography portfolio website"/>
     <meta name="author" content="Burcu Atak">
-    <meta name="keywords" content="Burcu Atak, photography, fotoğraf, portfolio">
+    <meta name="keywords" content={% block keywords %}"Burcu Atak, photography, fotoğraf, portfolio"{% endblock %}>
     <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css"/>
     <link id="css" rel="stylesheet" href="{% static 'style/main-dark.css' %}">
-    <title>Burcu Atak | Photography</title>
+    <title>{% block title %}Burcu Atak &#8211 Photography{% endblock title %}</title>
 </head>
 <body>
 <p id="top"></p>

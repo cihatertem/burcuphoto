@@ -1,15 +1,20 @@
 {% extends 'main.html' %}
 {% load static %}
+{% block keywords %}"Burcu Atak, portfolio, photography, portfolyo, fotoğraf"{% endblock %}
+{% block title %}
+    Portfolio
+{% endblock %}
 {% block main %}
     {% if object_list %}
+        <h1 class="portfolio-title">Portfolio</h1>
         <div class="swiper portfolio">
             <div class="swiper-wrapper">
                 {% for object in object_list %}
                     <div class="swiper-slide">
                         <div class="card">
-                            <a class="title-link" href="{% url 'base:portfolio_detail' object.slug %}"><h1
+                            <a class="title-link" href="{% url 'base:portfolio_detail' object.slug %}"><h2
                                     class="card-title"
-                            >{{ object.title }}</h1></a>
+                            >{{ object.title }}</h2></a>
                             <img onclick="window.location.href='{% url 'base:portfolio_detail' object.slug %}'"
                                  src="{{ object.featured_photo.url }}" alt=
                                          "{{ object.alt }}">

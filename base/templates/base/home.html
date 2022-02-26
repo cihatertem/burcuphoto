@@ -1,12 +1,17 @@
 {% extends 'main.html' %}
 {% load static %}
-
+{% block title %}
+    Burcu Atak Photography
+{% endblock %}
 {% block main %}
     <section class="hero">
         <div class="greeting">
-            <h1><em>Welcome!</em></h1>
-            <p>I share my photos that I have compiled especially from my travels and other works on my website. <br>
-                Hope you like my collection...</p>
+            <p>
+                <em>Welcome!</em>
+                <br>
+                I share my photos that I have compiled especially from my travels and other works on my website. <br>
+                Hope you like my collection...
+            </p>
             <a href="{% url 'base:portfolio' %}" class="btn btn-greeting">Explore <span class="arrow">&#8594;</span></a>
         </div>
 

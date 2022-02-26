@@ -44,9 +44,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # project apps
     "base.apps.BaseConfig",
+    # site map
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
     # third parties
     'django_cleanup.apps.CleanupConfig',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
