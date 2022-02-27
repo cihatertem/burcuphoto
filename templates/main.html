@@ -18,12 +18,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Burcu Atak's personal photography portfolio website"/>
+    <meta name="description" content="{% block meta-description %}{% endblock %}"/>
     <meta name="author" content="Burcu Atak">
-    <meta name="keywords" content={% block keywords %}"Burcu Atak, photography, fotoğraf, portfolio"{% endblock %}>
+    <meta name="keywords" content="{% block meta-keywords %}Burcu Atak, photography, fotoğraf, portfolio{% endblock %}">
     <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css"/>
     <link id="css" rel="stylesheet" href="{% static 'style/main-dark.css' %}">
-    <title>{% block title %}Burcu Atak &#8211 Photography{% endblock title %}</title>
+    <title>{% block meta-title %}{% endblock %}</title>
 </head>
 <body>
 <p id="top"></p>

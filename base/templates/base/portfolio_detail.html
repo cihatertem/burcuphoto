@@ -1,8 +1,9 @@
 {% extends 'main.html' %}
 {% load static %}
-{% block title %}
-    {{ project.slug }} &#8211 Burcu Atak Photography
-{% endblock %}
+{% block meta-description %}{% if project.meta_title %}{{ project.meta_title }}{% else %}{{ project.slug }}
+{% endif %}{% endblock %}
+{% block meta-title %}{% if project.meta_title %}{{ project.meta_title }}{% else %}{{ project.slug }}
+{% endif %}{% endblock %}
 {% block main %}
     <section class="project">
         <a href="#top" class="btn btn-up">&#8679;</a>

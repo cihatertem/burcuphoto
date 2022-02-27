@@ -10,6 +10,8 @@ import sys
 class Project(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     title = models.CharField(max_length=200, verbose_name="Title")
+    meta_title = models.CharField(max_length=100, verbose_name="Meta Title", null=True, blank=True)
+    meta_description = models.CharField(max_length=200, verbose_name="Meta Description", null=True, blank=True)
     slug = models.SlugField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
