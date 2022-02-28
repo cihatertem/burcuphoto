@@ -561,7 +561,7 @@ section.email-card h2 {
 }
 
 input.btn-submit {
-    margin-top: 1rem;
+    margin-top: .5rem;
     color: var(--font-second) !important;
     height: 3rem !important;
     padding: .5rem 0;
@@ -752,7 +752,7 @@ input.btn-submit {
     }
 
     .contact-title {
-        margin-bottom: 1rem;
+        margin-bottom: .8rem;
     }
 }
 
@@ -803,7 +803,7 @@ input.btn-submit {
     section.media-card {
         height: 8rem;
         padding-top: 1.5rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         justify-content: center;
     }
 
@@ -812,7 +812,11 @@ input.btn-submit {
     }
 
     section.email-card {
-        height: 28rem;
+        height: 26rem;
+    }
+
+    #email-form {
+        margin-bottom: -1.5rem;
     }
 
     .photo-flow-img {
