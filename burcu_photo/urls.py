@@ -13,7 +13,8 @@ load_dotenv()
 urlpatterns = [
     path(os.getenv("ADMIN_ADDRESS"), admin.site.urls),
     path('', include('base.urls', namespace='base')),
-    path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'))
+    path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    path('yandex_697c73042871080e.html', TemplateView.as_view(template_name='yandex_697c73042871080e.html'))
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
