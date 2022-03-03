@@ -1,6 +1,6 @@
 {% extends 'main.html' %}
 {% load static %}
-{% block meta-description %}{% if project.meta_title %}{{ project.meta_title }}{% else %}{{ project.slug }}
+{% block meta-description %}{% if project.meta_description %}{{ project.meta_description }}{% else %}{{ project.slug }}
 {% endif %}{% endblock %}
 {% block meta-title %}{% if project.meta_title %}{{ project.meta_title }}{% else %}{{ project.slug }}
 {% endif %}{% endblock %}
