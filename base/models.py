@@ -41,6 +41,11 @@ class ProjectPortfolio(models.Model):
     index = models.IntegerField(default=0, blank=True, null=True)
     updated = models.DateTimeField(auto_now=True)
 
+
+    class Meta:
+        ordering = ('index',)
+
+
     def __str__(self):
         return self.project.slug
 
