@@ -6,7 +6,8 @@
 {% endif %}{% endblock %}
 {% block main %}
     <section class="project">
-        <a href="#top" class="btn btn-up">&#8679;</a>
+        <a href="#top" class="btn btn-up"><img role="img" class="arrow arrow-up"
+                                               src="{% static 'icons/arrow-up-short.svg' %}"></a>
         <a href="{% if request.META.HTTP_REFERER %}
         {{ request.META.HTTP_REFERER }}
         {% else %}

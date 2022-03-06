@@ -357,6 +357,11 @@ section.hero {
     filter: drop-shadow(8px 5px 6px rgba(0, 0, 0, 0.25));
 }
 
+.arrow-up {
+    filter: invert(97%) sepia(4%) saturate(1582%) hue-rotate(325deg) brightness(101%) contrast(89%);
+    width: 3rem;
+}
+
 .project-title {
     font-size: 2rem;
     font-weight: bold;
