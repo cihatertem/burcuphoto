@@ -21,5 +21,5 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(ProjectPortfolio)
 class ProjectPortfolioAdmin(admin.ModelAdmin):
-    ordering = ["project", "created"]
+    ordering = ["index", "project", "created"]
     list_display = ["project", "alt", "created", "updated"]

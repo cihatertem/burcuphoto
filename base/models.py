@@ -38,6 +38,7 @@ class ProjectPortfolio(models.Model):
     photo = models.ImageField(max_length=200, upload_to=portfolio_directory_path)
     alt = models.CharField(max_length=100, blank=True, null=True, help_text="Fotoğraf için alt metin.")
     created = models.DateTimeField(auto_now_add=True)
+    index = models.IntegerField(default=0, blank=True, null=True)
     updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
