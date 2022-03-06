@@ -18,7 +18,7 @@ class PortfolioList(ListView):
 class PortfolioDetail(DetailView):
     template_name = 'base/portfolio_detail.html'
     model = Project
-    # queryset = Project.objects.all().ordered('index')
+    queryset = Project.objects.all().order_by('index')
 
 
 class About(TemplateView):
