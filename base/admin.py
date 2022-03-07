@@ -18,6 +18,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_editable = ('draft',)
     list_filter = ('created', 'updated', "draft")
     search_fields = ('title',)
+    list_per_page = 25
 
     def link(self, obj: Project) -> str:
         return format_html(
@@ -30,5 +31,7 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(ProjectPortfolio)
 class ProjectPortfolioAdmin(admin.ModelAdmin):
-    ordering = ("index", "project", "created")
+    ordering = ("project", "created")
     list_display = ("project", "alt", "created", "updated")
+    list_filter = ("project", 'created', 'updated')
+    list_per_page = 25

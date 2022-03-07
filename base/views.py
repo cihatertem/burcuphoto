@@ -13,13 +13,12 @@ class HomeView(TemplateView):
 
 class PortfolioList(ListView):
     template_name = 'base/portfolio_list.html'
-    model = Project
     queryset = Project.objects.filter(draft=False)
 
 
 class PortfolioDetail(DetailView):
     template_name = 'base/portfolio_detail.html'
-    model = Project
+    queryset = Project.objects.filter(draft=False)
 
 
 class About(TemplateView):
@@ -50,11 +49,9 @@ class Contact(TemplateView):
 
 class DraftList(LoginRequiredMixin, ListView):
     template_name = 'base/portfolio_list.html'
-    model = Project
     queryset = Project.objects.filter(draft=True)
 
 
 class DraftDetail(LoginRequiredMixin, DetailView):
     template_name = 'base/portfolio_detail.html'
-    model = Project
     queryset = Project.objects.filter(draft=True)
