@@ -18,4 +18,6 @@ urlpatterns = [
     path('portfolio/<slug:slug>/', views.PortfolioDetail.as_view(), name='portfolio_detail'),
     path('about/', views.About.as_view(), name="about"),
     path('contact/', views.Contact.as_view(), name="contact"),
+    path('draft/', views.DraftList.as_view(), name='draft'),
+    path('draft/<slug:slug>/', views.DraftDetail.as_view(), name='draft_detail'),
 ]

@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
-from django.views.generic import TemplateView, ListView, DetailView, FormView
+from django.views.generic import TemplateView, ListView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Project
 from django.core.mail import send_mail
 from django.contrib import messages
@@ -13,6 +14,7 @@ class HomeView(TemplateView):
 class PortfolioList(ListView):
     template_name = 'base/portfolio_list.html'
     model = Project
+    queryset = Project.objects.filter(draft=False)
 
 
 class PortfolioDetail(DetailView):
@@ -44,3 +46,15 @@ class Contact(TemplateView):
         messages.success(request, "Your message was sent successfully.\nWe will touch you back soon.")
 
         return redirect("base:home")
+
+
+class DraftList(LoginRequiredMixin, ListView):
+    template_name = 'base/portfolio_list.html'
+    model = Project
+    queryset = Project.objects.filter(draft=True)
+
+
+class DraftDetail(LoginRequiredMixin, DetailView):
+    template_name = 'base/portfolio_detail.html'
+    model = Project
+    queryset = Project.objects.filter(draft=True)

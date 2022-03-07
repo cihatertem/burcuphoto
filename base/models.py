@@ -17,6 +17,8 @@ class Project(models.Model):
     updated = models.DateTimeField(auto_now=True)
     featured_photo = models.ImageField(max_length=200, upload_to=project_directory_path)
     alt = models.CharField(max_length=100, blank=True, null=True, help_text="Fotoğraf için alt metin.")
+    draft = models.BooleanField(default=True)
+    project_link = models.URLField(max_length=300, null=True, blank=True)
 
     def __str__(self):
         return self.title
@@ -29,6 +31,11 @@ class Project(models.Model):
             self.featured_photo = InMemoryUploadedFile(output, 'ImageField',
                                                        "%s.jpg" % self.featured_photo.name.split('.')[0],
                                                        'image/jpeg', sys.getsizeof(output), None)
+        if self.draft:
+            self.project_link = f'https://burcuatak.com/draft/{self.slug}/'
+        elif not self.draft:
+            self.project_link = f'https://burcuatak.com/portfolio/{self.slug}/'
+
         super(Project, self).save()
 
 
