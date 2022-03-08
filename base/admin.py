@@ -34,4 +34,5 @@ class ProjectPortfolioAdmin(admin.ModelAdmin):
     ordering = ("project", "created")
     list_display = ("project", "alt", "created", "updated")
     list_filter = ("project", 'created', 'updated')
+    search_fields = ('project',)
     list_per_page = 25
