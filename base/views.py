@@ -4,6 +4,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Project
 from django.core.mail import send_mail
 from django.contrib import messages
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # Create your views here.
@@ -37,9 +41,10 @@ class Contact(TemplateView):
             f"""
             From {name}, {email},\n
             \t{body}
+            Site: www.burcuatak.com
             """,
             email,
-            ['atakburcu@gmail.com', 'cihatertem@gmail.com'],
+            [os.getenv("EMAIL_RECEIVER_ONE"), os.getenv("EMAIL_RECEIVER_TWO")],
             fail_silently=False,
         )
         messages.success(request, "Your message was sent successfully.\nWe will touch you back soon.")
