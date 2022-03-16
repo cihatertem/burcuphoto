@@ -194,6 +194,12 @@ section.hero {
     right: -10000px;
 }
 
+.portfoliopage-title {
+    position: fixed;
+    top: 0;
+    right: -10000px;
+}
+
 .greeting p em {
     margin-bottom: 1rem;
     text-shadow: 3px 2px 3px rgba(0, 0, 0, 0.25);

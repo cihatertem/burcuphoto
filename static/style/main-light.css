@@ -188,6 +188,12 @@ section.hero {
     flex-direction: column;
 }
 
+.portfoliopage-title {
+    position: fixed;
+    top: 0;
+    right: -10000px;
+}
+
 .greeting-title {
     position: fixed;
     top: 0;
