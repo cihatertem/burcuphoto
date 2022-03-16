@@ -11,14 +11,15 @@
                 {% for object in object_list %}
                     <div class="swiper-slide">
                         <div class="card">
-                            <a class="title-link" href="{% url 'base:portfolio_detail' object.slug %}"><h2
-                                    class="card-title"
-                            >{{ object.title }}</h2></a>
+                            <a class="title-link" href="{% url 'base:portfolio_detail' object.slug %}">
+                                <h2 class="card-title">{{ object.title }}</h2>
+                            </a>
                             <img onclick="window.location.href='{% url 'base:portfolio_detail' object.slug %}'"
-                                 src="{{ object.featured_photo.url }}" alt=
-                                         "{{ object.alt }}">
-                            <a href="{% url 'base:portfolio_detail' object.slug %}" class="btn btn-card">Read
-                                more... </a>
+                                 src="{{ object.featured_photo.url }}"
+                                 alt="{{ object.alt }}">
+                            <a href="{% url 'base:portfolio_detail' object.slug %}" class="btn btn-card">
+                                Read more...
+                            </a>
                         </div>
                     </div>
                 {% endfor %}
