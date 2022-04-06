@@ -1,4 +1,4 @@
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Project
@@ -6,6 +6,8 @@ from django.core.mail import send_mail
 from django.contrib import messages
 import os
 from dotenv import load_dotenv
+from random import random
+import math
 
 load_dotenv()
 
@@ -31,6 +33,14 @@ class About(TemplateView):
 
 class Contact(TemplateView):
     template_name = "base/contact.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(Contact, self).get_context_data(**kwargs)
+        num_one = math.floor(random() * 10) + 1
+        num_two = math.floor(random() * 10) + 1
+        context["num1"] = num_one
+        context["num2"] = num_two
+        return context
 
     def post(self, request, *args, **kwargs):
         name = request.POST.get("name")

@@ -595,6 +595,25 @@ input.btn-submit {
   cursor: pointer;
 }
 
+
+.captcha {
+  margin-top: -.5rem;
+  margin-bottom: -1rem;
+}
+
+#captcha {
+  margin-left: .3rem;
+  width: 32px !important;
+  -moz-appearance: textfield;
+  text-align: center;
+}
+
+#captcha::-webkit-outer-spin-button,
+#captcha::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .messages {
   width: 20rem;
   height: 10rem;
