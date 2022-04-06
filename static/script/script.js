@@ -163,7 +163,7 @@ if (numOne && numTwo) {
   let totalNum = numOne + numTwo
   let captchaNum
 
-  captcha.addEventListener("change", e => {
+  captcha.addEventListener("keyup", e => {
     captchaNum = e.target.value
     captchaNum = parseInt(captchaNum)
     captcha.setCustomValidity("")
