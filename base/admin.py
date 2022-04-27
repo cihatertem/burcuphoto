@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project, ProjectPortfolio
+from .models import Project, ProjectPortfolio, SpamFilter
 from django.utils.html import format_html
 
 
@@ -35,4 +35,13 @@ class ProjectPortfolioAdmin(admin.ModelAdmin):
     list_display = ("project", "alt", "created", "updated")
     list_filter = ("project", 'created', 'updated')
     search_fields = ('project',)
+    list_per_page = 25
+
+
+@admin.register(SpamFilter)
+class SpamFilterAdmin(admin.ModelAdmin):
+    ordering = ("keyword",)
+    list_display = ("keyword",)
+    list_filter = ("keyword", 'created')
+    search_fields = ('keyword',)
     list_per_page = 25

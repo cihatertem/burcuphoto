@@ -1,13 +1,14 @@
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Project
+from .models import Project, SpamFilter
 from django.core.mail import send_mail
 from django.contrib import messages
 import os
 from dotenv import load_dotenv
 from random import random
 import math
+from .utils import spam_checker
 
 load_dotenv()
 
@@ -46,6 +47,13 @@ class Contact(TemplateView):
         name = request.POST.get("name")
         email = request.POST.get("email")
         body = request.POST.get("message")
+
+        if spam_checker(body):
+            messages.success(
+                request, "Your message was not sent .\nDONT MAKE SPAM!")
+
+            return redirect("base:home")
+
         send_mail(
             'Web Site Visitor',
             f"""
@@ -57,7 +65,8 @@ class Contact(TemplateView):
             [os.getenv("EMAIL_RECEIVER_ONE"), os.getenv("EMAIL_RECEIVER_TWO")],
             fail_silently=False,
         )
-        messages.success(request, "Your message was sent successfully.\nWe will touch you back soon.")
+        messages.success(
+            request, "Your message was sent successfully.\nWe will touch you back soon.")
 
         return redirect("base:home")
 

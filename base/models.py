@@ -8,15 +8,20 @@ import sys
 
 # Create your models here.
 class Project(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    id = models.UUIDField(default=uuid.uuid4, unique=True,
+                          primary_key=True, editable=False)
     title = models.CharField(max_length=200, verbose_name="Title")
-    meta_title = models.CharField(max_length=100, verbose_name="Meta Title", null=True, blank=True)
-    meta_description = models.CharField(max_length=200, verbose_name="Meta Description", null=True, blank=True)
+    meta_title = models.CharField(
+        max_length=100, verbose_name="Meta Title", null=True, blank=True)
+    meta_description = models.CharField(
+        max_length=200, verbose_name="Meta Description", null=True, blank=True)
     slug = models.SlugField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    featured_photo = models.ImageField(max_length=200, upload_to=project_directory_path)
-    alt = models.CharField(max_length=100, blank=True, null=True, help_text="Fotoğraf için alt metin.")
+    featured_photo = models.ImageField(
+        max_length=200, upload_to=project_directory_path)
+    alt = models.CharField(max_length=100, blank=True,
+                           null=True, help_text="Fotoğraf için alt metin.")
     draft = models.BooleanField(default=True)
     project_link = models.URLField(max_length=300, null=True, blank=True)
 
@@ -29,7 +34,8 @@ class Project(models.Model):
         if image.height > 780 or image.width > 780:
             output = photo_resizer(image, 780)
             self.featured_photo = InMemoryUploadedFile(output, 'ImageField',
-                                                       "%s.jpg" % self.featured_photo.name.split('.')[0],
+                                                       "%s.jpg" % self.featured_photo.name.split('.')[
+                                                           0],
                                                        'image/jpeg', sys.getsizeof(output), None)
         if self.draft:
             self.project_link = f'https://burcuatak.com/draft/{self.slug}/'
@@ -40,18 +46,19 @@ class Project(models.Model):
 
 
 class ProjectPortfolio(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    id = models.UUIDField(default=uuid.uuid4, unique=True,
+                          primary_key=True, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    photo = models.ImageField(max_length=200, upload_to=portfolio_directory_path)
-    alt = models.CharField(max_length=100, blank=True, null=True, help_text="Fotoğraf için alt metin.")
+    photo = models.ImageField(
+        max_length=200, upload_to=portfolio_directory_path)
+    alt = models.CharField(max_length=100, blank=True,
+                           null=True, help_text="Fotoğraf için alt metin.")
     created = models.DateTimeField(auto_now_add=True)
     index = models.IntegerField(default=0, blank=True, null=True)
     updated = models.DateTimeField(auto_now=True)
 
-
     class Meta:
         ordering = ('index',)
-
 
     def __str__(self):
         return self.project.slug
@@ -62,6 +69,17 @@ class ProjectPortfolio(models.Model):
         if image.height > 780 or image.width > 780:
             output = photo_resizer(image, 780)
             self.photo = InMemoryUploadedFile(output, 'ImageField',
-                                              "%s.jpg" % self.photo.name.split('.')[0],
+                                              "%s.jpg" % self.photo.name.split('.')[
+                                                  0],
                                               'image/jpeg', sys.getsizeof(output), None)
         super(ProjectPortfolio, self).save()
+
+
+class SpamFilter(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True,
+                          primary_key=True, editable=False)
+    keyword = models.CharField(max_length=50)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.keyword
