@@ -15,24 +15,29 @@ load_dotenv()
 
 # Create your views here.
 class HomeView(TemplateView):
+    __slot__ = "template_name"
     template_name = 'base/home.html'
 
 
 class PortfolioList(ListView):
+    __slot__ = "template_name", "queryset"
     template_name = 'base/portfolio_list.html'
     queryset = Project.objects.filter(draft=False)
 
 
 class PortfolioDetail(DetailView):
+    __slot__ = "template_name", "queryset"
     template_name = 'base/portfolio_detail.html'
     queryset = Project.objects.filter(draft=False)
 
 
 class About(TemplateView):
+    __slot__ = "template_name"
     template_name = "base/about.html"
 
 
 class Contact(TemplateView):
+    __slot__ = "template_name"
     template_name = "base/contact.html"
 
     def get_context_data(self, **kwargs):
@@ -72,10 +77,12 @@ class Contact(TemplateView):
 
 
 class DraftList(LoginRequiredMixin, ListView):
+    __slot__ = "template_name", "queryset"
     template_name = 'base/portfolio_list.html'
     queryset = Project.objects.filter(draft=True)
 
 
 class DraftDetail(LoginRequiredMixin, DetailView):
+    __slot__ = "template_name", "queryset"
     template_name = 'base/portfolio_detail.html'
     queryset = Project.objects.filter(draft=True)
