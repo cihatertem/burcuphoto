@@ -8,6 +8,7 @@ import sys
 
 # Create your models here.
 class Project(models.Model):
+    __slot__ = "id", "title", "meta_title", "meta_description", "slug", "created", "updated", "featured_photo", "alt", "draft", "project_link"
     id = models.UUIDField(default=uuid.uuid4, unique=True,
                           primary_key=True, editable=False)
     title = models.CharField(max_length=200, verbose_name="Title")
@@ -46,6 +47,7 @@ class Project(models.Model):
 
 
 class ProjectPortfolio(models.Model):
+    __slot__ = "id", "project", "photo", "alt", "created", "index", "updated"
     id = models.UUIDField(default=uuid.uuid4, unique=True,
                           primary_key=True, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
@@ -76,6 +78,7 @@ class ProjectPortfolio(models.Model):
 
 
 class SpamFilter(models.Model):
+    __slot__ = "id", "keyword", "created"
     id = models.UUIDField(default=uuid.uuid4, unique=True,
                           primary_key=True, editable=False)
     keyword = models.CharField(max_length=50)
