@@ -38,6 +38,7 @@ class Project(models.Model):
                                                        "%s.jpg" % self.featured_photo.name.split('.')[
                                                            0],
                                                        'image/jpeg', sys.getsizeof(output), None)
+        image.close()
         if self.draft:
             self.project_link = f'https://burcuatak.com/draft/{self.slug}/'
         elif not self.draft:
@@ -74,6 +75,7 @@ class ProjectPortfolio(models.Model):
                                               "%s.jpg" % self.photo.name.split('.')[
                                                   0],
                                               'image/jpeg', sys.getsizeof(output), None)
+        image.close()
         super(ProjectPortfolio, self).save()
 
 
