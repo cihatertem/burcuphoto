@@ -8,7 +8,7 @@
     {% if project_list %}
         <div class="swiper portfolio">
             <div class="swiper-wrapper">
-                {% for object in object_list %}
+                {% for object in project_list %}
                     <div class="swiper-slide">
                         <div class="card">
                             <a class="title-link" href="{% url 'base:portfolio_detail' object.slug %}">

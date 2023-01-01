@@ -9,12 +9,22 @@ from dotenv import load_dotenv
 from random import random
 import math
 from .utils import spam_checker
+from datetime import date
 
 load_dotenv()
 
+YEAR = date.today().year
+
 
 # Create your views here.
-class HomeView(TemplateView):
+class YearContext(TemplateView):
+    def get_context_data(self, **kwargs):
+        context = super(YearContext, self).get_context_data(**kwargs)
+        context["year"] = YEAR
+        return context
+
+
+class HomeView(YearContext, TemplateView):
     __slot__ = "template_name"
     template_name = 'base/home.html'
 
@@ -24,19 +34,28 @@ class PortfolioList(ListView):
     template_name = 'base/portfolio_list.html'
     queryset = Project.objects.filter(draft=False)
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data()
+        context["year"] = YEAR
+        return context
 
-class PortfolioDetail(DetailView):
+
+class PortfolioDetail( DetailView):
     __slot__ = "template_name", "queryset"
     template_name = 'base/portfolio_detail.html'
     queryset = Project.objects.filter(draft=False)
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data()
+        context["year"] = YEAR
+        return context
 
-class About(TemplateView):
+class About(YearContext, TemplateView):
     __slot__ = "template_name"
     template_name = "base/about.html"
 
 
-class Contact(TemplateView):
+class Contact(YearContext, TemplateView):
     __slot__ = "template_name"
     template_name = "base/contact.html"
 
@@ -76,13 +95,13 @@ class Contact(TemplateView):
         return redirect("base:home")
 
 
-class DraftList(LoginRequiredMixin, ListView):
+class DraftList(LoginRequiredMixin, YearContext, ListView):
     __slot__ = "template_name", "queryset"
     template_name = 'base/portfolio_list.html'
     queryset = Project.objects.filter(draft=True)
 
 
-class DraftDetail(LoginRequiredMixin, DetailView):
+class DraftDetail(LoginRequiredMixin, YearContext, DetailView):
     __slot__ = "template_name", "queryset"
     template_name = 'base/portfolio_detail.html'
     queryset = Project.objects.filter(draft=True)
