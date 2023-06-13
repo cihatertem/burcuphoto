@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 from random import random
 import math
-from .utils import spam_checker
+from .utils import spam_checker, get_client_ip
 from datetime import date
 
 load_dotenv()
@@ -78,10 +78,12 @@ class Contact(YearContext, TemplateView):
 
             return redirect("base:home")
 
+        ip_address = get_client_ip(request)
+
         send_mail(
             'Web Site Visitor',
             f"""
-            From {name}, {email},\n
+            From {name}, {email}, {ip_address}\n
             \t{body}
             Site: www.burcuatak.com
             """,

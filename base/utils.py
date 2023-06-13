@@ -1,6 +1,7 @@
 from PIL import Image, ImageOps
 from io import BytesIO
 from base import models
+from django.http import HttpRequest
 
 
 def project_directory_path(instance, filename):
@@ -42,3 +43,11 @@ def spam_checker(mail_body):
     for stripped_word in stripped_words:
         if stripped_word in spam_list:
             return True
+
+def get_client_ip(request:HttpRequest):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
