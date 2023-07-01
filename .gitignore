@@ -8,6 +8,4 @@
 __pycache__/
 swarm/
 environment.txt
-docker-compose-*
-traefik.yml
-aws_user_data.sh
+

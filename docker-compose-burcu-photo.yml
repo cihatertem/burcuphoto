@@ -1,0 +1,86 @@
+version: "3.9"
+
+services:
+  burcuphoto:
+    image: ndhakara/burcuphoto
+    deploy:
+      mode: global
+      labels:
+        - "traefik.enable=true"
+        # Routers
+        ## HTTP
+        - "traefik.http.routers.burcuphoto.rule=(Host(`burcuatak.com`) || Host(`www.burcuatak.com`))"
+        - "traefik.http.routers.burcuphoto.entrypoints=web"
+        - "traefik.http.routers.burcuphoto.middlewares=burcuphoto-redirect"
+        ## HTTPS
+        - "traefik.http.routers.burcuphoto-secure.rule=(Host(`burcuatak.com`) || Host(`www.burcuatak.com`))"
+        - "traefik.http.routers.burcuphoto-secure.tls.certresolver=awsresolver"
+        - "traefik.http.routers.burcuphoto-secure.entrypoints=websecure"
+        - "traefik.http.routers.burcuphoto-secure.middlewares=burcuphoto-inflightreq,burcuphoto-ratelimit,burcuphoto-retry,burcuphoto-compress"
+        - "traefik.http.services.burcuphoto-secure.loadbalancer.server.port=8000"
+        - "traefik.docker.network=frontend"
+        # Middlewares
+        # Redirect Middleware
+        - "traefik.http.middlewares.burcuphoto-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.burcuphoto-redirect.redirectscheme.permanent=true"
+        ## Rate Limit
+        - "traefik.http.middlewares.burcuphoto-ratelimit.ratelimit.average=10"
+        - "traefik.http.middlewares.burcuphoto-ratelimit.ratelimit.burst=20"
+        - "traefik.http.middlewares.burcuphoto-ratelimit.ratelimit.sourcecriterion.ipstrategy.excludedips=10.0.2.0/24"
+        ## Retries
+        - "traefik.http.middlewares.burcuphoto-retry.retry.attempts=2"
+        - "traefik.http.middlewares.burcuphoto-retry.retry.initialinterval=100ms"
+        ## InFlightReq
+        - "traefik.http.middlewares.burcuphoto-inflightreq.inflightreq.amount=3"
+        - "traefik.http.middlewares.burcuphoto-inflightreq.inflightreq.sourcecriterion.ipstrategy.excludedips=10.0.2.0/24"
+        ## Compress
+        - "traefik.http.middlewares.burcuphoto-compress.compress=true"
+      placement:
+        constraints:
+          - node.role==worker
+          - node.labels.project==burcuphoto
+    env_file:
+      - ./environments/burcuphoto_environment.txt
+    environment:
+      SECRET_KEY: /run/secrets/secret-key
+      EMAIL_HOST_USER: /run/secrets/email-user
+      EMAIL_HOST_PASSWORD: /run/secrets/email-pass
+      POSTGRES_USER: /run/secrets/postgres-user
+      POSTGRES_PASSWORD: /run/secrets/postgres-pass
+      AWS_ACCESS_KEY_ID: /run/secrets/aws-access
+      AWS_SECRET_ACCESS_KEY: /run/secrets/aws-secret
+    secrets:
+      - secret-key
+      - email-pass
+      - email-user
+      - postgres-user
+      - postgres-pass
+      - aws-secret
+      - aws-access
+    ports:
+      - 8000:8000
+    networks:
+      - frontend
+      - backend
+
+networks:
+  frontend:
+    external: true
+  backend:
+    external: true
+
+secrets:
+  secret-key:
+    external: true
+  email-pass:
+    external: true
+  email-user:
+    external: true
+  postgres-user:
+    external: true
+  postgres-pass:
+    external: true
+  aws-secret:
+    external: true
+  aws-access:
+    external: true

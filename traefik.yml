@@ -1,0 +1,30 @@
+api:
+  dashboard: true
+
+# Enable Healthcheck
+ping: {}
+
+# Docker configuration backend
+providers:
+  docker:
+    exposedByDefault: false
+    swarmMode: true
+
+log:
+  level: ERROR
+
+# Entrypoint
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  awsresolver:
+    acme:
+      email: YOUR_EMAIL_ADDRESS
+      storage: /letsencrypt/acme.json
+      dnsChallenge:
+        provider: route53
+#        delayBeforeCheck: 0

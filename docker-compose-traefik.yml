@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  traefik:
+    image: traefik:2.10
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        # Routers
+        ## HTTP
+        - "traefik.http.routers.dashboard.rule=Host(`traefik.CHANGEME.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+        - "traefik.http.routers.dashboard.entrypoints=web"
+        - "traefik.http.routers.dashboard.middlewares=traefik-redirect"
+        ## HTTPS
+        - "traefik.http.routers.dashboard-secure.rule=Host(`traefik.CHANGEME.com`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+        - "traefik.http.routers.dashboard-secure.service=api@internal"
+        - "traefik.http.routers.dashboard-secure.entrypoints=websecure"
+        - "traefik.http.routers.dashboard-secure.tls.certresolver=awsresolver"
+        - "traefik.http.routers.dashboard-secure.middlewares=auth"
+        # Services
+        - "traefik.http.services.dashboard-secure.loadbalancer.server.port=8080"
+        - "traefik.docker.network=frontend"
+        # Middlewares
+        ## Redirect
+        - "traefik.http.middlewares.traefik-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.traefik-redirect.redirectscheme.permanent=true"
+        ## BasicAuth
+        - "traefik.http.middlewares.auth.basicauth.users=CHANGEME:CHANGEME_WITH_HASHED"
+      placement:
+        constraints:
+          - node.role==manager
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    env_file:
+      - ./environments/traefik_environment.txt
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/etc/traefik/traefik.yml
+      - traefik_cert:/letsencrypt
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    external: true
+volumes:
+  traefik_cert:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=YOUR_EFS_IP_OR_DNS,rw,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport
+      device: ":/CERT_LOCATION_DIR"

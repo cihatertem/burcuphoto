@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/postgres-user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres-pass
+    volumes:
+      - db-data:/var/lib/postgresql/data:rw
+    networks:
+      - backend
+    secrets:
+      - postgres-user
+      - postgres-pass
+
+secrets:
+  postgres-user:
+    external: true
+  postgres-pass:
+    external: true
+volumes:
+  db-data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=EFS_IP_OR_DNS_NAME,rw,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport
+      device: ":/POSTGRES_DATA_DIR"
+networks:
+  backend:
+    external: true

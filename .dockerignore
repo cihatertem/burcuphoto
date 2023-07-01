@@ -9,7 +9,9 @@ Dockerfile
 .git
 .github
 environment.txt
+environments/
 secrets/
 docker-compose*
 traefik.yml
 aws_user_data.sh
+README.md
