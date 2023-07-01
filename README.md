@@ -10,6 +10,9 @@ Database requirement was met with Postgres image in swarm cluster.
 
 The Github action is just to build and push docker image to docker hub repository.
 
+Data persistent requirement is met by **AWS EFS** Volume for Traefik CERT and Postgres data location. With EFS Volume, new nodes can connect easyly to the DIRs.
+
+
 ## environtment example
 
 Environment settings inside **environments/burcuphoto_environment.txt"
