@@ -1,4 +1,4 @@
-# Photography Portfolio (Web Site)[https://burcuatak.com]
+# Photography Portfolio [Web Site](https://burcuatak.com)
 
 The portfolio web site based on **Django** framework. It is ready to go & **dockerized** for **swarm cluster** on **AWS EC2 nodes**.
 
