@@ -4,11 +4,11 @@ from base import models
 from django.http import HttpRequest
 
 
-def project_directory_path(instance, filename):
+def project_directory_path(instance, filename: str) -> str:
     return 'projects/{0}/{1}'.format(instance.slug, filename)
 
 
-def portfolio_directory_path(instance, filename):
+def portfolio_directory_path(instance, filename: str) -> str:
     return 'projects/{0}/photos/{1}'.format(instance.project.slug, filename)
 
 
@@ -23,7 +23,7 @@ def photo_resizer(image: Image, size: int) -> BytesIO:
     return output
 
 
-def spam_checker(mail_body):
+def spam_checker(mail_body: str) -> bool | None:
     spam_keywords = models.SpamFilter.objects.all()
 
     spam_list = []
@@ -44,10 +44,18 @@ def spam_checker(mail_body):
         if stripped_word in spam_list:
             return True
 
-def get_client_ip(request:HttpRequest):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
+
+def get_client_ip(request: HttpRequest) -> str:
+    return {
+        "HTTP_X_FORWARDED_FOR":  request.META.get('HTTP_X_FORWARDED_FOR', None),
+        "REMOTE_ADDR": request.META.get('REMOTE_ADDR', None),
+        "X_Real_IP": request.META.get('X_Real_IP', None),
+        "HTTP_X_Real_IP": request.META.get('HTTP_X_Real_IP', None),
+        'X_FORWARDED_FOR':  request.META.get('X_FORWARDED_FOR', None),
+        'HTTP_CLIENT_IP':  request.META.get('HTTP_CLIENT_IP', None),
+        'HTTP_X_FORWARDED':  request.META.get('HTTP_X_FORWARDED', None),
+        'HTTP_X_CLUSTER_CLIENT_IP':  request.META.get('HTTP_X_CLUSTER_CLIENT_IP', None),
+        'HTTP_FORWARDED_FOR':  request.META.get('HTTP_FORWARDED_FOR', None),
+        'HTTP_FORWARDED':  request.META.get('HTTP_FORWARDED', None),
+        'HTTP_VIA':  request.META.get('HTTP_VIA', None),
+    }

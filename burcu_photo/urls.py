@@ -6,9 +6,6 @@ from django.conf.urls.static import static
 from django.views.generic import TemplateView
 #  dotenv
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 urlpatterns = [
     path(os.getenv("ADMIN_ADDRESS"), admin.site.urls),

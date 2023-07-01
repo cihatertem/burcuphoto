@@ -1,17 +1,15 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Project, SpamFilter
+from .models import Project
 from django.core.mail import send_mail
 from django.contrib import messages
 import os
-from dotenv import load_dotenv
 from random import random
 import math
 from .utils import spam_checker, get_client_ip
 from datetime import date
 
-load_dotenv()
 
 YEAR = date.today().year
 
@@ -25,12 +23,10 @@ class YearContext(TemplateView):
 
 
 class HomeView(YearContext, TemplateView):
-    __slot__ = "template_name"
     template_name = 'base/home.html'
 
 
 class PortfolioList(ListView):
-    __slot__ = "template_name", "queryset"
     template_name = 'base/portfolio_list.html'
     queryset = Project.objects.filter(draft=False)
 
@@ -40,8 +36,7 @@ class PortfolioList(ListView):
         return context
 
 
-class PortfolioDetail( DetailView):
-    __slot__ = "template_name", "queryset"
+class PortfolioDetail(DetailView):
     template_name = 'base/portfolio_detail.html'
     queryset = Project.objects.filter(draft=False)
 
@@ -50,13 +45,12 @@ class PortfolioDetail( DetailView):
         context["year"] = YEAR
         return context
 
+
 class About(YearContext, TemplateView):
-    __slot__ = "template_name"
     template_name = "base/about.html"
 
 
 class Contact(YearContext, TemplateView):
-    __slot__ = "template_name"
     template_name = "base/contact.html"
 
     def get_context_data(self, **kwargs):
@@ -74,7 +68,8 @@ class Contact(YearContext, TemplateView):
 
         if spam_checker(body):
             messages.success(
-                request, "Your message was not sent .\nDONT MAKE SPAM!")
+                request, "Your message was not sent .\nDONT MAKE SPAM!"
+            )
 
             return redirect("base:home")
 
@@ -83,8 +78,9 @@ class Contact(YearContext, TemplateView):
         send_mail(
             'Web Site Visitor',
             f"""
-            From {name}, {email}, {ip_address}\n
-            \t{body}
+            From {name}, {email}\n
+            \t{body}\n
+            {ip_address}
             Site: www.burcuatak.com
             """,
             email,
@@ -92,18 +88,17 @@ class Contact(YearContext, TemplateView):
             fail_silently=False,
         )
         messages.success(
-            request, "Your message was sent successfully.\nWe will touch you back soon.")
+            request, "Your message was sent successfully.\nWe will touch you back soon."
+        )
 
         return redirect("base:home")
 
 
 class DraftList(LoginRequiredMixin, YearContext, ListView):
-    __slot__ = "template_name", "queryset"
     template_name = 'base/portfolio_list.html'
     queryset = Project.objects.filter(draft=True)
 
 
 class DraftDetail(LoginRequiredMixin, YearContext, DetailView):
-    __slot__ = "template_name", "queryset"
     template_name = 'base/portfolio_detail.html'
     queryset = Project.objects.filter(draft=True)

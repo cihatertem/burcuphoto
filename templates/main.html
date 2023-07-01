@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
-<head>
+  <head>
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LZ1W81BBF1"></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-LZ1W81BBF1"
+    ></script>
     <script>
       window.dataLayer = window.dataLayer || [];
 
@@ -11,78 +14,95 @@
         dataLayer.push(arguments);
       }
 
-      gtag('js', new Date());
+      gtag("js", new Date());
 
-      gtag('config', 'G-LZ1W81BBF1');
+      gtag("config", "G-LZ1W81BBF1");
     </script>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="{% block meta-description %}{% endblock %}"/>
-    <meta name="author" content="Burcu Atak">
-    <meta name="keywords" content="{% block meta-keywords %}Burcu Atak, photography, fotoğraf, portfolio{% endblock %}">
-    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css"/>
-    <link id="css" rel="stylesheet" href="{% static 'style/main-dark.css' %}">
-    <meta name="yandex-verification" content="697c73042871080e"/>
-    <meta name='Petal-Search-site-verification' content='35c4381892'/>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="{% block meta-description %}{% endblock %}"
+    />
+    <meta name="author" content="Burcu Atak" />
+    <meta
+      name="keywords"
+      content="{% block meta-keywords %}Burcu Atak, photography, fotoğraf, portfolio{% endblock %}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swiper@7/swiper-bundle.min.css"
+    />
+    <link id="css" rel="stylesheet" href="{% static 'style/main-dark.css' %}" />
+    <meta name="yandex-verification" content="697c73042871080e" />
+    <meta name="Petal-Search-site-verification" content="35c4381892" />
     <title>{% block meta-title %}{% endblock %}</title>
-</head>
-<body>
-<p id="top"></p>
-{% include "includes/navbar.html" %}
-{% if messages %}
+  </head>
+  <body>
+    <p id="top"></p>
+    {% include "includes/navbar.html" %} {% if messages %}
     <div class="messages">
-        <button class="btn-messages">&#10005;</button>
-        {% for message in messages %}
-            <p {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
-        {% endfor %}
+      <button class="btn-messages">&#10005;</button>
+      {% for message in messages %}
+      <p {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+        {{ message }}
+      </p>
+      {% endfor %}
     </div>
-{% endif %}
-<div class="container">
-    <div class="empty"></div>
-    <main>
-        {% block main %}
-
-        {% endblock %}
-    </main>
-    <footer>
+    {% endif %}
+    <div class="container">
+      <div class="empty"></div>
+      <main>{% block main %} {% endblock %}</main>
+      <footer>
         <div class="footer-socials">
-            <a href="https://www.twitter.com" target="_blank">
-                <img role="img"
-                     alt="twitter button icon"
-                     class="footer-social-icon"
-                     src="{% static 'icons/social-twitter.svg' %}">
-            </a>
-            <a href="https://www.facebook.com/burcu.atak.589" target="_blank">
-                <img role="img"
-                     alt="facebook button icon"
-                     class="footer-social-icon"
-                     src="{% static 'icons/social-facebook.svg' %}">
-            </a>
-            <a href="https://www.instagram.com/burcu__atak/" target="_blank">
-                <img role="img"
-                     alt="instagram button icon"
-                     class="footer-social-icon"
-                     src="{% static 'icons/social-instagram.svg' %}">
-            </a>
-            <a href="https://www.linkedin.com/in/burcu-atak-ertem-115814232/" target="_blank">
-                <img role="img"
-                     alt="linkedin button icon"
-                     class="footer-social-icon"
-                     src="{% static 'icons/social-linkedin.svg' %}">
-            </a>
+          <a href="https://www.twitter.com" target="_blank">
+            <img
+              role="img"
+              alt="twitter button icon"
+              class="footer-social-icon"
+              src="{% static 'icons/social-twitter.svg' %}"
+            />
+          </a>
+          <a href="https://www.facebook.com/burcu.atak.589" target="_blank">
+            <img
+              role="img"
+              alt="facebook button icon"
+              class="footer-social-icon"
+              src="{% static 'icons/social-facebook.svg' %}"
+            />
+          </a>
+          <a href="https://www.instagram.com/burcu__atak/" target="_blank">
+            <img
+              role="img"
+              alt="instagram button icon"
+              class="footer-social-icon"
+              src="{% static 'icons/social-instagram.svg' %}"
+            />
+          </a>
+          <a
+            href="https://www.linkedin.com/in/burcu-atak-ertem-115814232/"
+            target="_blank"
+          >
+            <img
+              role="img"
+              alt="linkedin button icon"
+              class="footer-social-icon"
+              src="{% static 'icons/social-linkedin.svg' %}"
+            />
+          </a>
         </div>
-        <p> Copyright {{year}} © Burcu Atak | Design by <a target="_blank" href="https://www.cihatertem.dev"><span
-                class="dev-link">Cihat
-            Ertem</span>
-        </a></p>
-    </footer>
-</div>
-{% block photo_zoom %}
+        <p>
+          Copyright {{year}} © Burcu Atak | Design by
+          <a target="_blank" href="https://www.cihatertem.dev"
+            ><span class="dev-link">Cihat Ertem</span>
+          </a>
+        </p>
+      </footer>
+    </div>
+    {% block photo_zoom %} {% endblock %}
 
-{% endblock %}
-
-<script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
-<script src="{% static 'script/script.js' %}"></script>
-</body>
+    <script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
+    <script src="{% static 'script/script.js' %}"></script>
+  </body>
 </html>

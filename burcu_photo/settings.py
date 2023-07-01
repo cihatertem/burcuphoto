@@ -12,9 +12,14 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+def get_secret(key: str, default: str = "") -> str:
+    value = os.getenv(key, default)
+    if os.path.isfile(value):
+        with open(value) as f:
+            return f.readline().strip("\n")
+    return value.strip("\n")
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,18 +28,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = get_secret("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if os.getenv("DEBUG") == "False":
-    DEBUG = False
-elif os.getenv("DEBUG") == "True":
-    DEBUG = True
+DEBUG = bool(int(os.environ.get("DEBUG", "0")))
 
-ALLOWED_HOSTS = [os.getenv("AlLOWED_ONE"), os.getenv("AlLOWED_TWO")]
+ALLOWED_HOSTS = [host for host in os.environ.get("ALLOWED_HOSTS").split(",")]
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -68,8 +69,7 @@ ROOT_URLCONF = 'burcu_photo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -84,19 +84,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'burcu_photo.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -127,6 +117,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles/'
 STATICFILES_DIRS = [
     BASE_DIR / "static/",
 ]
@@ -144,11 +135,35 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = get_secret("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = get_secret("EMAIL_HOST_PASSWORD")
 
-if os.getenv("DEBUG") == "False":
-    STATIC_ROOT = BASE_DIR / 'staticfiles/'
+
+# Database
+# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv("POSTGRES_DB"),
+        "HOST": os.getenv("DB_HOST"),
+        "USER": get_secret("POSTGRES_USER"),
+        "PASSWORD": get_secret("POSTGRES_PASSWORD")
+    }
+}
+
+STORAGES = {
+    "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+    "staticfiles": {"BACKEND": "storages.backends.s3boto3.S3StaticStorage"}
+}
+
+AWS_ACCESS_KEY_ID = get_secret("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = get_secret("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("BUCKET_NAME")
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_REGION_NAME= os.getenv("AWS_S3_REGION_NAME")
+
+if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
     SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

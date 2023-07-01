@@ -11,7 +11,6 @@ class ProjectPortfolioAdmin(admin.StackedInline):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    __slot__ = "prepopulated_fields", "inlines", "ordering", "list_display", "list_display_links", "list_editable", "list_filter", "search_fields", "list_per_page"
     prepopulated_fields = {"slug": ("title",)}
     inlines = (ProjectPortfolioAdmin,)
     ordering = ("-created",)
@@ -33,7 +32,6 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(ProjectPortfolio)
 class ProjectPortfolioAdmin(admin.ModelAdmin):
-    __slot__ = "ordering", "list_display", "list_filter", "search_fields", "list_per_page"
     ordering = ("project", "created")
     list_display = ("project", "alt", "created", "updated")
     list_filter = ("project", 'created', 'updated')
@@ -43,7 +41,6 @@ class ProjectPortfolioAdmin(admin.ModelAdmin):
 
 @admin.register(SpamFilter)
 class SpamFilterAdmin(admin.ModelAdmin):
-    __slot__ = "ordering", "list_display", "list_filter", "search_fields", "list_per_page"
     ordering = ("keyword",)
     list_display = ("keyword",)
     list_filter = ("keyword", 'created')
