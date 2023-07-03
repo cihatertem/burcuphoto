@@ -55,7 +55,8 @@ checkboxLabel.addEventListener("click", (e) => {
   }
 });
 
-window.onload = () => {
+// window.onload = () => {
+const themeLoader = (event) => {
   let storedTheme = localStorage.getItem("theme");
 
   if (storedTheme === null || storedTheme === "dark") {
@@ -68,6 +69,8 @@ window.onload = () => {
     checkbox.checked = true;
   }
 };
+
+addEventListener("DOMContentLoaded", themeLoader)
 
 //Django flash message
 if (btnMessage) {

@@ -25,23 +25,29 @@ services:
         - "traefik.http.middlewares.traefik-redirect.redirectscheme.scheme=https"
         - "traefik.http.middlewares.traefik-redirect.redirectscheme.permanent=true"
         ## BasicAuth
-        - "traefik.http.middlewares.auth.basicauth.users=CHANGEME:CHANGEME_WITH_HASHED"
+        - "traefik.http.middlewares.auth.basicauth.users=CHANGE_WITH:CHANGE_WITH_HASHED"
       placement:
         constraints:
           - node.role==manager
     ports:
       - 80:80
       - 443:443
-      - 8080:8080
-    env_file:
-      - ./environments/traefik_environment.txt
+#      - 8080:8080
+    environment:
+      - AWS_SHARED_CREDENTIALS_FILE=/run/secrets/aws_shared_credentials
+    secrets:
+      - aws_shared_credentials
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik.yml:/etc/traefik/traefik.yml
       - traefik_cert:/letsencrypt
     networks:
       - frontend
 
+
+secrets:
+  aws_shared_credentials:
+    file: ./secrets/aws_shared_credentials.secret
 networks:
   frontend:
     external: true
@@ -50,5 +56,5 @@ volumes:
     driver: local
     driver_opts:
       type: nfs
-      o: addr=YOUR_EFS_IP_OR_DNS,rw,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport
+      o: addr=CHANGE_WITH_YOUR_EFS_IP_OR_DNS,rw,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport
       device: ":/CERT_LOCATION_DIR"
