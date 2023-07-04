@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: 'Cigra';
-  src: url('../fonts/MrsSaintDelafield-Regular.ttf');
+  src: url('https://burcu-photo.s3.amazonaws.com/fonts/MrsSaintDelafield-Regular.ttf');
 }
 
 * {
