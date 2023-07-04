@@ -16,7 +16,7 @@ services:
         - "traefik.http.routers.burcuphoto-secure.rule=(Host(`burcuatak.com`) || Host(`www.burcuatak.com`))"
         - "traefik.http.routers.burcuphoto-secure.tls.certresolver=awsresolver"
         - "traefik.http.routers.burcuphoto-secure.entrypoints=websecure"
-        - "traefik.http.routers.burcuphoto-secure.middlewares=burcuphoto-inflightreq,burcuphoto-ratelimit,burcuphoto-retry,burcuphoto-compress"
+        - "traefik.http.routers.burcuphoto-secure.middlewares=burcuphoto-inflightreq,burcuphoto-ratelimit,burcuphoto-retry,burcuphoto-compress,burcuphoto-headers"
         - "traefik.http.services.burcuphoto-secure.loadbalancer.server.port=8000"
         - "traefik.docker.network=frontend"
         # Middlewares
@@ -35,6 +35,13 @@ services:
         - "traefik.http.middlewares.burcuphoto-inflightreq.inflightreq.sourcecriterion.ipstrategy.excludedips=10.0.2.0/24"
         ## Compress
         - "traefik.http.middlewares.burcuphoto-compress.compress=true"
+        ## Headers
+        - "traefik.http.middlewares.burcuphoto-headers.headers.sslredirect=true"
+        - "traefik.http.middlewares.burcuphoto-headers.headers.stsincludesubdomains=true"
+        - "traefik.http.middlewares.burcuphoto-headers.headers.stspreload=true"
+        - "traefik.http.middlewares.burcuphoto-headers.headers.stsseconds=63072000"
+        - "traefik.http.middlewares.burcuphoto-headers.headers.permissionsPolicy=geolocation=(),midi=(),sync-xhr=(),microphone=(),camera=(),magnetometer=(),gyroscope=(),fullscreen=self,payment=()"
+        - "traefik.http.middlewares.burcuphoto-headers.headers.contentSecurityPolicy=default-src 'self'; script-src 'self' https:; object-src 'self'; style-src 'self' https: data:; img-src 'self' https: data:; media-src 'self'; frame-src 'self'; font-src 'self' https: data:; connect-src 'self' https: data:; frame-ancestors 'self';"
       placement:
         constraints:
           - node.role==worker
