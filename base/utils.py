@@ -11,7 +11,7 @@ from http import HTTPStatus
 class HealthCheckMiddleware(MiddlewareMixin):
     def process_request(self, request):
         if request.META['PATH_INFO'] == '/ping':
-            return JsonResponse({"pong!"}, safe=False, status=HTTPStatus.OK)
+            return JsonResponse({"response": "pong!"}, status=HTTPStatus.OK)
 
 
 def project_directory_path(instance, filename: str) -> str:
