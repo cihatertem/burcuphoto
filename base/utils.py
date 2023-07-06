@@ -3,6 +3,14 @@ from io import BytesIO
 from base import models
 from datetime import date
 from django.http import HttpRequest
+from django.http import HttpResponse
+from django.utils.deprecation import MiddlewareMixin
+
+
+class HealthCheckMiddleware(MiddlewareMixin):
+    def process_request(self, request):
+        if request.META['PATH_INFO'] == '/ping':
+            return HttpResponse('pong!')
 
 
 def project_directory_path(instance, filename: str) -> str:
@@ -12,7 +20,8 @@ def project_directory_path(instance, filename: str) -> str:
 def portfolio_directory_path(instance, filename: str) -> str:
     return 'projects/{0}/photos/{1}'.format(instance.project.slug, filename)
 
-def current_year()->int:
+
+def current_year() -> int:
     return date.today().year
 
 
@@ -49,7 +58,7 @@ def spam_checker(mail_body: str) -> bool | None:
             return True
 
 
-def get_client_ip(request: HttpRequest) -> dict[str,str]:
+def get_client_ip(request: HttpRequest) -> dict[str, str]:
     return {
         "HTTP_X_FORWARDED_FOR":  request.META.get('HTTP_X_FORWARDED_FOR', None),
         "REMOTE_ADDR": request.META.get('REMOTE_ADDR', None),

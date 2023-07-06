@@ -1,12 +1,9 @@
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http.response import JsonResponse
-from django.http.request import HttpRequest
 from .models import Project
 from django.core.mail import send_mail
 from django.contrib import messages
-from http import HTTPStatus
 import os
 from random import random
 import math
@@ -14,10 +11,6 @@ from .utils import spam_checker, get_client_ip, current_year
 
 
 # Create your views here.
-def health_check(request: HttpRequest) -> JsonResponse:
-    return JsonResponse({"status": "ok"}, status=HTTPStatus.OK)
-
-
 class YearContext(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(YearContext, self).get_context_data(**kwargs)
