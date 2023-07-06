@@ -1,6 +1,7 @@
 from PIL import Image, ImageOps
 from io import BytesIO
 from base import models
+from datetime import date
 from django.http import HttpRequest
 
 
@@ -11,8 +12,11 @@ def project_directory_path(instance, filename: str) -> str:
 def portfolio_directory_path(instance, filename: str) -> str:
     return 'projects/{0}/photos/{1}'.format(instance.project.slug, filename)
 
+def current_year()->int:
+    return date.today().year
 
-def photo_resizer(image: Image, size: int) -> BytesIO:
+
+def photo_resizer(image: Image.Image, size: int) -> BytesIO:
     output = BytesIO()
     if image.mode in ("RGBA", "P"):
         image = image.convert("RGB")
@@ -45,7 +49,7 @@ def spam_checker(mail_body: str) -> bool | None:
             return True
 
 
-def get_client_ip(request: HttpRequest) -> str:
+def get_client_ip(request: HttpRequest) -> dict[str,str]:
     return {
         "HTTP_X_FORWARDED_FOR":  request.META.get('HTTP_X_FORWARDED_FOR', None),
         "REMOTE_ADDR": request.META.get('REMOTE_ADDR', None),

@@ -15,3 +15,4 @@ docker-compose*
 traefik.yml
 aws_user_data.sh
 README.md
+.vscode/
