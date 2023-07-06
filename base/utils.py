@@ -3,7 +3,7 @@ from io import BytesIO
 from base import models
 from datetime import date
 from django.http import HttpRequest
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from http import HTTPStatus
 
