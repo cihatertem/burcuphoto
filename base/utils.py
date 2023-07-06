@@ -3,14 +3,15 @@ from io import BytesIO
 from base import models
 from datetime import date
 from django.http import HttpRequest
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from http import HTTPStatus
 from django.utils.deprecation import MiddlewareMixin
 
 
 class HealthCheckMiddleware(MiddlewareMixin):
     def process_request(self, request):
         if request.META['PATH_INFO'] == '/ping':
-            return HttpResponse('pong!')
+            return JsonResponse({"pong!"}, status=HTTPStatus.OK)
 
 
 def project_directory_path(instance, filename: str) -> str:
