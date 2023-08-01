@@ -31,7 +31,7 @@ class PortfolioList( ListView):
         return queryset.filter(draft=False)
 
 
-class PortfolioDetail(YearContext, DetailView):
+class PortfolioDetail(DetailView):
     template_name = 'base/portfolio_detail.html'
     model = Project
 
