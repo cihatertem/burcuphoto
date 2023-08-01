@@ -22,7 +22,7 @@ class HomeView(YearContext, TemplateView):
     template_name = 'base/home.html'
 
 
-class PortfolioList( ListView, YearContext):
+class PortfolioList( ListView):
     template_name = 'base/portfolio_list.html'
     model = Project
 
@@ -32,7 +32,7 @@ class PortfolioList( ListView, YearContext):
         return context
 
 
-class PortfolioDetail( DetailView, YearContext):
+class PortfolioDetail( DetailView):
     template_name = 'base/portfolio_detail.html'
     model = Project
 
