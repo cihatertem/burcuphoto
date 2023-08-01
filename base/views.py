@@ -24,12 +24,12 @@ class HomeView(YearContext, TemplateView):
 
 class PortfolioList(YearContext, ListView):
     template_name = 'base/portfolio_list.html'
-    queryset = Project.objects.filter(draft=False)
+    model = Project
 
 
 class PortfolioDetail(YearContext, DetailView):
     template_name = 'base/portfolio_detail.html'
-    queryset = Project.objects.filter(draft=False)
+    mode = Project
 
 
 class About(YearContext, TemplateView):
