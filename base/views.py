@@ -26,20 +26,14 @@ class PortfolioList( ListView):
     template_name = 'base/portfolio_list.html'
     model = Project
 
-    def get_context_data(self, **kwargs):
-        context = super(PortfolioList, self).get_context_data(**kwargs)
-        context['project_list'] = Project.objects.filter(draft=False)
-        return context
+     def get_queryset(self, **kwargs):
+       queryset = super().get_queryset(**kwargs)
+       return queryset.filter(draft=False)
 
 
-class PortfolioDetail( DetailView):
+class PortfolioDetail(YearContext, DetailView):
     template_name = 'base/portfolio_detail.html'
     model = Project
-
-    def get_context_data(self, **kwargs):
-        context = super(PortfolioDetail, self).get_context_data(**kwargs)
-        context['project'] = Project.objects.filter(draft=False)
-        return context
 
 
 class About(YearContext, TemplateView):
