@@ -26,9 +26,9 @@ class PortfolioList( ListView):
     template_name = 'base/portfolio_list.html'
     model = Project
 
-     def get_queryset(self, **kwargs):
-       queryset = super().get_queryset(**kwargs)
-       return queryset.filter(draft=False)
+    def get_queryset(self, **kwargs):
+        queryset = super().get_queryset(**kwargs)
+        return queryset.filter(draft=False)
 
 
 class PortfolioDetail(YearContext, DetailView):
