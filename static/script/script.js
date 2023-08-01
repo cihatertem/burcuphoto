@@ -141,8 +141,13 @@ const swiper1 = new Swiper(".portfolio", {
     prevEl: ".swiper-button-prev",
   },
   breakpoints: {
+    200: {
+      slidesPerView: 1,
+      spaceBetween: 0
+    },
     576: {
       slidesPerView: 1,
+      spaceBetween: 0
     },
     786: {
       slidesPerView:
