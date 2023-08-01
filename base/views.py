@@ -22,7 +22,7 @@ class HomeView(YearContext, TemplateView):
     template_name = 'base/home.html'
 
 
-class PortfolioList(ListView):
+class PortfolioList(YearContext, ListView):
     template_name = 'base/portfolio_list.html'
     model = Project
 
@@ -32,9 +32,14 @@ class PortfolioList(ListView):
         return context
 
 
-class PortfolioDetail(DetailView):
+class PortfolioDetail(YearContext, DetailView):
     template_name = 'base/portfolio_detail.html'
-    queryset = Project.objects.filter(draft=False)
+    model = Project
+
+    def get_context_data(self, **kwargs):
+        context = super(PortfolioDetail, self).get_context_data(**kwargs)
+        context['object_list'] = Project.objects.filter(draft=False)
+        return context
 
 
 class About(YearContext, TemplateView):

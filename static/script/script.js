@@ -133,6 +133,9 @@ menuBtn.onclick = () => {
 // portfolio swiper
 const swiper1 = new Swiper(".portfolio", {
   loop: true,
+  direction : 'horizontal',
+  slidesPerView: 4,
+  spaceBetween: 0,
   navigation: {
     nextEl: ".swiper-button-next",
     prevEl: ".swiper-button-prev",
