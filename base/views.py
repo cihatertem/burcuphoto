@@ -28,7 +28,7 @@ class PortfolioList(YearContext, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(PortfolioList, self).get_context_data(**kwargs)
-        context['object_list'] = Project.objects.filter(draft=False)
+        context['project_list'] = Project.objects.filter(draft=False)
         return context
 
 
@@ -38,7 +38,7 @@ class PortfolioDetail(YearContext, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(PortfolioDetail, self).get_context_data(**kwargs)
-        context['object_list'] = Project.objects.filter(draft=False)
+        context['project'] = Project.objects.filter(draft=False)
         return context
 
 
