@@ -508,6 +508,10 @@ section.about {
   flex-wrap: wrap;
 }
 
+.honeypot {
+  display: none;
+}
+
 section.media-card, section.email-card {
   width: 32rem;
   height: 31rem;

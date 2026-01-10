@@ -65,6 +65,14 @@ class Contact(YearContext, TemplateView):
         name = request.POST.get("name")
         email = request.POST.get("email")
         body = request.POST.get("message")
+        website = request.POST.get("website")
+
+        if website:
+            messages.success(
+                request, "Your message was sent successfully! "
+            )
+
+            return redirect("base:home")
 
         if spam_checker(body):
             messages.success(

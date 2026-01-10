@@ -35,6 +35,7 @@
             <h2>Email Me...</h2>
             <form method="POST" class="form-group" id="email-form">
                 {% csrf_token %}
+                <input type="text" name="website" id="website" autocomplete="off" tabindex="-1" aria-hidden="true" class="website">
                 <input type="text" name="name" id="name" required placeholder="Type your name...">
                 <input type="email" name="email" id="email" placeholder="example@mail.com" required>
                 <textarea rows="8" name="message" id="message" required placeholder="Your message..."></textarea>
