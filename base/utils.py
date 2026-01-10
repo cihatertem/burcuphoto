@@ -38,6 +38,8 @@ def photo_resizer(image: Image.Image, size: int) -> BytesIO:
 
 
 def spam_checker(mail_body: str) -> bool | None:
+    if not mail_body:
+        return False
     spam_keywords = models.SpamFilter.objects.all()
 
     spam_list = []

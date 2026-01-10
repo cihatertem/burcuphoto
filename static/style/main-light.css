@@ -122,8 +122,6 @@ header .nav-link-active {
   height: 5rem;
 }
 
-main {}
-
 footer {
   color: var(--font-second);
   opacity: 40%;
