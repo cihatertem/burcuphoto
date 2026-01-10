@@ -79,7 +79,8 @@ header .nav-link {
   transition: all .2s linear;
 }
 
-header .nav-link:hover, header .logo:hover {
+header .nav-link:hover,
+header .logo:hover {
   color: rgba(246, 188, 46, 0.57);
   transition: all .2s linear;
 }
@@ -121,8 +122,7 @@ header .nav-link-active {
   height: 5rem;
 }
 
-main {
-}
+main {}
 
 footer {
   color: var(--font-second);
@@ -508,11 +508,12 @@ section.about {
   flex-wrap: wrap;
 }
 
-.honeypot {
+.website_ {
   display: none;
 }
 
-section.media-card, section.email-card {
+section.media-card,
+section.email-card {
   width: 32rem;
   height: 31rem;
   text-align: center;
@@ -526,7 +527,8 @@ section.media-card, section.email-card {
 }
 
 
-section.media-card h2, section.email-card h2 {
+section.media-card h2,
+section.email-card h2 {
   font-size: 1.5rem;
   font-style: italic;
   color: var(--font-main);
@@ -570,11 +572,13 @@ section.email-card h2 {
   margin-top: -1rem;
 }
 
-#email-form #name, #email-form #email {
+#email-form #name,
+#email-form #email {
   line-height: 1.2rem;
 }
 
-#email-form input, #email-form textarea {
+#email-form input,
+#email-form textarea {
   width: 75%;
   color: var(--bg-main);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
@@ -583,7 +587,8 @@ section.email-card h2 {
   padding: 0 .3rem;
 }
 
-#email-form input:focus, #email-form textarea:focus {
+#email-form input:focus,
+#email-form textarea:focus {
   border: 1px solid rgba(0, 218, 255, 0.6);
   box-shadow: 0 0 6px rgba(0, 218, 255, 0.6);
   transform: scale(105%);
@@ -678,7 +683,8 @@ input.btn-submit {
   z-index: -100;
 }
 
-.moon span, .sun span {
+.moon span,
+.sun span {
   color: var(--font-main);
   font-size: 1.2rem;
 }
@@ -698,7 +704,7 @@ input.btn-submit {
   transition: all .2s linear;
 }
 
-.theme-checkbox:checked + .theme-label .ball {
+.theme-checkbox:checked+.theme-label .ball {
   background-color: #fff;
   transform: translateX(-30px);
   transition: all .2s linear;
@@ -723,7 +729,8 @@ input.btn-submit {
     font-size: 13px;
   }
 
-  section.media-card, section.email-card {
+  section.media-card,
+  section.email-card {
     width: 30rem;
   }
 
@@ -737,7 +744,8 @@ input.btn-submit {
     font-size: 12px;
   }
 
-  section.media-card, section.email-card {
+  section.media-card,
+  section.email-card {
     width: 25rem;
   }
 
@@ -783,7 +791,8 @@ input.btn-submit {
     margin-right: -2rem;
   }
 
-  .nav-link:after, .nav-link:hover:after {
+  .nav-link:after,
+  .nav-link:hover:after {
     display: none;
   }
 
@@ -795,7 +804,8 @@ input.btn-submit {
     max-height: 30rem;
   }
 
-  .btn-back, .btn-back span {
+  .btn-back,
+  .btn-back span {
     font-size: 1.2rem;
   }
 
@@ -815,7 +825,8 @@ input.btn-submit {
     margin: 0;
   }
 
-  section.hero h1, section.hero p {
+  section.hero h1,
+  section.hero p {
     display: none;
   }
 
@@ -855,7 +866,8 @@ input.btn-submit {
     justify-content: center;
   }
 
-  section.media-card h2, section.media-card .socials {
+  section.media-card h2,
+  section.media-card .socials {
     margin: 1rem 0 0 0;
   }
 
