@@ -6,6 +6,11 @@ ENV PYTHONUNBUFFERED=1
 
 RUN groupadd -r django && useradd --no-log-init -r -g django django
 
+RUN apt-get update && apt-get install -y curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt clean -y \
+    && apt autopurge -y
+
 COPY requirements.txt /tmp
 
 RUN python -m venv /venv \
