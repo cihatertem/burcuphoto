@@ -68,7 +68,7 @@ class Contact(YearContext, TemplateView):
 
         return context
 
-    @method_decorator(ratelimit(key=CONTACT_RATE_LIMIT_KEY, rate=CONTACT_RATE_LIMIT, block=False, method='GET'))
+    @method_decorator(ratelimit(key=CONTACT_RATE_LIMIT_KEY, rate=CONTACT_RATE_LIMIT, block=False, method='POST'))
     def post(self, request, *args, **kwargs):
         name = request.POST.get("name")
         email = request.POST.get("email")
