@@ -5,7 +5,8 @@ from django.http import HttpRequest
 from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from http import HTTPStatus
-
+from django.conf import settings
+import ipaddress
 
 class HealthCheckMiddleware(MiddlewareMixin):
     def process_request(self, request):
@@ -36,17 +37,34 @@ def photo_resizer(image: Image.Image, size: int) -> BytesIO:
     return output
 
 
-def get_client_ip(request: HttpRequest) -> dict[str, str]:
-    return {
-        "HTTP_X_FORWARDED_FOR":  request.META.get('HTTP_X_FORWARDED_FOR', None),
-        "REMOTE_ADDR": request.META.get('REMOTE_ADDR', None),
-        "X_Real_IP": request.META.get('X_Real_IP', None),
-        "HTTP_X_Real_IP": request.META.get('HTTP_X_Real_IP', None),
-        'X_FORWARDED_FOR':  request.META.get('X_FORWARDED_FOR', None),
-        'HTTP_CLIENT_IP':  request.META.get('HTTP_CLIENT_IP', None),
-        'HTTP_X_FORWARDED':  request.META.get('HTTP_X_FORWARDED', None),
-        'HTTP_X_CLUSTER_CLIENT_IP':  request.META.get('HTTP_X_CLUSTER_CLIENT_IP', None),
-        'HTTP_FORWARDED_FOR':  request.META.get('HTTP_FORWARDED_FOR', None),
-        'HTTP_FORWARDED':  request.META.get('HTTP_FORWARDED', None),
-        'HTTP_VIA':  request.META.get('HTTP_VIA', None),
-    }
+def get_client_ip(request) -> str | None:
+    remote = request.META.get("REMOTE_ADDR")
+    if not remote:
+        return None
+
+    ra = ipaddress.ip_address(remote)
+
+    trusted_nets = getattr(settings, "TRUSTED_PROXY_NETS", None) or []
+
+    # Sadece trusted proxy'den geliyorsa XFF'e güven
+    if trusted_nets and any(ra in net for net in trusted_nets):
+        xff = request.META.get("HTTP_X_FORWARDED_FOR")
+        if xff:
+            return xff.split(",")[0].strip()
+
+    return remote
+
+# def get_client_ip(request: HttpRequest) -> dict[str, str]:
+#     return {
+#         "HTTP_X_FORWARDED_FOR":  request.META.get('HTTP_X_FORWARDED_FOR', None),
+#         "REMOTE_ADDR": request.META.get('REMOTE_ADDR', None),
+#         "X_Real_IP": request.META.get('X_Real_IP', None),
+#         "HTTP_X_Real_IP": request.META.get('HTTP_X_Real_IP', None),
+#         'X_FORWARDED_FOR':  request.META.get('X_FORWARDED_FOR', None),
+#         'HTTP_CLIENT_IP':  request.META.get('HTTP_CLIENT_IP', None),
+#         'HTTP_X_FORWARDED':  request.META.get('HTTP_X_FORWARDED', None),
+#         'HTTP_X_CLUSTER_CLIENT_IP':  request.META.get('HTTP_X_CLUSTER_CLIENT_IP', None),
+#         'HTTP_FORWARDED_FOR':  request.META.get('HTTP_FORWARDED_FOR', None),
+#         'HTTP_FORWARDED':  request.META.get('HTTP_FORWARDED', None),
+#         'HTTP_VIA':  request.META.get('HTTP_VIA', None),
+#     }

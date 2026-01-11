@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 import os
+import ipaddress
 
 def get_secret(key: str, default: str = "") -> str:
     value = os.getenv(key, default)
@@ -163,10 +164,18 @@ AWS_STORAGE_BUCKET_NAME = os.getenv("BUCKET_NAME")
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_REGION_NAME= os.getenv("AWS_S3_REGION_NAME")
 
+_raw = os.getenv("TRUSTED_PROXY_NETS", "")
+TRUSTED_PROXY_NETS = []
+
+if _raw:
+    for net in _raw.split(","):
+        TRUSTED_PROXY_NETS.append(ipaddress.ip_network(net.strip()))
+
 if not DEBUG:
     CSRF_COOKIE_SECURE = True
     CSRF_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = True
     SECURE_SSL_REDIRECT = True
+    USE_X_FORWARDED_HOST = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_HTTPONLY = True

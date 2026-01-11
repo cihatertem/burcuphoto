@@ -1,14 +1,18 @@
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView, DetailView
+from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Project
 from django.core.mail import send_mail
 from django.contrib import messages
+from django_ratelimit.decorators import ratelimit
 import os
 from random import random
 import math
 from .utils import get_client_ip, current_year
 
+CONTACT_RATE_LIMIT = "2/m"
+CONTACT_RATE_LIMIT_KEY = "ip"
 
 # Create your views here.
 class YearContext(TemplateView):
@@ -50,6 +54,7 @@ class About(YearContext, TemplateView):
     template_name = "base/about.html"
 
 
+
 class Contact(YearContext, TemplateView):
     template_name = "base/contact.html"
 
@@ -63,12 +68,20 @@ class Contact(YearContext, TemplateView):
 
         return context
 
+    @method_decorator(ratelimit(key=CONTACT_RATE_LIMIT_KEY, rate=CONTACT_RATE_LIMIT, block=False, method='GET'))
     def post(self, request, *args, **kwargs):
         name = request.POST.get("name")
         email = request.POST.get("email")
         body = request.POST.get("message")
         website = request.POST.get("website", "")
         captcha = request.POST.get("captcha", "")
+
+        if getattr(request, "limited", False):
+            messages.error(
+                request,
+                "Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.",
+            )
+            return redirect("core:home")
 
         if website.strip():
             messages.success(
