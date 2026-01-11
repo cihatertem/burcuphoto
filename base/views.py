@@ -81,7 +81,7 @@ class Contact(YearContext, TemplateView):
                 request,
                 "Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.",
             )
-            return redirect("core:home")
+            return redirect("base:home")
 
         if website.strip():
             messages.success(
