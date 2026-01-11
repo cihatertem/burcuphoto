@@ -1,6 +1,5 @@
 from PIL import Image, ImageOps
 from io import BytesIO
-from base import models
 from datetime import date
 from django.http import HttpRequest
 from django.http import JsonResponse
@@ -35,30 +34,6 @@ def photo_resizer(image: Image.Image, size: int) -> BytesIO:
     image.save(output, format='JPEG', quality=100)
     output.seek(0)
     return output
-
-
-def spam_checker(mail_body: str) -> bool | None:
-    if not mail_body:
-        return False
-    spam_keywords = models.SpamFilter.objects.all()
-
-    spam_list = []
-
-    for keyword in spam_keywords:
-        spam_list.append(keyword.keyword.lower())
-
-    body_words = mail_body.strip().split(" ")
-    stripped_words = []
-
-    for body_word in body_words:
-        body_word = body_word.strip(".?!:;* '\"-_,`").lower()
-        if not body_word:
-            continue
-        stripped_words.append(body_word)
-
-    for stripped_word in stripped_words:
-        if stripped_word in spam_list:
-            return True
 
 
 def get_client_ip(request: HttpRequest) -> dict[str, str]:

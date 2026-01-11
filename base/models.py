@@ -100,12 +100,3 @@ class ProjectPortfolio(models.Model):
 
         return super().save(force_insert, force_update, using, update_fields)
 
-
-class SpamFilter(models.Model):
-    id = models.UUIDField(
-        default=uuid.uuid4, unique=True, primary_key=True, editable=False)
-    keyword = models.CharField(max_length=50)
-    created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self) -> str:
-        return self.keyword

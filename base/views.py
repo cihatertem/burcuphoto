@@ -7,7 +7,7 @@ from django.contrib import messages
 import os
 from random import random
 import math
-from .utils import spam_checker, get_client_ip, current_year
+from .utils import get_client_ip, current_year
 
 
 # Create your views here.
@@ -67,7 +67,7 @@ class Contact(YearContext, TemplateView):
         body = request.POST.get("message")
         website = request.POST.get("website")
 
-        if spam_checker(body) or website:
+        if website:
             messages.success(
                 request, "Your message was sent successfully.\nThank you!"
             )
