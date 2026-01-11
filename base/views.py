@@ -59,20 +59,33 @@ class Contact(YearContext, TemplateView):
         num_two = math.floor(random() * 10) + 1
         context["num1"] = num_one
         context["num2"] = num_two
+        self.request.session["contact_captcha_answer"] = num_one + num_two
+
         return context
 
     def post(self, request, *args, **kwargs):
         name = request.POST.get("name")
         email = request.POST.get("email")
         body = request.POST.get("message")
-        website = request.POST.get("website")
+        website = request.POST.get("website", "")
+        captcha = request.POST.get("captcha", "")
 
-        if website:
+        if website.strip():
             messages.success(
                 request, "Your message was sent successfully.\nThank you!"
             )
 
             return redirect("base:home")
+
+                try:
+            expected = int(request.session.get("contact_captcha_answer", -1))
+            got = int(captcha)
+        except ValueError:
+            got = None
+
+        if got != expected:
+            messages.error(request, "Captcha incorrect. Please try again.")
+            return redirect("base:contact")
 
         ip_address = get_client_ip(request)
 
