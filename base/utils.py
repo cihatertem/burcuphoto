@@ -54,6 +54,10 @@ def get_client_ip(request) -> str | None:
 
     return remote
 
+def client_ip_key(group, request):
+    # request None olmasın, ip yoksa sabit değer ver
+    return get_client_ip(request) or "unknown"
+
 # def get_client_ip(request: HttpRequest) -> dict[str, str]:
 #     return {
 #         "HTTP_X_FORWARDED_FOR":  request.META.get('HTTP_X_FORWARDED_FOR', None),
