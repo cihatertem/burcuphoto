@@ -77,7 +77,7 @@ class Contact(YearContext, TemplateView):
 
             return redirect("base:home")
 
-                try:
+        try:
             expected = int(request.session.get("contact_captcha_answer", -1))
             got = int(captcha)
         except ValueError:
