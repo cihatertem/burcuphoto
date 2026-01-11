@@ -164,6 +164,16 @@ AWS_STORAGE_BUCKET_NAME = os.getenv("BUCKET_NAME")
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_REGION_NAME= os.getenv("AWS_S3_REGION_NAME")
 
+# gunicorn 2+ workers ratelimit issue
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "ratelimit_cache",
+    }
+}
+
+RATELIMIT_USE_CACHE = "default"
+
 _raw = os.getenv("TRUSTED_PROXY_NETS", "")
 TRUSTED_PROXY_NETS = []
 
