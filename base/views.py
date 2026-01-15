@@ -10,7 +10,7 @@ from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView, ListView, DetailView
 from django.utils.decorators import method_decorator
-from ratelimit.decorators import ratelimit
+from django_ratelimit.decorators import ratelimit
 
 from .utils import get_client_ip, current_year, client_ip_key
 from .models import Project
