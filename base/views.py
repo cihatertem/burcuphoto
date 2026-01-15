@@ -1,15 +1,26 @@
+import os
+import math
+from random import random
+
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.mail import send_mail
 from django.shortcuts import redirect
+from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView, ListView, DetailView
 from django.utils.decorators import method_decorator
-from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Project
-from django.core.mail import send_mail
-from django.contrib import messages
-from django_ratelimit.decorators import ratelimit
-import os
-from random import random
-import math
+from ratelimit.decorators import ratelimit
+
 from .utils import get_client_ip, current_year, client_ip_key
+from .models import Project
+
+
+
+
+CAPTCHA_NUM1_KEY = "contact_captcha_num1"
+CAPTCHA_NUM2_KEY = "contact_captcha_num2"
+CAPTCHA_ANS_KEY = "contact_captcha_answer"
 
 CONTACT_RATE_LIMIT = "2/m"
 CONTACT_RATE_LIMIT_KEY = "ip"
@@ -55,26 +66,53 @@ class About(YearContext, TemplateView):
 
 
 
-@method_decorator(ratelimit(key=client_ip_key, rate=CONTACT_RATE_LIMIT, block=False, method='POST'), name="dispatch")
+
+def _generate_captcha(request) -> None:
+    n1 = math.floor(random() * 10) + 1
+    n2 = math.floor(random() * 10) + 1
+    request.session[CAPTCHA_NUM1_KEY] = n1
+    request.session[CAPTCHA_NUM2_KEY] = n2
+    request.session[CAPTCHA_ANS_KEY] = n1 + n2
+
+
+def _parse_int(value) -> int | None:
+    try:
+        if value in (None, ""):
+            return None
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def captcha_is_valid(request) -> bool:
+    expected = _parse_int(request.session.get(CAPTCHA_ANS_KEY))
+    got = _parse_int(request.POST.get("captcha"))
+    return expected is not None and got is not None and got == expected
+
+
+@method_decorator(
+    ratelimit(key=client_ip_key, rate=CONTACT_RATE_LIMIT, block=False, method="POST"),
+    name="dispatch",
+)
 class Contact(YearContext, TemplateView):
     template_name = "base/contact.html"
 
-    def get_context_data(self, **kwargs):
-        context = super(Contact, self).get_context_data(**kwargs)
-        num_one = math.floor(random() * 10) + 1
-        num_two = math.floor(random() * 10) + 1
-        context["num1"] = num_one
-        context["num2"] = num_two
-        self.request.session["contact_captcha_answer"] = num_one + num_two
+    def get(self, request, *args, **kwargs):
+        # Captcha sadece GET’te üretilir (POST’ta asla overwrite edilmez)
+        _generate_captcha(request)
+        return super().get(request, *args, **kwargs)
 
-        return context
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["num1"] = self.request.session.get(CAPTCHA_NUM1_KEY)
+        ctx["num2"] = self.request.session.get(CAPTCHA_NUM2_KEY)
+        return ctx
 
     def post(self, request, *args, **kwargs):
-        name = request.POST.get("name")
-        email = request.POST.get("email")
-        body = request.POST.get("message")
-        website = request.POST.get("website", "")
-        captcha = request.POST.get("captcha", "")
+        name = request.POST.get("name", "").strip()
+        email = request.POST.get("email", "").strip()
+        body = request.POST.get("message", "").strip()
+        website = request.POST.get("website", "").strip()  # honeypot
 
         if getattr(request, "limited", False):
             messages.error(
@@ -83,41 +121,43 @@ class Contact(YearContext, TemplateView):
             )
             return redirect("base:home")
 
-        if website.strip():
-            messages.success(
-                request, "Your message was sent successfully.\nThank you!"
-            )
-
+        # Honeypot doluysa bot kabul et ve sessizce başarılı gibi dön
+        if website:
+            messages.success(request, "Your message was sent successfully.\nThank you!")
             return redirect("base:home")
 
-        try:
-            expected = int(request.session.get("contact_captcha_answer", -1))
-            got = int(captcha)
-        except ValueError:
-            got = None
-
-        if got != expected:
+        # Captcha doğrula (session yoksa/bozuksa da False döner)
+        if not captcha_is_valid(request):
             messages.error(request, "Captcha incorrect. Please try again.")
             return redirect("base:contact")
+
+        # Tek kullanımlık captcha: doğrulandıktan sonra session'dan sil
+        request.session.pop(CAPTCHA_ANS_KEY, None)
+        request.session.pop(CAPTCHA_NUM1_KEY, None)
+        request.session.pop(CAPTCHA_NUM2_KEY, None)
 
         ip_address = get_client_ip(request)
 
         send_mail(
-            'Web Site Visitor',
-            f"""
-            From {name}, {email}\n
-            \t{body}\n
-            {ip_address}
-            Site: www.burcuatak.com
-            """,
-            email,
-            [os.getenv("EMAIL_RECEIVER_ONE"), os.getenv("EMAIL_RECEIVER_TWO")],
+            subject="Web Site Visitor",
+            message=(
+                f"From {name}, {email}\n\n"
+                f"{body}\n\n"
+                f"IP: {ip_address}\n"
+                f"Site: www.burcuatak.com\n"
+            ),
+            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", email) or email,
+            recipient_list=[
+                os.getenv("EMAIL_RECEIVER_ONE"),
+                os.getenv("EMAIL_RECEIVER_TWO"),
+            ],
             fail_silently=False,
         )
-        messages.success(
-            request, "Your message was sent successfully.\nWe will touch you back soon."
-        )
 
+        messages.success(
+            request,
+            "Your message was sent successfully.\nWe will touch you back soon.",
+        )
         return redirect("base:home")
 
 
