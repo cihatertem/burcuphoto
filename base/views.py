@@ -119,7 +119,7 @@ class Contact(YearContext, TemplateView):
                 request,
                 "Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.",
             )
-            return redirect("base:home")
+            return redirect("base:contact")
 
         # Honeypot doluysa bot kabul et ve sessizce başarılı gibi dön
         if website:
