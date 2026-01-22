@@ -6,19 +6,13 @@ let swiperClose = document.querySelector(".btn-swiper-close");
 let btnMessage = document.querySelector(".btn-messages");
 let messageBox = document.querySelector(".messages");
 let checkbox = document.getElementById("checkbox");
-let checkboxLabel = document.getElementById("theme-label");
-let css = document.getElementById("css");
+let root = document.documentElement;
 let navLink = document.getElementsByClassName("nav-link");
 let numOne = document.querySelector(".num1");
 let numTwo = document.querySelector(".num2");
 let captcha = document.querySelector("#captcha");
 const submitBtn = document.querySelector("#contact-submit");
 const emailForm = document.getElementById("email-form");
-
-const DARK_THEME =
-  "https://burcu-photo.s3.eu-north-1.amazonaws.com/style/main-dark.css";
-const LIGHT_THEME =
-  "https://burcu-photo.s3.eu-north-1.amazonaws.com/style/main-light.css";
 
 //Navlink active
 for (let i = 0; i < navLink.length; i++) {
@@ -29,48 +23,33 @@ for (let i = 0; i < navLink.length; i++) {
 }
 
 //themeswitcher
-checkbox.checked = false;
-let themeValue = localStorage.getItem("theme");
-if (themeValue === null) {
-  localStorage.setItem("theme", "dark");
-  themeValue = "dark";
-}
-
-checkboxLabel.addEventListener("click", (e) => {
-  e.preventDefault();
-  if (themeValue === "dark") {
-    css.href = LIGHT_THEME;
-    localStorage.setItem("theme", "light");
-    checkbox.checked = true;
-    themeValue = "light";
-    return;
-  }
-
-  if (themeValue === "light") {
-    css.href = DARK_THEME;
-    localStorage.setItem("theme", "dark");
-    checkbox.checked = false;
-    themeValue = "dark";
-    return;
-  }
-});
-
-// window.onload = () => {
-const themeLoader = (event) => {
-  let storedTheme = localStorage.getItem("theme");
-
-  if (storedTheme === null || storedTheme === "dark") {
-    css.href = DARK_THEME;
-  }
-
-  if (storedTheme === "light") {
-    css.href = LIGHT_THEME;
-    localStorage.setItem("theme", "light");
-    checkbox.checked = true;
-  }
+const setTheme = (theme) => {
+  root.dataset.theme = theme;
+  checkbox.checked = theme === "light";
+  localStorage.setItem("theme", theme);
 };
 
-addEventListener("DOMContentLoaded", themeLoader)
+const getPreferredTheme = () => {
+  const storedTheme = localStorage.getItem("theme");
+  if (storedTheme) {
+    return storedTheme;
+  }
+
+  if (window.matchMedia?.("(prefers-color-scheme: light)").matches) {
+    return "light";
+  }
+
+  return "dark";
+};
+
+checkbox.checked = false;
+addEventListener("DOMContentLoaded", () => {
+  setTheme(getPreferredTheme());
+});
+
+checkbox.addEventListener("change", () => {
+  setTheme(checkbox.checked ? "light" : "dark");
+});
 
 //Django flash message
 if (btnMessage) {

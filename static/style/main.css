@@ -4,6 +4,28 @@
   --font-main: #ffc483;
   --font-second: #F1E6D3;
   --border-main: #F8D6AD;
+  --footer-social-color: var(--bg-main);
+  --swiper-button-bg: rgba(196, 147, 122, 0.27);
+  --swiper-button-bg-hover: rgba(241, 230, 211, 0.50);
+  --email-card-margin-top: -1rem;
+  --email-form-input-color: var(--bg-main);
+  --media-card-socials-margin-top: 1rem;
+  --swiper-image-z-index: 10000;
+}
+
+[data-theme="light"] {
+  --bg-main: #B9AEA5;
+  --bg-second: #B5A89D;
+  --font-main: #f8f5f5;
+  --font-second: #f8f5f5;
+  --border-main: #F8D6AD;
+  --footer-social-color: var(--font-second);
+  --swiper-button-bg: rgba(241, 230, 211, 0.50);
+  --swiper-button-bg-hover: rgba(196, 147, 122, 0.27);
+  --email-card-margin-top: -2rem;
+  --email-form-input-color: #333;
+  --media-card-socials-margin-top: 2rem;
+  --swiper-image-z-index: auto;
 }
 
 @font-face {
@@ -146,7 +168,7 @@ footer {
 .footer-social-icon {
   width: 1.2rem;
   filter: invert(87%) sepia(20%) saturate(327%) hue-rotate(334deg) brightness(109%) contrast(89%);
-  color: var(--bg-main);
+  color: var(--footer-social-color);
   transition: all .2s linear;
 }
 
@@ -320,7 +342,7 @@ section.hero {
 .swiper-button-prev,
 .swiper-button-next {
   color: var(--font-second);
-  background-color: rgba(196, 147, 122, 0.27);
+  background-color: var(--swiper-button-bg);
   padding: 2rem;
   margin-bottom: 20rem;
   border-radius: .5rem;
@@ -330,7 +352,7 @@ section.hero {
 .swiper-button-prev:hover,
 .swiper-button-next:hover {
   color: var(--font-main);
-  background-color: rgba(241, 230, 211, 0.50);
+  background-color: var(--swiper-button-bg-hover);
   transition: all .2s linear;
 }
 
@@ -443,7 +465,7 @@ section.hero {
   border: none;
   max-height: 70%;
   align-self: center;
-  z-index: 10000;
+  z-index: var(--swiper-image-z-index);
 }
 
 .btn-swiper-close {
@@ -572,7 +594,7 @@ section.email-card h2 {
   height: 60%;
   justify-content: space-evenly;
   align-items: center;
-  margin-top: -1rem;
+  margin-top: var(--email-card-margin-top);
 }
 
 #email-form #name,
@@ -583,7 +605,7 @@ section.email-card h2 {
 #email-form input,
 #email-form textarea {
   width: 75%;
-  color: var(--bg-main);
+  color: var(--email-form-input-color);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
   border-radius: .5rem;
   margin-bottom: 1rem;
@@ -871,7 +893,7 @@ input.btn-submit {
 
   section.media-card h2,
   section.media-card .socials {
-    margin: 1rem 0 0 0;
+    margin: var(--media-card-socials-margin-top) 0 0 0;
   }
 
   section.email-card {
