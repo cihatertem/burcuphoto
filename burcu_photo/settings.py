@@ -150,7 +150,12 @@ DATABASES = {
         'NAME': os.getenv("POSTGRES_DB"),
         "HOST": os.getenv("DB_HOST"),
         "USER": get_secret("POSTGRES_USER"),
-        "PASSWORD": get_secret("POSTGRES_PASSWORD")
+        "PASSWORD": get_secret("POSTGRES_PASSWORD"),
+        "CONN_MAX_AGE": int(os.getenv("DJANGO_DB_CONN_MAX_AGE", "60")),
+        "CONN_HEALTH_CHECKS": True,
+        "OPTIONS": {
+            "connect_timeout": 5,
+        },
     }
 }
 
