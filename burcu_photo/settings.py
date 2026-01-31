@@ -151,10 +151,16 @@ DATABASES = {
         "HOST": os.getenv("DB_HOST"),
         "USER": get_secret("POSTGRES_USER"),
         "PASSWORD": get_secret("POSTGRES_PASSWORD"),
-        "CONN_MAX_AGE": int(os.getenv("DJANGO_DB_CONN_MAX_AGE", "60")),
-        "CONN_HEALTH_CHECKS": True,
+        # "CONN_MAX_AGE": int(os.getenv("DJANGO_DB_CONN_MAX_AGE", "60")),
+        # "CONN_HEALTH_CHECKS": True,
         "OPTIONS": {
             "connect_timeout": 5,
+            'pool': {
+                'min_size': 0,
+                'max_size': 2,
+                'timeout': 5,
+                'max_lifetime': 300,
+            },
         },
     }
 }

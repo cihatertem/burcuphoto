@@ -5,7 +5,7 @@ python-dotenv~=1.2.1
 django-ratelimit~=4.1.0
 
 # PostgreSQL (prod için binary wheel önerilir)
-psycopg[binary]~=3.3.2
+psycopg[binary,pool]~=3.3.2
 
 # WSGI server
 gunicorn~=23.0.0
