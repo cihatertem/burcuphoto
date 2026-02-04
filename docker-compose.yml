@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:17
+    init: true
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -17,6 +18,7 @@ services:
 
   web:
     build: .
+    init: true
     env_file:
       - .env
     environment:

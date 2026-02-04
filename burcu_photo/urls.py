@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 import os
 
 urlpatterns = [
-    path(os.getenv("ADMIN_ADDRESS"), admin.site.urls),
+    path(os.getenv("ADMIN_ADDRESS", "admin/"), admin.site.urls),
     path('', include('base.urls', namespace='base')),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
     path('yandex_697c73042871080e.html', TemplateView.as_view(template_name='yandex_697c73042871080e.html'))

@@ -4,7 +4,7 @@ LABEL maintainer="Cihat Ertem <cihatertem@gmail.com>"
 
 ENV PYTHONUNBUFFERED=1
 
-RUN groupadd -r django && useradd --no-log-init -r -g django django
+RUN groupadd -g 1000 -r django && useradd --no-log-init -u 1000 -r -g django django
 
 RUN apt-get update && apt-get install -y curl \
     && rm -rf /var/lib/apt/lists/* \
