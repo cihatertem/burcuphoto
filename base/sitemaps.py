@@ -24,7 +24,7 @@ class ProjectSitemap(Sitemap):
     priority = 0.5
 
     def items(self):
-        return Project.objects.all()
+        return Project.objects.order_by("updated", "pk")
 
     def location(self, item):
         return reverse('base:portfolio_detail', args=[item.slug])
