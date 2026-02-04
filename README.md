@@ -12,14 +12,13 @@ The Github action is just to build and push docker image to docker hub repositor
 
 Data persistent requirement is met by **AWS EFS** Volume for Traefik CERT and Postgres data location. With EFS Volume, new nodes can connect easyly to the DIRs.
 
-
 ## environtment example
 
-Environment settings inside **environments/burcuphoto_environment.txt"
+Environment settings inside \*\*environments/burcuphoto_environment.txt"
 
-* Email Receivers for website contact form's endpoint.
-* DEBUG 1 (True) or 0 (False)
-* DB_HOST willnot need to change if docker-compose-postgres' definition.
+- Email Receivers for website contact form's endpoint.
+- DEBUG 1 (True) or 0 (False)
+- DB_HOST willnot need to change if docker-compose-postgres' definition.
 
 ```shell
 ADMIN_ADDRESS=CHANGE/WITH/YOUR/ADMIN/ENDPOINT
@@ -37,6 +36,17 @@ AWS_S3_REGION_NAME=CHANGE_WITH_AWS_REGION_NAME
 
 3 Docker compose files are setted up for swarm cluster and there are several **CHANGE_WITH** sections in the files.
 
+## Local development with Docker Compose
+
+Use the local compose file and env template below to run the app locally:
+
+```shell
+${EDITOR:-nano} environments/burcuphoto_local.env
+docker compose up --build
+```
+
+The app will be available at http://localhost:8000.
+
 ## aws_user_data.sh
 
-This file is for AWS EC2 instance creation page's **USER DATA** section. This scipt targets swarm worker instance. And it contains server harden & network optimization settings. There are several **CHANGE_WITH** sections.
+This file is for AWS EC2 instance creation page's **USER DATA** section. This scipt targets swarm worker instance. And it contains server harden & network optimization settings. There are several **CHANGE_WITH** sections.This file is for AWS EC2 instance creation page's **USER DATA** section. This scipt targets swarm worker instance. And it contains server harden & network optimization settings. There are several **CHANGE_WITH** sections.
