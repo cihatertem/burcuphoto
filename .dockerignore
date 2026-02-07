@@ -17,3 +17,4 @@ aws_user_data.sh
 README.md
 .vscode/
 codex.patch
+*.old

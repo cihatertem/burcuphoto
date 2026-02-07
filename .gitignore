@@ -11,3 +11,4 @@ swarm/
 environment.txt
 .vscode/
 codex.patch
+*.old

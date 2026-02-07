@@ -34,7 +34,7 @@ SECRET_KEY = get_secret("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.environ.get("DEBUG", "0")))
 
-ALLOWED_HOSTS = [host for host in os.environ.get("ALLOWED_HOSTS").split(",")]
+ALLOWED_HOSTS = ["*"] if DEBUG else os.getenv("ALLOWED_HOSTS", "").split(",")
 
 # Application definition
 INSTALLED_APPS = [
@@ -126,7 +126,6 @@ STATICFILES_DIRS = [
 ]
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -180,16 +179,22 @@ DATABASES = {
     }
 }
 
-STORAGES = {
-    "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
-    "staticfiles": {"BACKEND": "storages.backends.s3boto3.S3StaticStorage"}
-}
+USE_S3 = (not DEBUG) and bool(os.getenv("BUCKET_NAME"))
 
-AWS_ACCESS_KEY_ID = get_secret("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = get_secret("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.getenv("BUCKET_NAME")
-AWS_QUERYSTRING_AUTH = False
-AWS_S3_REGION_NAME= os.getenv("AWS_S3_REGION_NAME")
+if USE_S3:
+    STORAGES = {
+        "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+        "staticfiles": {"BACKEND": "storages.backends.s3boto3.S3StaticStorage"}
+    }
+
+    AWS_ACCESS_KEY_ID = get_secret("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = get_secret("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("BUCKET_NAME")
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_REGION_NAME= os.getenv("AWS_S3_REGION_NAME")
+    MEDIA_ROOT = None
+else:
+    MEDIA_ROOT = BASE_DIR / "media/"
 
 # gunicorn 2+ workers ratelimit issue
 CACHES = {
