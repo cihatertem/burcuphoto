@@ -1,10 +1,12 @@
-from django.db import models
-import uuid
-from base.utils import project_directory_path, portfolio_directory_path, photo_resizer
-from PIL import Image
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.utils.translation import gettext_lazy as _
 import sys
+import uuid
+
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from PIL import Image
+
+from base.utils import photo_resizer, portfolio_directory_path, project_directory_path
 
 PHOTO_ALT_TEXT = _("Alt text for the photo.")
 
@@ -58,7 +60,7 @@ class Project(models.Model):
         elif not self.draft:
             self.project_link = f'https://burcuatak.com/portfolio/{self.slug}/'
 
-        return super().save(force_insert, force_update, using, update_fields)
+        return super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
 
 class ProjectPortfolio(models.Model):
@@ -98,5 +100,5 @@ class ProjectPortfolio(models.Model):
                     None
                 )
 
-        return super().save(force_insert, force_update, using, update_fields)
+        return super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 

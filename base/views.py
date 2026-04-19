@@ -1,6 +1,5 @@
 import os
-import math
-from random import random
+import secrets
 
 from django.conf import settings
 from django.contrib import messages
@@ -68,8 +67,8 @@ class About(YearContext, TemplateView):
 
 
 def _generate_captcha(request) -> None:
-    n1 = math.floor(random() * 10) + 1
-    n2 = math.floor(random() * 10) + 1
+    n1 = secrets.randbelow(10) + 1
+    n2 = secrets.randbelow(10) + 1
     request.session[CAPTCHA_NUM1_KEY] = n1
     request.session[CAPTCHA_NUM2_KEY] = n2
     request.session[CAPTCHA_ANS_KEY] = n1 + n2

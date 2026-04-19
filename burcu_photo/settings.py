@@ -169,13 +169,6 @@ DATABASES = {
             "keepalives_count": DB_KEEPALIVES_COUNT,
             "connect_timeout": 10,
         },
-        # "OPTIONS": {
-        #     "keepalives": 1,
-        #     "keepalives_idle": 60,
-        #     "keepalives_interval": 10,
-        #     "keepalives_count": 3,
-        #     "connect_timeout": 10,
-        # },
     }
 }
 
