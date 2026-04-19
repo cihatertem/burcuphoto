@@ -48,13 +48,19 @@ class Project(models.Model):
     draft = models.BooleanField(default=True)
     project_link = models.URLField(max_length=300, null=True, blank=True)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._initial_featured_photo = self.featured_photo
+
     def __str__(self):
         return self.title
 
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        if self.featured_photo and not getattr(self.featured_photo, "_committed", True):
+        if self.featured_photo and (
+            self._state.adding or self.featured_photo != self._initial_featured_photo
+        ):
             self.featured_photo = process_image_field(self.featured_photo)
 
         if self.draft:
@@ -86,13 +92,17 @@ class ProjectPortfolio(models.Model):
     class Meta:
         ordering = ("index",)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._initial_photo = self.photo
+
     def __str__(self):
         return self.project.slug
 
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        if self.photo and not getattr(self.photo, "_committed", True):
+        if self.photo and (self._state.adding or self.photo != self._initial_photo):
             self.photo = process_image_field(self.photo)
 
         return super().save(

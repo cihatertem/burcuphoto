@@ -5,7 +5,7 @@ import threading
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -142,24 +142,25 @@ class Contact(YearContext, TemplateView):
 
         ip_address = get_client_ip(request)
 
-        threading.Thread(
-            target=send_mail,
-            kwargs={
-                "subject": "Web Site Visitor",
-                "message": (
+        def _send_email_thread():
+            msg = EmailMessage(
+                subject="Web Site Visitor",
+                body=(
                     f"From {name}, {email}\n\n"
                     f"{body}\n\n"
                     f"IP: {ip_address}\n"
                     f"Site: www.burcuatak.com\n"
                 ),
-                "from_email": getattr(settings, "DEFAULT_FROM_EMAIL", email) or email,
-                "recipient_list": [
+                from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
+                to=[
                     os.getenv("EMAIL_RECEIVER_ONE"),
                     os.getenv("EMAIL_RECEIVER_TWO"),
                 ],
-                "fail_silently": False,
-            },
-        ).start()
+                reply_to=[email] if email else None,
+            )
+            msg.send(fail_silently=False)
+
+        threading.Thread(target=_send_email_thread).start()
 
         messages.success(
             request,
