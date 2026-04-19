@@ -1,9 +1,10 @@
 {% extends 'main.html' %}
-{% load static %}
+{% load static cache %}
 {% block meta-description %}Burcu Atak's personal photography portfolio website. You will find Burcu Atak's travel,
     street, portrait and still life photography works in this web site.{% endblock %}
 {% block meta-title %}Burcu Atak Photography Portfolio{% endblock %}
 {% block main %}
+    {% cache 900 home_main %}
     <section class="hero">
         <div class="greeting">
             <h1 class="greeting-title">Welcome to Burcu Atak's Photography Portfolio Web Site</h1>
@@ -23,4 +24,5 @@
             <img src="{% static 'images/burcu.png' %}" alt="Burcu Atak's own photo on desert.">
         </div>
     </section>
+    {% endcache %}
 {% endblock %}

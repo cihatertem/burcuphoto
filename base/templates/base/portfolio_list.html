@@ -1,9 +1,10 @@
 {% extends 'main.html' %}
-{% load static %}
+{% load static cache %}
 {% block meta-keywords %}Burcu Atak, portfolio, photography, portfolyo, fotoğraf{% endblock %}
 {% block meta-description %}You may reach Burcu Atak's photography works and archive from this page.{% endblock %}
 {% block meta-title %}Burcu Atak's photography portofolio works page.{% endblock %}
 {% block main %}
+    {% cache 900 portfolio_list %}
     <h1 class="portfoliopage-title">Burcu Atak's photography portofolio works page.</h1>
     {% if project_list %}
         <div class="swiper portfolio">
@@ -26,4 +27,5 @@
             <div class="swiper-button-next"></div>
         </div>
     {% endif %}
+    {% endcache %}
 {% endblock %}

@@ -31,12 +31,10 @@ class YearContext(TemplateView):
         return context
 
 
-@method_decorator(cache_page(60 * 15), name="dispatch")
 class HomeView(YearContext, TemplateView):
     template_name = "base/home.html"
 
 
-@method_decorator(cache_page(60 * 15), name="dispatch")
 class PortfolioList(ListView):
     template_name = "base/portfolio_list.html"
     model = Project
@@ -51,7 +49,6 @@ class PortfolioList(ListView):
         return context
 
 
-@method_decorator(cache_page(60 * 15), name="dispatch")
 class PortfolioDetail(DetailView):
     template_name = "base/portfolio_detail.html"
     model = Project
@@ -66,7 +63,6 @@ class PortfolioDetail(DetailView):
         return context
 
 
-@method_decorator(cache_page(60 * 15), name="dispatch")
 class About(YearContext, TemplateView):
     template_name = "base/about.html"
 

@@ -1,10 +1,11 @@
 {% extends 'main.html' %}
-{% load static %}
+{% load static cache %}
 {% block meta-description %}{% if project.meta_description %}{{ project.meta_description }}{% else %}{{ project.slug }}
 {% endif %}{% endblock %}
 {% block meta-title %}{% if project.meta_title %}{{ project.meta_title }}{% else %}{{ project.slug }}
 {% endif %}{% endblock %}
 {% block main %}
+    {% cache 900 portfolio_detail_main project.slug %}
     <section class="project">
         <a href="#top" class="btn btn-up"><img role="img" class="arrow arrow-up"
                                                src="{% static 'icons/arrow-up-short.svg' %}"></a>
@@ -22,10 +23,12 @@
             {% endfor %}
         </div>
     </section>
+    {% endcache %}
 {% endblock %}
 
 {% block photo_zoom %}
 
+    {% cache 900 portfolio_detail_zoom project.slug %}
     <div class="swiper photo-zoom">
         <button href="" class="btn btn-swiper-close">&#10005;</button>
         <div class="swiper-wrapper photo-zoom-wrapper">
@@ -37,5 +40,6 @@
         <div class="swiper-button-prev zoom"></div>
         <div class="swiper-button-next zoom"></div>
     </div>
+    {% endcache %}
 
 {% endblock %}

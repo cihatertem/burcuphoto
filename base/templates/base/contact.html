@@ -1,11 +1,12 @@
 {% extends 'main.html' %}
-{% load static %}
+{% load static cache %}
 {% block meta-description %} Burcu Atak's social media links and e-mail form page. {% endblock %}
 {% block meta-title %} Contact Burcu Atak {% endblock %}
 
 {% block main %}
 <h1 class="contact-title">Contact...</h1>
 <div class="card-box">
+  {% cache 900 contact_static %}
   <section class="media-card">
     <h2>Other Mediums</h2>
     <div class="socials">
@@ -43,6 +44,7 @@
       /></a>
     </div>
   </section>
+  {% endcache %}
 
   <section class="email-card">
     <h2>Email Me...</h2>
