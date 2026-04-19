@@ -56,6 +56,10 @@ class PortfolioDetail(DetailView):
     template_name = "base/portfolio_detail.html"
     model = Project
 
+    def get_queryset(self, **kwargs):
+        queryset = super().get_queryset(**kwargs)
+        return queryset.filter(draft=False)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["year"] = current_year()

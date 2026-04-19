@@ -54,7 +54,7 @@ class Project(models.Model):
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        if self.featured_photo:
+        if self.featured_photo and not getattr(self.featured_photo, "_committed", True):
             self.featured_photo = process_image_field(self.featured_photo)
 
         if self.draft:
@@ -92,7 +92,7 @@ class ProjectPortfolio(models.Model):
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        if self.photo:
+        if self.photo and not getattr(self.photo, "_committed", True):
             self.photo = process_image_field(self.photo)
 
         return super().save(

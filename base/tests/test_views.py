@@ -210,3 +210,56 @@ class ContactViewTests(TestCase):
             str(messages[0]),
             "Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.",
         )
+
+
+from io import BytesIO
+
+from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
+
+from base.models import Project
+
+
+class PortfolioDetailSecurityTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Create a valid image file
+        file_obj = BytesIO()
+        image = Image.new("RGB", (100, 100), "white")
+        image.save(file_obj, "JPEG")
+        file_obj.seek(0)
+
+        img = SimpleUploadedFile(
+            "test_image.jpg", file_obj.read(), content_type="image/jpeg"
+        )
+
+        self.draft_project = Project.objects.create(
+            title="Draft Project", slug="draft-project", draft=True, featured_photo=img
+        )
+
+        file_obj.seek(0)
+        img2 = SimpleUploadedFile(
+            "test_image2.jpg", file_obj.read(), content_type="image/jpeg"
+        )
+
+        self.published_project = Project.objects.create(
+            title="Published Project",
+            slug="published-project",
+            draft=False,
+            featured_photo=img2,
+        )
+
+    def test_draft_project_inaccessible(self):
+        response = self.client.get(
+            reverse("base:portfolio_detail", kwargs={"slug": self.draft_project.slug})
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_published_project_accessible(self):
+        response = self.client.get(
+            reverse(
+                "base:portfolio_detail", kwargs={"slug": self.published_project.slug}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
