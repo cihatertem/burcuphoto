@@ -1,20 +1,85 @@
-venv/
-.env
-__pycache__/
-swarm/
-db.sqlite3
-media/
-Dockerfile
+# Git
+.git/
+.github/
 .gitignore
-.git
-.github
+
+# Environments
+.env
+.env.*
+.venv/
+venv/
+ENV/
+
+# Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+db.sqlite3
+db.sqlite3-journal
+*.log
+
+# uv
+.uv/
+
+# Testing / Profiling
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+pytestdebug.log
+test_media/
+
+# Linters / Formatters
+.ruff_cache/
+.mypy_cache/
+
+# IDEs / Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+traefik.yml
+
+# Project specific
+media/
+projects/
+secrets/
+swarm/
 environment.txt
 environments/
-secrets/
-docker-compose*
-traefik.yml
 aws_user_data.sh
 README.md
-.vscode/
+GEMINI.md
 codex.patch
 *.old

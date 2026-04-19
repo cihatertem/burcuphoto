@@ -1,14 +1,82 @@
-/.env
-/venv/
+# Environments
+.env
+.env.*
+!.env.example
 .venv/
-/.idea/
-/db.sqlite3
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+db.sqlite3
+db.sqlite3-journal
+*.log
+local_settings.py
+
+# uv
+.uv/
+
+# Testing / Profiling
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+pytestdebug.log
+
+# Linters / Formatters
+.ruff_cache/
+.mypy_cache/
+
+# IDEs / Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Project specific
 /projects/
 /media/
 /secrets/
-__pycache__/
-swarm/
+/swarm/
 environment.txt
-.vscode/
 codex.patch
 *.old

@@ -80,3 +80,16 @@ STORAGES = {
     },
 }
 MEDIA_ROOT = BASE_DIR / "test_media/"
+
+import shutil
+from django.test.runner import DiscoverRunner
+
+
+class MediaCleanupTestRunner(DiscoverRunner):
+    def teardown_test_environment(self, **kwargs):
+        super().teardown_test_environment(**kwargs)
+        if MEDIA_ROOT.exists():
+            shutil.rmtree(MEDIA_ROOT)
+
+
+TEST_RUNNER = "burcu_photo.test_settings.MediaCleanupTestRunner"
