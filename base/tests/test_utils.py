@@ -12,42 +12,84 @@ class GetClientIPTests(TestCase):
         self.factory = RequestFactory()
 
     def test_no_remote_addr(self):
-        request = self.factory.get('/')
+        request = self.factory.get("/")
         # RequestFactory.get() might set REMOTE_ADDR to 127.0.0.1 by default
-        if 'REMOTE_ADDR' in request.META:
-            del request.META['REMOTE_ADDR']
+        if "REMOTE_ADDR" in request.META:
+            del request.META["REMOTE_ADDR"]
         self.assertIsNone(get_client_ip(request))
 
     @override_settings(TRUSTED_PROXY_NETS=[])
     def test_untrusted_proxy_returns_remote_addr(self):
-        request = self.factory.get('/', REMOTE_ADDR='1.2.3.4', HTTP_X_FORWARDED_FOR='5.6.7.8')
-        self.assertEqual(get_client_ip(request), '1.2.3.4')
+        request = self.factory.get(
+            "/", REMOTE_ADDR="1.2.3.4", HTTP_X_FORWARDED_FOR="5.6.7.8"
+        )
+        self.assertEqual(get_client_ip(request), "1.2.3.4")
 
-    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network('127.0.0.1/32')])
+    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network("127.0.0.1/32")])
     def test_trusted_proxy_no_xff(self):
-        request = self.factory.get('/', REMOTE_ADDR='127.0.0.1')
-        self.assertEqual(get_client_ip(request), '127.0.0.1')
+        request = self.factory.get("/", REMOTE_ADDR="127.0.0.1")
+        self.assertEqual(get_client_ip(request), "127.0.0.1")
 
-    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network('127.0.0.1/32')])
+    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network("127.0.0.1/32")])
     def test_trusted_proxy_with_xff(self):
-        request = self.factory.get('/', REMOTE_ADDR='127.0.0.1', HTTP_X_FORWARDED_FOR='5.6.7.8')
-        self.assertEqual(get_client_ip(request), '5.6.7.8')
+        request = self.factory.get(
+            "/", REMOTE_ADDR="127.0.0.1", HTTP_X_FORWARDED_FOR="5.6.7.8"
+        )
+        self.assertEqual(get_client_ip(request), "5.6.7.8")
 
-    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network('127.0.0.1/32')])
+    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network("127.0.0.1/32")])
     def test_trusted_proxy_with_multiple_xff(self):
-        request = self.factory.get('/', REMOTE_ADDR='127.0.0.1', HTTP_X_FORWARDED_FOR='5.6.7.8, 9.10.11.12')
-        self.assertEqual(get_client_ip(request), '5.6.7.8')
+        # The rightmost non-trusted IP should be returned
+        request = self.factory.get(
+            "/", REMOTE_ADDR="127.0.0.1", HTTP_X_FORWARDED_FOR="5.6.7.8, 9.10.11.12"
+        )
+        self.assertEqual(get_client_ip(request), "9.10.11.12")
 
-    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network('192.168.1.0/24')])
+    @override_settings(
+        TRUSTED_PROXY_NETS=[
+            ipaddress.ip_network("127.0.0.1/32"),
+            ipaddress.ip_network("10.0.0.0/8"),
+        ]
+    )
+    def test_trusted_proxy_with_multiple_xff_and_multiple_trusted_proxies(self):
+        # 10.0.0.1 is trusted, so it should be skipped and 9.10.11.12 should be returned
+        request = self.factory.get(
+            "/",
+            REMOTE_ADDR="127.0.0.1",
+            HTTP_X_FORWARDED_FOR="5.6.7.8, 9.10.11.12, 10.0.0.1",
+        )
+        self.assertEqual(get_client_ip(request), "9.10.11.12")
+
+    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network("127.0.0.1/32")])
+    def test_trusted_proxy_with_spoofed_ip(self):
+        # Malicious client sends X-Forwarded-For: 1.2.3.4
+        # Proxy adds real client IP 9.10.11.12
+        request = self.factory.get(
+            "/", REMOTE_ADDR="127.0.0.1", HTTP_X_FORWARDED_FOR="1.2.3.4, 9.10.11.12"
+        )
+        self.assertEqual(get_client_ip(request), "9.10.11.12")
+
+    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network("127.0.0.1/32")])
+    def test_trusted_proxy_with_invalid_ip(self):
+        request = self.factory.get(
+            "/", REMOTE_ADDR="127.0.0.1", HTTP_X_FORWARDED_FOR="5.6.7.8, invalid_ip"
+        )
+        self.assertEqual(get_client_ip(request), "invalid_ip")
+
+    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network("192.168.1.0/24")])
     def test_trusted_network_range(self):
-        request = self.factory.get('/', REMOTE_ADDR='192.168.1.50', HTTP_X_FORWARDED_FOR='10.0.0.1')
-        self.assertEqual(get_client_ip(request), '10.0.0.1')
+        request = self.factory.get(
+            "/", REMOTE_ADDR="192.168.1.50", HTTP_X_FORWARDED_FOR="10.0.0.1"
+        )
+        self.assertEqual(get_client_ip(request), "10.0.0.1")
 
     def test_trusted_proxy_nets_not_set(self):
         # Ensure it works when TRUSTED_PROXY_NETS is not in settings
         with self.settings(TRUSTED_PROXY_NETS=None):
-            request = self.factory.get('/', REMOTE_ADDR='127.0.0.1', HTTP_X_FORWARDED_FOR='5.6.7.8')
-            self.assertEqual(get_client_ip(request), '127.0.0.1')
+            request = self.factory.get(
+                "/", REMOTE_ADDR="127.0.0.1", HTTP_X_FORWARDED_FOR="5.6.7.8"
+            )
+            self.assertEqual(get_client_ip(request), "127.0.0.1")
 
 
 class PhotoResizerTests(TestCase):

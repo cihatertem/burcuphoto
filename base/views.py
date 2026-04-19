@@ -1,22 +1,19 @@
 import os
 import secrets
+import threading
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.shortcuts import redirect
-from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView, ListView, DetailView
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.views.generic import DetailView, ListView, TemplateView
 from django_ratelimit.decorators import ratelimit
 
-from .utils import get_client_ip, current_year, client_ip_key
 from .models import Project
-
-
-
+from .utils import client_ip_key, current_year, get_client_ip
 
 CAPTCHA_NUM1_KEY = "contact_captcha_num1"
 CAPTCHA_NUM2_KEY = "contact_captcha_num2"
@@ -24,6 +21,7 @@ CAPTCHA_ANS_KEY = "contact_captcha_answer"
 
 CONTACT_RATE_LIMIT = "2/m"
 CONTACT_RATE_LIMIT_KEY = "ip"
+
 
 # Create your views here.
 class YearContext(TemplateView):
@@ -33,14 +31,14 @@ class YearContext(TemplateView):
         return context
 
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class HomeView(YearContext, TemplateView):
-    template_name = 'base/home.html'
+    template_name = "base/home.html"
 
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
-class PortfolioList( ListView):
-    template_name = 'base/portfolio_list.html'
+@method_decorator(cache_page(60 * 15), name="dispatch")
+class PortfolioList(ListView):
+    template_name = "base/portfolio_list.html"
     model = Project
 
     def get_queryset(self, **kwargs):
@@ -53,9 +51,9 @@ class PortfolioList( ListView):
         return context
 
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class PortfolioDetail(DetailView):
-    template_name = 'base/portfolio_detail.html'
+    template_name = "base/portfolio_detail.html"
     model = Project
 
     def get_context_data(self, **kwargs):
@@ -64,11 +62,9 @@ class PortfolioDetail(DetailView):
         return context
 
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class About(YearContext, TemplateView):
     template_name = "base/about.html"
-
-
 
 
 def _generate_captcha(request) -> None:
@@ -84,7 +80,7 @@ def _parse_int(value) -> int | None:
         if value in (None, ""):
             return None
         return int(value)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
 
 
@@ -142,21 +138,24 @@ class Contact(YearContext, TemplateView):
 
         ip_address = get_client_ip(request)
 
-        send_mail(
-            subject="Web Site Visitor",
-            message=(
-                f"From {name}, {email}\n\n"
-                f"{body}\n\n"
-                f"IP: {ip_address}\n"
-                f"Site: www.burcuatak.com\n"
-            ),
-            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", email) or email,
-            recipient_list=[
-                os.getenv("EMAIL_RECEIVER_ONE"),
-                os.getenv("EMAIL_RECEIVER_TWO"),
-            ],
-            fail_silently=False,
-        )
+        threading.Thread(
+            target=send_mail,
+            kwargs={
+                "subject": "Web Site Visitor",
+                "message": (
+                    f"From {name}, {email}\n\n"
+                    f"{body}\n\n"
+                    f"IP: {ip_address}\n"
+                    f"Site: www.burcuatak.com\n"
+                ),
+                "from_email": getattr(settings, "DEFAULT_FROM_EMAIL", email) or email,
+                "recipient_list": [
+                    os.getenv("EMAIL_RECEIVER_ONE"),
+                    os.getenv("EMAIL_RECEIVER_TWO"),
+                ],
+                "fail_silently": False,
+            },
+        ).start()
 
         messages.success(
             request,
@@ -166,10 +165,10 @@ class Contact(YearContext, TemplateView):
 
 
 class DraftList(LoginRequiredMixin, YearContext, ListView):
-    template_name = 'base/portfolio_list.html'
+    template_name = "base/portfolio_list.html"
     queryset = Project.objects.filter(draft=True)
 
 
 class DraftDetail(LoginRequiredMixin, YearContext, DetailView):
-    template_name = 'base/portfolio_detail.html'
+    template_name = "base/portfolio_detail.html"
     queryset = Project.objects.filter(draft=True)

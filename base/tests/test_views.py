@@ -85,6 +85,10 @@ class ContactViewTests(TestCase):
         # Verify redirect to home
         self.assertRedirects(response, reverse("base:home"))
 
+        import time
+
+        time.sleep(0.1)  # wait for background thread to send email
+
         # Verify email sent
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("This is a test message.", mail.outbox[0].body)
