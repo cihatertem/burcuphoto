@@ -1,3 +1,4 @@
+import os
 import secrets
 
 from django.db import models
@@ -6,6 +7,12 @@ from django.db.models.expressions import Expression
 from burcu_photo.settings import *
 
 SECRET_KEY = secrets.token_urlsafe(50)
+
+# Custom Test Settings
+EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+RATELIMIT_ENABLE = False
+os.environ["EMAIL_RECEIVER_ONE"] = "receiver1@example.com"
+os.environ["EMAIL_RECEIVER_TWO"] = "receiver2@example.com"
 
 DATABASES = {
     "default": {
