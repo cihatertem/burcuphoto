@@ -9,6 +9,7 @@ from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView, ListView, DetailView
 from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django_ratelimit.decorators import ratelimit
 
 from .utils import get_client_ip, current_year, client_ip_key
@@ -32,6 +33,7 @@ class YearContext(TemplateView):
         return context
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class HomeView(YearContext, TemplateView):
     template_name = 'base/home.html'
 
@@ -60,6 +62,7 @@ class PortfolioDetail(DetailView):
         return context
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class About(YearContext, TemplateView):
     template_name = "base/about.html"
 
