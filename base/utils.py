@@ -4,7 +4,7 @@ from http import HTTPStatus
 from io import BytesIO
 
 from django.conf import settings
-from django.http import HttpRequest, JsonResponse
+from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from PIL import Image, ImageOps
 

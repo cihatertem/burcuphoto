@@ -27,6 +27,10 @@ class GetClientIPTests(TestCase):
             del request.META["REMOTE_ADDR"]
         self.assertIsNone(get_client_ip(request))
 
+    def test_invalid_remote_addr(self):
+        request = self.factory.get("/", REMOTE_ADDR="invalid_ip")
+        self.assertEqual(get_client_ip(request), "invalid_ip")
+
     @override_settings(TRUSTED_PROXY_NETS=[])
     def test_untrusted_proxy_returns_remote_addr(self):
         request = self.factory.get(
