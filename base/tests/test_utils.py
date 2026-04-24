@@ -6,7 +6,12 @@ from django.http import JsonResponse
 from django.test import Client, RequestFactory, TestCase, override_settings
 from PIL import Image
 
-from base.utils import HealthCheckMiddleware, get_client_ip, photo_resizer
+from base.utils import (
+    HealthCheckMiddleware,
+    client_ip_key,
+    get_client_ip,
+    photo_resizer,
+)
 
 
 class GetClientIPTests(TestCase):
@@ -141,6 +146,21 @@ class PhotoResizerTests(TestCase):
         self.assertEqual(result_image.format, "JPEG")
         # thumbnail((300, 300)) on 600x800 should yield 225x300
         self.assertEqual(result_image.size, (225, 300))
+
+
+class ClientIpKeyTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_with_remote_addr(self):
+        request = self.factory.get("/", REMOTE_ADDR="1.2.3.4")
+        self.assertEqual(client_ip_key(None, request), "1.2.3.4")
+
+    def test_no_remote_addr(self):
+        request = self.factory.get("/")
+        if "REMOTE_ADDR" in request.META:
+            del request.META["REMOTE_ADDR"]
+        self.assertEqual(client_ip_key(None, request), "unknown")
 
 
 class HealthCheckMiddlewareTests(TestCase):

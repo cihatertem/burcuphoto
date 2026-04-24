@@ -26,6 +26,7 @@ CONTACT_RATE_LIMIT_KEY = "ip"
 # Create your views here.
 from django.views.generic.base import ContextMixin
 
+
 class YearContext(ContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -82,7 +83,7 @@ def _parse_int(value) -> int | None:
         if value in (None, ""):
             return None
         return int(value)
-    except TypeError, ValueError:
+    except (TypeError, ValueError):
         return None
 
 
