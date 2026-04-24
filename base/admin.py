@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import Project, ProjectPortfolio
 from django.utils.html import format_html
+
+from .models import Project, ProjectPortfolio
 
 
 # Register your models here.
@@ -23,11 +24,12 @@ class ProjectAdmin(admin.ModelAdmin):
 
     def link(self, obj: Project) -> str:
         return format_html(
-            f'<a  href="{obj.project_link}" >{obj.project_link}</a>'
+            '<a  href="{}" >{}</a>',
+            obj.project_link,
+            obj.project_link
         )
 
     link.short_description = 'Project Link'
-    link.allow_tags = True
 
 
 @admin.register(ProjectPortfolio)

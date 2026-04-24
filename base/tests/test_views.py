@@ -1,5 +1,3 @@
-import os
-
 from django.contrib.messages import get_messages
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core import mail

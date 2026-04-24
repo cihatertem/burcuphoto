@@ -24,9 +24,11 @@ CONTACT_RATE_LIMIT_KEY = "ip"
 
 
 # Create your views here.
-class YearContext(TemplateView):
+from django.views.generic.base import ContextMixin
+
+class YearContext(ContextMixin):
     def get_context_data(self, **kwargs):
-        context = super(YearContext, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["year"] = current_year()
         return context
 
@@ -167,9 +169,9 @@ class Contact(YearContext, TemplateView):
 
 class DraftList(LoginRequiredMixin, YearContext, ListView):
     template_name = "base/portfolio_list.html"
-    queryset = Project.objects.filter(draft=True)
+    queryset = Project.objects.filter(draft=True).prefetch_related("projectportfolio_set")
 
 
 class DraftDetail(LoginRequiredMixin, YearContext, DetailView):
     template_name = "base/portfolio_detail.html"
-    queryset = Project.objects.filter(draft=True)
+    queryset = Project.objects.filter(draft=True).prefetch_related("projectportfolio_set")

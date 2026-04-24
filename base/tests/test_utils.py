@@ -1,10 +1,12 @@
 import ipaddress
+import json
 from io import BytesIO
 
-from django.test import RequestFactory, TestCase, override_settings
+from django.http import JsonResponse
+from django.test import Client, RequestFactory, TestCase, override_settings
 from PIL import Image
 
-from base.utils import get_client_ip, photo_resizer
+from base.utils import HealthCheckMiddleware, get_client_ip, photo_resizer
 
 
 class GetClientIPTests(TestCase):
@@ -139,3 +141,31 @@ class PhotoResizerTests(TestCase):
         self.assertEqual(result_image.format, "JPEG")
         # thumbnail((300, 300)) on 600x800 should yield 225x300
         self.assertEqual(result_image.size, (225, 300))
+
+
+class HealthCheckMiddlewareTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.middleware = HealthCheckMiddleware(
+            lambda r: JsonResponse({"response": "chain"})
+        )
+
+    def test_ping_returns_pong(self):
+        request = self.factory.get("/ping")
+        # MiddlewareMixin uses process_request
+        response = self.middleware.process_request(request)
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content), {"response": "pong!"})
+
+    def test_other_path_not_intercepted(self):
+        request = self.factory.get("/some-other-path")
+        response = self.middleware.process_request(request)
+        # It should return None so that the request continues down the chain
+        self.assertIsNone(response)
+
+    def test_integration_ping(self):
+        client = Client()
+        response = client.get("/ping")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"response": "pong!"})
