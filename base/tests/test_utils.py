@@ -11,6 +11,8 @@ from base.utils import (
     client_ip_key,
     get_client_ip,
     photo_resizer,
+    portfolio_directory_path,
+    project_directory_path,
 )
 
 
@@ -161,6 +163,24 @@ class ClientIpKeyTests(TestCase):
         if "REMOTE_ADDR" in request.META:
             del request.META["REMOTE_ADDR"]
         self.assertEqual(client_ip_key(None, request), "unknown")
+
+
+class DirectoryPathTests(TestCase):
+    def test_project_directory_path(self):
+        from unittest.mock import MagicMock
+
+        instance = MagicMock()
+        instance.slug = "my-project"
+        path = project_directory_path(instance, "test.jpg")
+        self.assertEqual(path, "projects/my-project/test.jpg")
+
+    def test_portfolio_directory_path(self):
+        from unittest.mock import MagicMock
+
+        instance = MagicMock()
+        instance.project.slug = "my-project"
+        path = portfolio_directory_path(instance, "test.jpg")
+        self.assertEqual(path, "projects/my-project/photos/test.jpg")
 
 
 class HealthCheckMiddlewareTests(TestCase):

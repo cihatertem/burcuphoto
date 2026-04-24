@@ -1,10 +1,48 @@
 from io import BytesIO
 
+from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from django.urls import reverse
 from PIL import Image
 
 from base.models import Project, ProjectPortfolio
+from base.views import CAPTCHA_ANS_KEY, CAPTCHA_NUM1_KEY, CAPTCHA_NUM2_KEY
+
+
+class ContactViewTest(TestCase):
+    @override_settings(
+        RATELIMIT_ENABLE=False,
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
+    def test_contact_post_sends_email_synchronously(self):
+        """Test that posting to the Contact view sends an email synchronously without using a thread."""
+        session = self.client.session
+        session[CAPTCHA_NUM1_KEY] = 5
+        session[CAPTCHA_NUM2_KEY] = 3
+        session[CAPTCHA_ANS_KEY] = 8
+        session.save()
+
+        post_data = {
+            "name": "Test User",
+            "email": "test@example.com",
+            "message": "Hello, this is a test.",
+            "website": "",  # empty for honeypot
+            "captcha": "8",
+        }
+
+        response = self.client.post(reverse("base:contact"), data=post_data)
+
+        # Confirm the form submission redirected successfully
+        self.assertRedirects(response, reverse("base:home"))
+
+        # Check that exactly one email was sent
+        self.assertEqual(len(mail.outbox), 1)
+
+        email = mail.outbox[0]
+        self.assertEqual(email.subject, "Web Site Visitor")
+        self.assertIn("Hello, this is a test.", email.body)
+        self.assertEqual(email.reply_to, ["test@example.com"])
 
 
 class ImageTestMixin:

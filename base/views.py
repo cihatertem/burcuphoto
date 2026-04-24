@@ -83,7 +83,7 @@ def _parse_int(value) -> int | None:
         if value in (None, ""):
             return None
         return int(value)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
 
 
@@ -141,25 +141,22 @@ class Contact(YearContext, TemplateView):
 
         ip_address = get_client_ip(request)
 
-        def _send_email_thread():
-            msg = EmailMessage(
-                subject="Web Site Visitor",
-                body=(
-                    f"From {name}, {email}\n\n"
-                    f"{body}\n\n"
-                    f"IP: {ip_address}\n"
-                    f"Site: www.burcuatak.com\n"
-                ),
-                from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
-                to=[
-                    os.getenv("EMAIL_RECEIVER_ONE"),
-                    os.getenv("EMAIL_RECEIVER_TWO"),
-                ],
-                reply_to=[email] if email else None,
-            )
-            msg.send(fail_silently=False)
-
-        threading.Thread(target=_send_email_thread).start()
+        msg = EmailMessage(
+            subject="Web Site Visitor",
+            body=(
+                f"From {name}, {email}\n\n"
+                f"{body}\n\n"
+                f"IP: {ip_address}\n"
+                f"Site: www.burcuatak.com\n"
+            ),
+            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
+            to=[
+                os.getenv("EMAIL_RECEIVER_ONE"),
+                os.getenv("EMAIL_RECEIVER_TWO"),
+            ],
+            reply_to=[email] if email else None,
+        )
+        msg.send(fail_silently=False)
 
         messages.success(
             request,
@@ -170,9 +167,13 @@ class Contact(YearContext, TemplateView):
 
 class DraftList(LoginRequiredMixin, YearContext, ListView):
     template_name = "base/portfolio_list.html"
-    queryset = Project.objects.filter(draft=True).prefetch_related("projectportfolio_set")
+    queryset = Project.objects.filter(draft=True).prefetch_related(
+        "projectportfolio_set"
+    )
 
 
 class DraftDetail(LoginRequiredMixin, YearContext, DetailView):
     template_name = "base/portfolio_detail.html"
-    queryset = Project.objects.filter(draft=True).prefetch_related("projectportfolio_set")
+    queryset = Project.objects.filter(draft=True).prefetch_related(
+        "projectportfolio_set"
+    )
