@@ -53,17 +53,38 @@ def get_client_ip(request) -> str | None:
     if trusted_nets and any(ra in net for net in trusted_nets):
         xff = request.META.get("HTTP_X_FORWARDED_FOR")
         if xff:
-            ips = [ip.strip() for ip in xff.split(",") if ip.strip()]
-            for ip_str in reversed(ips):
+            last_valid_ip = None
+            end = len(xff)
+            while end > 0:
+                start = xff.rfind(",", 0, end)
+                if start == -1:
+                    ip_str = xff[:end].strip()
+                    end = 0
+                else:
+                    ip_str = xff[start + 1 : end].strip()
+                    end = start
+
+                if not ip_str:
+                    continue
+                last_valid_ip = ip_str
                 try:
                     ip_obj = ipaddress.ip_address(ip_str)
-                    if any(ip_obj in net for net in trusted_nets):
+
+                    is_trusted = False
+                    for net in trusted_nets:
+                        if ip_obj in net:
+                            is_trusted = True
+                            break
+
+                    if is_trusted:
                         continue
+
                     return ip_str
                 except ValueError:
                     return ip_str
-            if ips:
-                return ips[0]
+
+            if last_valid_ip:
+                return last_valid_ip
 
     return remote
 
