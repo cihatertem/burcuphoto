@@ -1,6 +1,8 @@
 import ipaddress
 import json
+from datetime import date
 from io import BytesIO
+from unittest.mock import patch
 
 from django.http import JsonResponse
 from django.test import Client, RequestFactory, TestCase, override_settings
@@ -9,6 +11,7 @@ from PIL import Image
 from base.utils import (
     HealthCheckMiddleware,
     client_ip_key,
+    current_year,
     get_client_ip,
     photo_resizer,
     portfolio_directory_path,
@@ -153,6 +156,52 @@ class PhotoResizerTests(TestCase):
         # thumbnail((300, 300)) on 600x800 should yield 225x300
         self.assertEqual(result_image.size, (225, 300))
 
+    def test_resize_image_with_exif_orientation(self):
+        # Create a dummy RGB image of size 800x600
+        image = Image.new("RGB", (800, 600))
+
+        # Set EXIF orientation to 6 (Rotated 90 degrees counter-clockwise, meaning it needs 270 degrees CW rotation)
+        exif = image.getexif()
+        exif[274] = 6
+        image.info["exif"] = exif.tobytes()
+
+        target_size = 400
+
+        output = photo_resizer(image, size=target_size)
+        self.assertIsInstance(output, BytesIO)
+
+        result_image = Image.open(output)
+        self.assertEqual(result_image.format, "JPEG")
+
+        # thumbnail((400, 400)) on 800x600 yields 400x300.
+        # But due to EXIF orientation 6, exif_transpose will rotate it, swapping width and height.
+        # So the result should be 300x400.
+        self.assertEqual(result_image.size, (300, 400))
+
+    def test_resize_l_image(self):
+        # Create a dummy L (grayscale) image
+        image = Image.new("L", (800, 600))
+        target_size = 400
+
+        output = photo_resizer(image, size=target_size)
+        self.assertIsInstance(output, BytesIO)
+
+        result_image = Image.open(output)
+        self.assertEqual(result_image.format, "JPEG")
+        self.assertEqual(result_image.size, (400, 300))
+
+    def test_resize_la_image(self):
+        # Create a dummy LA (grayscale with alpha) image to test mode conversion
+        image = Image.new("LA", (800, 600))
+        target_size = 400
+
+        output = photo_resizer(image, size=target_size)
+        self.assertIsInstance(output, BytesIO)
+
+        result_image = Image.open(output)
+        self.assertEqual(result_image.format, "JPEG")
+        self.assertEqual(result_image.size, (400, 300))
+
 
 class ClientIpKeyTests(TestCase):
     def setUp(self):
@@ -167,6 +216,18 @@ class ClientIpKeyTests(TestCase):
         if "REMOTE_ADDR" in request.META:
             del request.META["REMOTE_ADDR"]
         self.assertEqual(client_ip_key(None, request), "unknown")
+
+
+class CurrentYearTests(TestCase):
+    @patch("base.utils.date")
+    def test_current_year(self, mock_date):
+        # Set a fixed date for today()
+        mock_date.today.return_value = date(2025, 1, 15)
+        self.assertEqual(current_year(), 2025)
+
+        # Test another year
+        mock_date.today.return_value = date(1999, 12, 31)
+        self.assertEqual(current_year(), 1999)
 
 
 class DirectoryPathTests(TestCase):

@@ -29,7 +29,7 @@ def current_year() -> int:
 
 def photo_resizer(image: Image.Image, size: int) -> BytesIO:
     output = BytesIO()
-    if image.mode in ("RGBA", "P"):
+    if image.mode in ("RGBA", "P", "LA"):
         image = image.convert("RGB")
     image.thumbnail((size, size))
     image = ImageOps.exif_transpose(image)
