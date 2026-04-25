@@ -186,14 +186,22 @@ if USE_S3:
             "BACKEND": "storages.backends.s3.S3Storage",
             "OPTIONS": {
                 "location": "media",
-                "custom_domain": os.getenv("AWS_S3_CUSTOM_DOMAIN", "static.burcuatak.com"),
+                "custom_domain": os.getenv(
+                    "AWS_S3_CUSTOM_DOMAIN", "static.burcuatak.com"
+                ),
             },
         },
         "staticfiles": {
-            "BACKEND": "storages.backends.s3.S3Storage",
+            "BACKEND": "storages.backends.s3.S3ManifestStaticStorage",
             "OPTIONS": {
                 "location": "static",
-                "custom_domain": os.getenv("AWS_S3_CUSTOM_DOMAIN", "static.burcuatak.com"),
+                "custom_domain": os.getenv(
+                    "AWS_S3_CUSTOM_DOMAIN", "static.burcuatak.com"
+                ),
+                "manifest_strict": False,
+                "object_parameters": {
+                    "CacheControl": "max-age=31536000, public",
+                },
             },
         },
     }
