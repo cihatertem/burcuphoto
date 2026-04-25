@@ -7,10 +7,10 @@
     {% cache 900 portfolio_list %}
     <h1 class="portfoliopage-title">Burcu Atak's photography portofolio works page.</h1>
     {% if project_list %}
-        <div class="swiper portfolio">
-            <div class="swiper-wrapper">
+        <div class="slider portfolio">
+            <div class="slider-wrapper">
                 {% for object in project_list %}
-                    <div class="swiper-slide">
+                    <div class="slider-slide">
                         <div class="card">
                             <a class="title-link" href="{% url 'base:portfolio_detail' object.slug %}">
                                 <h2 class="card-title">{{ object.title }}</h2>
@@ -23,8 +23,8 @@
                     </div>
                 {% endfor %}
             </div>
-            <div class="swiper-button-prev"></div>
-            <div class="swiper-button-next"></div>
+            <div class="slider-button-prev"></div>
+            <div class="slider-button-next"></div>
         </div>
     {% endif %}
     {% endcache %}

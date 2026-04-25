@@ -25,16 +25,16 @@
 {% block photo_zoom %}
 
     {% cache 900 portfolio_detail_zoom project.slug %}
-        <div class="swiper photo-zoom">
-            <button href="" class="btn btn-swiper-close">&#10005;</button>
-            <div class="swiper-wrapper photo-zoom-wrapper">
+        <div class="slider photo-zoom">
+            <button href="" class="btn btn-slider-close">&#10005;</button>
+            <div class="slider-wrapper photo-zoom-wrapper">
                 {% for portfolio in project.projectportfolio_set.all %}
-                    <img class="swiper-slide photo-zoom-img" src="{{ portfolio.photo.url }}"
+                    <img class="slider-slide photo-zoom-img" src="{{ portfolio.photo.url }}"
                          alt="{{ portfolio.alt }}">
                 {% endfor %}
             </div>
-            <div class="swiper-button-prev zoom"></div>
-            <div class="swiper-button-next zoom"></div>
+            <div class="slider-button-prev zoom"></div>
+            <div class="slider-button-next zoom"></div>
         </div>
     {% endcache %}
 

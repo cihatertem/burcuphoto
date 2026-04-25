@@ -2,7 +2,7 @@ let menuBtn = document.querySelector(".nav-button");
 let navbar = document.querySelector(".navbar");
 let photoList = document.querySelectorAll(".photo-flow-img");
 let photoSlider = document.querySelector(".photo-zoom");
-let swiperClose = document.querySelector(".btn-swiper-close");
+let sliderClose = document.querySelector(".btn-slider-close");
 let btnMessage = document.querySelector(".btn-messages");
 let messageBox = document.querySelector(".messages");
 let checkbox = document.getElementById("checkbox");
@@ -68,8 +68,8 @@ if (messageBox) {
 }
 
 //photo zoom frame
-if (swiperClose) {
-  swiperClose.onclick = (e) => {
+if (sliderClose) {
+  sliderClose.onclick = (e) => {
     e.preventDefault();
     photoSlider.classList.toggle("photo-zoom-active");
   };
@@ -83,12 +83,12 @@ for (let i = 0; i < photoList.length; i++) {
     photoSlider.classList.toggle("photo-zoom-active");
     photoIndex = photoList[i].dataset.photoindex - 1;
     photoIndex = parseInt(photoIndex);
-    const swiper2 = new Swiper(".photo-zoom", {
+    const slider2 = new VanillaSlider(".photo-zoom", {
       rewind: true,
       initialSlide: photoIndex ? photoIndex : 0,
       navigation: {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev",
+        nextEl: ".slider-button-next",
+        prevEl: ".slider-button-prev",
       },
       slidesPerView: 1,
     });
@@ -109,15 +109,15 @@ menuBtn.onclick = () => {
   }
 };
 
-// portfolio swiper
-const swiper1 = new Swiper(".portfolio", {
+// portfolio slider
+const slider1 = new VanillaSlider(".portfolio", {
   loop: true,
   direction : 'horizontal',
   slidesPerView: 4,
   spaceBetween: 0,
   navigation: {
-    nextEl: ".swiper-button-next",
-    prevEl: ".swiper-button-prev",
+    nextEl: ".slider-button-next",
+    prevEl: ".slider-button-prev",
   },
   breakpoints: {
     200: {
@@ -130,22 +130,22 @@ const swiper1 = new Swiper(".portfolio", {
     },
     786: {
       slidesPerView:
-        document.querySelectorAll(".swiper-slide").length < 2
-          ? document.querySelectorAll(".swiper-slide").length
+        document.querySelectorAll(".slider-slide").length < 2
+          ? document.querySelectorAll(".slider-slide").length
           : 2,
       spaceBetween: 0,
     },
     991: {
       slidesPerView:
-        document.querySelectorAll(".swiper-slide").length < 3
-          ? document.querySelectorAll(".swiper-slide").length
+        document.querySelectorAll(".slider-slide").length < 3
+          ? document.querySelectorAll(".slider-slide").length
           : 3,
       spaceBetween: 0,
     },
     1200: {
       slidesPerView:
-        document.querySelectorAll(".swiper-slide").length < 4
-          ? document.querySelectorAll(".swiper-slide").length
+        document.querySelectorAll(".slider-slide").length < 4
+          ? document.querySelectorAll(".slider-slide").length
           : 4,
       spaceBetween: 0,
     },
