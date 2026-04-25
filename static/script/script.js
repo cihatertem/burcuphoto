@@ -84,7 +84,7 @@ for (let i = 0; i < photoList.length; i++) {
     photoIndex = photoList[i].dataset.photoindex - 1;
     photoIndex = parseInt(photoIndex);
     const slider2 = new VanillaSlider(".photo-zoom", {
-      rewind: true,
+      loop: true,
       initialSlide: photoIndex ? photoIndex : 0,
       navigation: {
         nextEl: ".slider-button-next",

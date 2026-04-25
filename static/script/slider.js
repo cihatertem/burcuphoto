@@ -4,61 +4,68 @@ class VanillaSlider {
         if (!this.container) return;
 
         this.wrapper = this.container.querySelector('.slider-wrapper');
-        this.slides = Array.from(this.wrapper.children);
+        this.originalSlides = Array.from(this.wrapper.children);
+        this.slides = [...this.originalSlides];
         this.nextBtn = this.container.querySelector('.slider-button-next');
         this.prevBtn = this.container.querySelector('.slider-button-prev');
         
         this.options = Object.assign({
-            rewind: false,
+            loop: false,
             initialSlide: 0,
             slidesPerView: 1,
             breakpoints: {}
         }, options);
 
-        this.currentIndex = this.options.initialSlide;
         this.currentSlidesPerView = this.options.slidesPerView;
+        this.currentIndex = this.options.initialSlide;
 
-        // Swipe & drag variables
+        // Swipe variables
         this.startX = 0;
         this.currentX = 0;
         this.isDragging = false;
         this.moved = false;
+        this.isTransitioning = false;
+        this.loopInitialized = false;
 
         this.init();
     }
 
     init() {
         this.updateBreakpoints();
+
         window.addEventListener('resize', () => {
             this.updateBreakpoints();
-            this.updatePosition();
+            this.updatePosition(false);
         });
 
         if (this.nextBtn) {
             this.nextBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.next();
+                if (!this.isTransitioning) this.next();
             });
         }
         if (this.prevBtn) {
             this.prevBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.prev();
+                if (!this.isTransitioning) this.prev();
             });
         }
         
-        // Touch events for mobile
+        this.wrapper.addEventListener('transitionend', () => {
+            this.isTransitioning = false;
+            if (this.options.loop) this.checkLoop();
+        });
+
+        // Touch events
         this.wrapper.addEventListener('touchstart', this.touchStart.bind(this), {passive: true});
         this.wrapper.addEventListener('touchmove', this.touchMove.bind(this), {passive: true});
         this.wrapper.addEventListener('touchend', this.touchEnd.bind(this));
         
-        // Mouse events for desktop dragging
         this.wrapper.addEventListener('mousedown', this.touchStart.bind(this));
         this.wrapper.addEventListener('mousemove', this.touchMove.bind(this));
         this.wrapper.addEventListener('mouseup', this.touchEnd.bind(this));
         this.wrapper.addEventListener('mouseleave', this.touchEnd.bind(this));
 
-        // Prevent clicking if we dragged
         this.wrapper.addEventListener('click', (e) => {
             if (this.moved) {
                 e.preventDefault();
@@ -68,15 +75,81 @@ class VanillaSlider {
         }, { capture: true });
 
         this.updateSlides();
-        this.updatePosition();
+        this.updatePosition(false);
+        this.checkDisabled();
+    }
+
+    setupLoop() {
+        // Remove old clones
+        this.wrapper.querySelectorAll('.slider-clone').forEach(el => el.remove());
+        this.slides = [...this.originalSlides];
+
+        // Only loop if we have more original slides than slidesPerView
+        if (this.originalSlides.length <= this.currentSlidesPerView) return;
+
+        const clonesBefore = [];
+        const clonesAfter = [];
+        
+        for (let i = 0; i < this.currentSlidesPerView; i++) {
+            const cloneB = this.originalSlides[this.originalSlides.length - 1 - i].cloneNode(true);
+            cloneB.classList.add('slider-clone');
+            clonesBefore.unshift(cloneB);
+
+            const cloneA = this.originalSlides[i].cloneNode(true);
+            cloneA.classList.add('slider-clone');
+            clonesAfter.push(cloneA);
+        }
+
+        clonesBefore.forEach(clone => this.wrapper.insertBefore(clone, this.wrapper.firstChild));
+        clonesAfter.forEach(clone => this.wrapper.appendChild(clone));
+
+        this.slides = Array.from(this.wrapper.children);
+        
+        if (!this.loopInitialized) {
+            this.currentIndex += this.currentSlidesPerView;
+            this.loopInitialized = true;
+        }
+    }
+
+    checkLoop() {
+        if (!this.options.loop || this.originalSlides.length <= this.currentSlidesPerView) return;
+
+        if (this.currentIndex < this.currentSlidesPerView) {
+            this.currentIndex += this.originalSlides.length;
+            this.updatePosition(false);
+        } else if (this.currentIndex >= this.originalSlides.length + this.currentSlidesPerView) {
+            this.currentIndex -= this.originalSlides.length;
+            this.updatePosition(false);
+        }
+    }
+
+    checkDisabled() {
+        const disabled = this.originalSlides.length <= this.currentSlidesPerView;
+        if (disabled) {
+            this.container.classList.add('slider-disabled');
+            if (this.nextBtn) this.nextBtn.style.display = 'none';
+            if (this.prevBtn) this.prevBtn.style.display = 'none';
+            
+            // Snap back to 0 so we don't end up on a blank screen
+            if (!this.options.loop || disabled) {
+                 this.currentIndex = 0;
+            }
+            this.updatePosition(false);
+        } else {
+            this.container.classList.remove('slider-disabled');
+            if (this.nextBtn) this.nextBtn.style.display = '';
+            if (this.prevBtn) this.prevBtn.style.display = '';
+        }
+        return disabled;
     }
 
     touchStart(event) {
+        if (this.isTransitioning || this.checkDisabled()) return;
         this.isDragging = true;
         this.moved = false;
         this.startX = this.getPositionX(event);
         this.currentX = this.startX;
-        this.wrapper.style.transition = 'none'; // Remove transition for 1:1 finger tracking
+        this.wrapper.style.transition = 'none';
     }
 
     touchMove(event) {
@@ -84,7 +157,6 @@ class VanillaSlider {
         this.currentX = this.getPositionX(event);
         const diff = this.currentX - this.startX;
         
-        // Track if we moved enough to consider it a swipe/drag (ignore tiny accidental movements)
         if (Math.abs(diff) > 5) {
             this.moved = true;
         }
@@ -102,8 +174,6 @@ class VanillaSlider {
         
         const diff = this.currentX - this.startX;
         const containerWidth = this.container.clientWidth;
-        
-        // Swipe threshold: 15% of container width or at least 40px
         const threshold = Math.min(containerWidth * 0.15, 40);
         
         if (Math.abs(diff) > threshold) {
@@ -113,7 +183,6 @@ class VanillaSlider {
                 this.next();
             }
         } else {
-            // Revert back if not dragged enough
             this.updatePosition();
         }
     }
@@ -132,20 +201,33 @@ class VanillaSlider {
             }
         }
         
+        const oldSpv = this.currentSlidesPerView;
+        
         if (matchedBreakpoint > 0) {
             const bpOptions = this.options.breakpoints[matchedBreakpoint];
-            const spv = typeof bpOptions.slidesPerView === 'function' ? bpOptions.slidesPerView() : bpOptions.slidesPerView;
-            this.currentSlidesPerView = spv || 1;
+            this.currentSlidesPerView = typeof bpOptions.slidesPerView === 'function' ? bpOptions.slidesPerView() : bpOptions.slidesPerView || 1;
         } else {
             this.currentSlidesPerView = this.options.slidesPerView || 1;
         }
 
-        this.updateSlides();
+        if (this.options.loop && oldSpv !== this.currentSlidesPerView) {
+            // Need to re-setup loop because number of clones changes
+            this.loopInitialized = false;
+            this.currentIndex = this.options.initialSlide; 
+        }
+
+        if (this.options.loop) {
+            this.setupLoop();
+        }
         
-        const maxIndex = Math.max(0, this.slides.length - this.currentSlidesPerView);
-        if (this.currentIndex > maxIndex) {
-            this.currentIndex = maxIndex;
-            this.updatePosition();
+        this.updateSlides();
+        this.checkDisabled();
+        
+        if (!this.options.loop) {
+            const maxIndex = Math.max(0, this.slides.length - this.currentSlidesPerView);
+            if (this.currentIndex > maxIndex) {
+                this.currentIndex = maxIndex;
+            }
         }
     }
 
@@ -155,31 +237,40 @@ class VanillaSlider {
             slide.style.flex = `0 0 ${slideWidth}%`;
             slide.style.width = `${slideWidth}%`;
             
-            // Prevent default image drag to not interfere with mouse swiping
             slide.querySelectorAll('img').forEach(img => {
                 img.ondragstart = () => false;
             });
-            // Also prevent dragging on anchor tags
             slide.querySelectorAll('a').forEach(a => {
                 a.ondragstart = () => false;
             });
         });
     }
 
-    updatePosition() {
-        this.wrapper.style.transition = 'transform 0.3s ease-in-out';
-        const maxIndex = Math.max(0, this.slides.length - this.currentSlidesPerView);
-        if (this.currentIndex > maxIndex) {
-            this.currentIndex = maxIndex;
+    updatePosition(animate = true) {
+        if (animate) {
+            this.wrapper.style.transition = 'transform 0.3s ease-in-out';
+            this.isTransitioning = true;
+        } else {
+            this.wrapper.style.transition = 'none';
+            this.isTransitioning = false;
         }
+        
         const offset = -(this.currentIndex * (100 / this.currentSlidesPerView));
+        
+        // Force reflow
+        // eslint-disable-next-line no-unused-expressions
+        this.wrapper.offsetHeight; 
+        
         this.wrapper.style.transform = `translateX(${offset}%)`;
     }
 
     next() {
+        if (this.checkDisabled()) return;
         const maxIndex = Math.max(0, this.slides.length - this.currentSlidesPerView);
         if (this.currentIndex < maxIndex) {
             this.currentIndex++;
+        } else if (this.options.loop) {
+            this.currentIndex++; // let it transition to clone
         } else if (this.options.rewind) {
             this.currentIndex = 0;
         }
@@ -187,8 +278,11 @@ class VanillaSlider {
     }
 
     prev() {
+        if (this.checkDisabled()) return;
         if (this.currentIndex > 0) {
             this.currentIndex--;
+        } else if (this.options.loop) {
+            this.currentIndex--; // let it transition to clone
         } else if (this.options.rewind) {
             this.currentIndex = Math.max(0, this.slides.length - this.currentSlidesPerView);
         }
