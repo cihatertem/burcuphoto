@@ -288,13 +288,4 @@ class VanillaSlider {
         }
         this.updatePosition();
     }
-
-    goTo(index, animate = true) {
-        if (this.options.loop && this.originalSlides.length > this.currentSlidesPerView) {
-            this.currentIndex = index + this.currentSlidesPerView;
-        } else {
-            this.currentIndex = index;
-        }
-        this.updatePosition(animate);
-    }
 }

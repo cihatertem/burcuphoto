@@ -71,33 +71,27 @@ if (messageBox) {
 if (sliderClose) {
   sliderClose.onclick = (e) => {
     e.preventDefault();
-    photoSlider.classList.remove("photo-zoom-active");
+    photoSlider.classList.toggle("photo-zoom-active");
   };
 }
 
 let photoIndex;
-let photoSliderInstance = null;
 
 for (let i = 0; i < photoList.length; i++) {
   photoList[i].onclick = (e) => {
     e.preventDefault();
-    photoSlider.classList.add("photo-zoom-active");
+    photoSlider.classList.toggle("photo-zoom-active");
     photoIndex = photoList[i].dataset.photoindex - 1;
     photoIndex = parseInt(photoIndex);
-    
-    if (!photoSliderInstance) {
-        photoSliderInstance = new VanillaSlider(".photo-zoom", {
-          loop: true,
-          initialSlide: photoIndex ? photoIndex : 0,
-          navigation: {
-            nextEl: ".slider-button-next",
-            prevEl: ".slider-button-prev",
-          },
-          slidesPerView: 1,
-        });
-    } else {
-        photoSliderInstance.goTo(photoIndex ? photoIndex : 0, false);
-    }
+    const slider2 = new VanillaSlider(".photo-zoom", {
+      loop: true,
+      initialSlide: photoIndex ? photoIndex : 0,
+      navigation: {
+        nextEl: ".slider-button-next",
+        prevEl: ".slider-button-prev",
+      },
+      slidesPerView: 1,
+    });
   };
 }
 

@@ -29,10 +29,8 @@
             <button href="" class="btn btn-slider-close">&#10005;</button>
             <div class="slider-wrapper photo-zoom-wrapper">
                 {% for portfolio in project.projectportfolio_set.all %}
-                    <div class="slider-slide">
-                        <img class="photo-zoom-img" src="{{ portfolio.photo.url }}"
-                             alt="{{ portfolio.alt }}">
-                    </div>
+                    <img class="slider-slide photo-zoom-img" src="{{ portfolio.photo.url }}"
+                         alt="{{ portfolio.alt }}">
                 {% endfor %}
             </div>
             <div class="slider-button-prev zoom"></div>
