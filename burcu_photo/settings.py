@@ -192,13 +192,12 @@ if USE_S3:
             },
         },
         "staticfiles": {
-            "BACKEND": "storages.backends.s3.S3ManifestStaticStorage",
+            "BACKEND": "base.storages.CustomS3ManifestStaticStorage",
             "OPTIONS": {
                 "location": "static",
                 "custom_domain": os.getenv(
                     "AWS_S3_CUSTOM_DOMAIN", "static.burcuatak.com"
                 ),
-                "manifest_strict": False,
                 "object_parameters": {
                     "CacheControl": "max-age=31536000, public",
                 },
