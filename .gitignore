@@ -80,3 +80,4 @@ docker-compose.override.yml
 environment.txt
 codex.patch
 *.old
+aws_s3_migration.sh

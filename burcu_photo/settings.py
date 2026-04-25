@@ -182,8 +182,20 @@ USE_S3 = (not DEBUG) and bool(os.getenv("BUCKET_NAME"))
 
 if USE_S3:
     STORAGES = {
-        "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
-        "staticfiles": {"BACKEND": "storages.backends.s3boto3.S3StaticStorage"},
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "location": "media",
+                "custom_domain": os.getenv("AWS_S3_CUSTOM_DOMAIN", "static.burcuatak.com"),
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "location": "static",
+                "custom_domain": os.getenv("AWS_S3_CUSTOM_DOMAIN", "static.burcuatak.com"),
+            },
+        },
     }
 
     AWS_ACCESS_KEY_ID = get_secret("AWS_ACCESS_KEY_ID")

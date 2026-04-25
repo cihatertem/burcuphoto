@@ -83,3 +83,5 @@ README.md
 GEMINI.md
 codex.patch
 *.old
+test.sh
+aws_s3_migration.sh
