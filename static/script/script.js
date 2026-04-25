@@ -71,27 +71,34 @@ if (messageBox) {
 if (sliderClose) {
   sliderClose.onclick = (e) => {
     e.preventDefault();
-    photoSlider.classList.toggle("photo-zoom-active");
+    photoSlider.classList.remove("photo-zoom-active");
   };
 }
 
 let photoIndex;
+let slider2 = null;
 
 for (let i = 0; i < photoList.length; i++) {
   photoList[i].onclick = (e) => {
     e.preventDefault();
-    photoSlider.classList.toggle("photo-zoom-active");
-    photoIndex = photoList[i].dataset.photoindex - 1;
-    photoIndex = parseInt(photoIndex);
-    const slider2 = new VanillaSlider(".photo-zoom", {
-      loop: true,
-      initialSlide: photoIndex ? photoIndex : 0,
-      navigation: {
-        nextEl: ".slider-button-next",
-        prevEl: ".slider-button-prev",
-      },
-      slidesPerView: 1,
-    });
+    photoSlider.classList.add("photo-zoom-active");
+    
+    photoIndex = parseInt(photoList[i].dataset.photoindex || 1) - 1;
+    if (isNaN(photoIndex) || photoIndex < 0) photoIndex = 0;
+
+    if (!slider2) {
+      slider2 = new VanillaSlider(".photo-zoom", {
+        loop: true,
+        initialSlide: photoIndex,
+        navigation: {
+          nextEl: ".slider-button-next",
+          prevEl: ".slider-button-prev",
+        },
+        slidesPerView: 1,
+      });
+    } else {
+      slider2.goTo(photoIndex, false);
+    }
   };
 }
 
@@ -110,6 +117,7 @@ menuBtn.onclick = () => {
 };
 
 // portfolio slider
+const slideCount = document.querySelectorAll(".portfolio .slider-slide").length;
 const slider1 = new VanillaSlider(".portfolio", {
   loop: true,
   direction : 'horizontal',
@@ -129,24 +137,15 @@ const slider1 = new VanillaSlider(".portfolio", {
       spaceBetween: 0
     },
     786: {
-      slidesPerView:
-        document.querySelectorAll(".slider-slide").length < 2
-          ? document.querySelectorAll(".slider-slide").length
-          : 2,
+      slidesPerView: slideCount < 2 ? slideCount : 2,
       spaceBetween: 0,
     },
     991: {
-      slidesPerView:
-        document.querySelectorAll(".slider-slide").length < 3
-          ? document.querySelectorAll(".slider-slide").length
-          : 3,
+      slidesPerView: slideCount < 3 ? slideCount : 3,
       spaceBetween: 0,
     },
     1200: {
-      slidesPerView:
-        document.querySelectorAll(".slider-slide").length < 4
-          ? document.querySelectorAll(".slider-slide").length
-          : 4,
+      slidesPerView: slideCount < 4 ? slideCount : 4,
       spaceBetween: 0,
     },
   },

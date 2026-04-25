@@ -294,6 +294,10 @@ section.hero {
     top: 15%;
 }
 
+.card .card-img-link {
+    display: contents;
+}
+
 .card h2 {
     font-size: 1.5rem;
     color: var(--font-main);

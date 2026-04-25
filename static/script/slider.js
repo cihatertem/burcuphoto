@@ -288,4 +288,18 @@ class VanillaSlider {
         }
         this.updatePosition();
     }
+
+    goTo(originalIndex, animate = false) {
+        if (this.checkDisabled()) return;
+        
+        if (originalIndex < 0 || originalIndex >= this.originalSlides.length) return;
+
+        if (this.options.loop && this.originalSlides.length > this.currentSlidesPerView) {
+            this.currentIndex = originalIndex + this.currentSlidesPerView;
+        } else {
+            this.currentIndex = originalIndex;
+        }
+        
+        this.updatePosition(animate);
+    }
 }

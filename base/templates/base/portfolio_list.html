@@ -15,7 +15,7 @@
                             <a class="title-link" href="{% url 'base:portfolio_detail' object.slug %}">
                                 <h2 class="card-title">{{ object.title }}</h2>
                             </a>
-                            <a href="{% url 'base:portfolio_detail' object.slug %}" style="display: contents;">
+                            <a href="{% url 'base:portfolio_detail' object.slug %}" class="card-img-link">
                                 <img src="{{ object.featured_photo.url }}" alt="{{ object.alt }}">
                             </a>
                             <a href="{% url 'base:portfolio_detail' object.slug %}" class="btn btn-card">
