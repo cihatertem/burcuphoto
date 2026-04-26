@@ -173,6 +173,11 @@ class VanillaSlider {
         this.isDragging = false;
         
         const diff = this.currentX - this.startX;
+        if (diff === 0) {
+            this.wrapper.style.transition = 'transform 0.3s ease-in-out';
+            return;
+        }
+
         const containerWidth = this.container.clientWidth;
         const threshold = Math.min(containerWidth * 0.15, 40);
         
@@ -250,6 +255,10 @@ class VanillaSlider {
         if (animate) {
             this.wrapper.style.transition = 'transform 0.3s ease-in-out';
             this.isTransitioning = true;
+            if (this.transitionTimeout) clearTimeout(this.transitionTimeout);
+            this.transitionTimeout = setTimeout(() => {
+                this.isTransitioning = false;
+            }, 350);
         } else {
             this.wrapper.style.transition = 'none';
             this.isTransitioning = false;
