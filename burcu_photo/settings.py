@@ -14,6 +14,8 @@ import ipaddress
 import os
 from pathlib import Path
 
+from django.utils.csp import CSP
+
 
 def get_secret(key: str, default: str = "") -> str:
     value = os.getenv(key, default)
@@ -281,39 +283,37 @@ if not DEBUG:
 # CSP_CONNECT_SRC = ("'self'", "https:", "data:")
 # CSP_FRAME_ANCESTORS = ("'self'",)
 
-from django.utils.csp import CSP
 
 # Cutting-edge Layer: Tightened policy using Nonces
 # Change to SECURE_CSP after monitoring reports
 SECURE_CSP_REPORT_ONLY = {
     "default-src": [CSP.SELF],
     "script-src": [
-        CSP.SELF, 
-        "https://static.burcuatak.com", 
+        CSP.SELF,
+        "https://static.burcuatak.com",
         CSP.NONCE,
         # CSP.STRICT_DYNAMIC, # Can be enabled if all scripts are loaded with nonces
     ],
     "object-src": [CSP.NONE],
     "style-src": [
-        CSP.SELF, 
+        CSP.SELF,
         "https://static.burcuatak.com",
-        "https://fonts.googleapis.com", 
+        "https://fonts.googleapis.com",
         CSP.NONCE,
     ],
     "img-src": [
-        CSP.SELF, 
-        "https://static.burcuatak.com", 
-        "data:", 
+        CSP.SELF,
+        "https://static.burcuatak.com",
+        "data:",
     ],
     "media-src": [CSP.SELF, "https://static.burcuatak.com"],
     "frame-src": [CSP.SELF],
     "font-src": [
-        CSP.SELF, 
-        "https://static.burcuatak.com", 
+        CSP.SELF,
+        "https://static.burcuatak.com",
         "https://fonts.gstatic.com",
-        "data:", 
+        "data:",
     ],
     "connect-src": [CSP.SELF, "https://static.burcuatak.com"],
     "frame-ancestors": [CSP.SELF],
 }
-
