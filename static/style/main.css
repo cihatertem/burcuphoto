@@ -450,7 +450,7 @@ section.hero {
     }
 }
 
-.photo-zoom-active {
+.slider.photo-zoom-active {
     display: flex;
     flex-direction: column;
     align-items: center;
