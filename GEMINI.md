@@ -16,7 +16,7 @@
 - **Validation:** When development is complete, the full test suite must be run to verify structural and behavioral integrity. Tests run locally on powerful machines, so test performance is less critical than production performance.
 
 ## Workflows & Version Control
-- **Commits:** Upon completing a task, summarize the changes and propose a commit message. Do NOT create a Pull Request or commit the changes automatically.
+- **Commits:** Do NOT create a Pull Request, push, or commit the changes automatically. Commit and push operations are left entirely to the user. Upon completing a task, summarize the changes and propose a commit message, but you MUST NOT execute the commit or ask for permission to commit.
 
 ## AI Agent Guidelines
 - Be mindful of the `AppRegistryNotReady` and `ImproperlyConfigured` Django errors. Ensure that `DJANGO_SETTINGS_MODULE` is correctly pointing to the test settings.

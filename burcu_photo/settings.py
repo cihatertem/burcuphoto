@@ -286,7 +286,7 @@ if not DEBUG:
 
 # Cutting-edge Layer: Tightened policy using Nonces
 # Change to SECURE_CSP after monitoring reports
-SECURE_CSP_REPORT_ONLY = {
+SECURE_CSP = {
     "default-src": [CSP.SELF],
     "script-src": [
         CSP.SELF,

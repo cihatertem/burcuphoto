@@ -5,10 +5,10 @@
 {% block meta-title %}{% if project.meta_title %}{{ project.meta_title }}{% else %}{{ project.slug }}
 {% endif %}{% endblock %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'style/slider.css' %}"/>
+    <link rel="stylesheet" href="{% static 'style/slider.css' %}" nonce="{{ csp_nonce }}"/>
 {% endblock %}
 {% block extra_js %}
-    <script src="{% static 'script/slider.js' %}"></script>
+    <script src="{% static 'script/slider.js' %}" nonce="{{ csp_nonce }}"></script>
 {% endblock %}
 {% block main %}
     {% cache 900 portfolio_detail_main project.slug %}

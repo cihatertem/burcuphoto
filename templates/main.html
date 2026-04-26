@@ -14,7 +14,7 @@
             name="keywords"
             content="{% block meta-keywords %}Burcu Atak, photography, fotoğraf, portfolio{% endblock %}"
     />
-    <link rel="stylesheet" href="{% static 'style/main.css' %}"/>
+    <link rel="stylesheet" href="{% static 'style/main.css' %}" nonce="{{ csp_nonce }}"/>
     {% block extra_css %}{% endblock %}
     <meta name="yandex-verification" content="697c73042871080e"/>
     <meta name="Petal-Search-site-verification" content="35c4381892"/>
@@ -83,7 +83,7 @@
 </div>
 {% block photo_zoom %} {% endblock %}
 
-<script src="{% static 'script/script.js' %}"></script>
+<script src="{% static 'script/script.js' %}" nonce="{{ csp_nonce }}"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
