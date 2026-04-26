@@ -65,6 +65,7 @@ MIDDLEWARE = [
     "base.middlewares.TrustedProxyMiddleware",
     "base.utils.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -86,6 +87,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.csp",
             ],
         },
     },
@@ -262,3 +264,56 @@ if not DEBUG:
             os.getenv("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", "1") == "1"
         )
         SECURE_HSTS_PRELOAD = os.getenv("DJANGO_SECURE_HSTS_PRELOAD", "1") == "1"
+
+# ==============================================================================
+# CONTENT SECURITY POLICY (CSP) SETTINGS (Django 6 Native)
+# ==============================================================================
+# Stable Layer: Direct conversion of Traefik rules
+# CSP_REPORT_ONLY = True
+# CSP_DEFAULT_SRC = ("'self'",)
+# CSP_SCRIPT_SRC = ("'self'", "https://static.burcuatak.com", "https:")
+# CSP_OBJECT_SRC = ("'self'",)
+# CSP_STYLE_SRC = ("'self'", "https:", "data:")
+# CSP_IMG_SRC = ("'self'", "https:", "data:")
+# CSP_MEDIA_SRC = ("'self'",)
+# CSP_FRAME_SRC = ("'self'",)
+# CSP_FONT_SRC = ("'self'", "https:", "data:")
+# CSP_CONNECT_SRC = ("'self'", "https:", "data:")
+# CSP_FRAME_ANCESTORS = ("'self'",)
+
+from django.utils.csp import CSP
+
+# Cutting-edge Layer: Tightened policy using Nonces
+# Change to SECURE_CSP after monitoring reports
+SECURE_CSP_REPORT_ONLY = {
+    "default-src": [CSP.SELF],
+    "script-src": [
+        CSP.SELF, 
+        "https://static.burcuatak.com", 
+        CSP.NONCE,
+        # CSP.STRICT_DYNAMIC, # Can be enabled if all scripts are loaded with nonces
+    ],
+    "object-src": [CSP.NONE],
+    "style-src": [
+        CSP.SELF, 
+        "https://static.burcuatak.com",
+        "https://fonts.googleapis.com", 
+        CSP.NONCE,
+    ],
+    "img-src": [
+        CSP.SELF, 
+        "https://static.burcuatak.com", 
+        "data:", 
+    ],
+    "media-src": [CSP.SELF, "https://static.burcuatak.com"],
+    "frame-src": [CSP.SELF],
+    "font-src": [
+        CSP.SELF, 
+        "https://static.burcuatak.com", 
+        "https://fonts.gstatic.com",
+        "data:", 
+    ],
+    "connect-src": [CSP.SELF, "https://static.burcuatak.com"],
+    "frame-ancestors": [CSP.SELF],
+}
+

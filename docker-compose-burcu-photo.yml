@@ -48,7 +48,6 @@ services:
         - "traefik.http.middlewares.burcuphoto-headers.headers.stspreload=true"
         - "traefik.http.middlewares.burcuphoto-headers.headers.stsseconds=63072000"
         - "traefik.http.middlewares.burcuphoto-headers.headers.permissionsPolicy=geolocation=(),midi=(),sync-xhr=(),microphone=(),camera=(),magnetometer=(),gyroscope=(),fullscreen=self,payment=()"
-        - "traefik.http.middlewares.burcuphoto-headers.headers.contentSecurityPolicy=default-src 'self'; script-src 'self' https:; object-src 'self'; style-src 'self' https: data:; img-src 'self' https: data:; media-src 'self'; frame-src 'self'; font-src 'self' https: data:; connect-src 'self' https: data:; frame-ancestors 'self';"
       placement:
         constraints:
           - node.role==worker
