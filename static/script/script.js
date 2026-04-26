@@ -87,15 +87,19 @@ for (let i = 0; i < photoList.length; i++) {
     if (isNaN(photoIndex) || photoIndex < 0) photoIndex = 0;
 
     if (!slider2) {
-      slider2 = new VanillaSlider(".photo-zoom", {
-        loop: true,
-        initialSlide: photoIndex,
-        navigation: {
-          nextEl: ".slider-button-next",
-          prevEl: ".slider-button-prev",
-        },
-        slidesPerView: 1,
-      });
+      if (typeof VanillaSlider !== "undefined") {
+        slider2 = new VanillaSlider(".photo-zoom", {
+          loop: true,
+          initialSlide: photoIndex,
+          navigation: {
+            nextEl: ".slider-button-next",
+            prevEl: ".slider-button-prev",
+          },
+          slidesPerView: 1,
+        });
+      } else {
+        console.error("VanillaSlider is not defined.");
+      }
     } else {
       slider2.goTo(photoIndex, false);
     }
@@ -117,39 +121,42 @@ menuBtn.onclick = () => {
 };
 
 // portfolio slider
-const slideCount = document.querySelectorAll(".portfolio .slider-slide").length;
-const slider1 = new VanillaSlider(".portfolio", {
-  loop: true,
-  direction : 'horizontal',
-  slidesPerView: 4,
-  spaceBetween: 0,
-  navigation: {
-    nextEl: ".slider-button-next",
-    prevEl: ".slider-button-prev",
-  },
-  breakpoints: {
-    200: {
-      slidesPerView: 1,
-      spaceBetween: 0
+const portfolioContainer = document.querySelector(".portfolio");
+if (portfolioContainer && typeof VanillaSlider !== "undefined") {
+  const slideCount = portfolioContainer.querySelectorAll(".slider-slide").length;
+  const slider1 = new VanillaSlider(".portfolio", {
+    loop: true,
+    direction : 'horizontal',
+    slidesPerView: 4,
+    spaceBetween: 0,
+    navigation: {
+      nextEl: ".slider-button-next",
+      prevEl: ".slider-button-prev",
     },
-    576: {
-      slidesPerView: 1,
-      spaceBetween: 0
+    breakpoints: {
+      200: {
+        slidesPerView: 1,
+        spaceBetween: 0
+      },
+      576: {
+        slidesPerView: 1,
+        spaceBetween: 0
+      },
+      786: {
+        slidesPerView: slideCount < 2 ? slideCount : 2,
+        spaceBetween: 0,
+      },
+      991: {
+        slidesPerView: slideCount < 3 ? slideCount : 3,
+        spaceBetween: 0,
+      },
+      1200: {
+        slidesPerView: slideCount < 4 ? slideCount : 4,
+        spaceBetween: 0,
+      },
     },
-    786: {
-      slidesPerView: slideCount < 2 ? slideCount : 2,
-      spaceBetween: 0,
-    },
-    991: {
-      slidesPerView: slideCount < 3 ? slideCount : 3,
-      spaceBetween: 0,
-    },
-    1200: {
-      slidesPerView: slideCount < 4 ? slideCount : 4,
-      spaceBetween: 0,
-    },
-  },
-});
+  });
+}
 
 // CAPTCHA
 if (numOne && numTwo) {
