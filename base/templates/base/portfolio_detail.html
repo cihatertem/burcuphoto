@@ -4,6 +4,12 @@
 {% endif %}{% endblock %}
 {% block meta-title %}{% if project.meta_title %}{{ project.meta_title }}{% else %}{{ project.slug }}
 {% endif %}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'style/slider.css' %}"/>
+{% endblock %}
+{% block extra_js %}
+    <script src="{% static 'script/slider.js' %}"></script>
+{% endblock %}
 {% block main %}
     {% cache 900 portfolio_detail_main project.slug %}
         <section class="project">
