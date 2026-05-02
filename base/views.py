@@ -27,17 +27,14 @@ from django.views.generic.base import ContextMixin
 
 
 class YearContext(ContextMixin):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["year"] = current_year()
-        return context
+    extra_context = {"year": current_year()}
 
 
 class HomeView(YearContext, TemplateView):
     template_name = "base/home.html"
 
 
-class PortfolioList(ListView):
+class PortfolioList(YearContext, ListView):
     template_name = "base/portfolio_list.html"
     model = Project
 
@@ -45,13 +42,8 @@ class PortfolioList(ListView):
         queryset = super().get_queryset(**kwargs)
         return queryset.filter(draft=False).prefetch_related("projectportfolio_set")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["year"] = current_year()
-        return context
 
-
-class PortfolioDetail(DetailView):
+class PortfolioDetail(YearContext, DetailView):
     template_name = "base/portfolio_detail.html"
     model = Project
 
@@ -61,7 +53,6 @@ class PortfolioDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["year"] = current_year()
         context["portfolios"] = self.object.projectportfolio_set.all()
         return context
 
