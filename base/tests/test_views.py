@@ -47,6 +47,8 @@ class CaptchaTests(TestCase):
         self.assertIsNone(_parse_int("abc"))
         self.assertIsNone(_parse_int(""))
         self.assertIsNone(_parse_int(None))
+        self.assertIsNone(_parse_int([1, 2]))
+        self.assertIsNone(_parse_int({"a": 1}))
 
     def test_captcha_is_valid_success(self):
         request = self.factory.post("/", {"captcha": "15"})
@@ -68,8 +70,54 @@ class CaptchaTests(TestCase):
         request.session = {}
         self.assertFalse(captcha_is_valid(request))
 
+    def test_captcha_is_valid_fail_invalid_post_data_string(self):
+        request = self.factory.post("/", {"captcha": "abc"})
+        request.session = {CAPTCHA_ANS_KEY: 15}
+        self.assertFalse(captcha_is_valid(request))
+
+    def test_captcha_is_valid_fail_invalid_session_data_string(self):
+        request = self.factory.post("/", {"captcha": "15"})
+        request.session = {CAPTCHA_ANS_KEY: "abc"}
+        self.assertFalse(captcha_is_valid(request))
+
 
 class ContactViewTest(TestCase):
+    @override_settings(
+        RATELIMIT_ENABLE=False,
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
+    def test_contact_post_honeypot(self):
+        """Test that submitting the contact form with honeypot field filled redirects with success but sends no email."""
+        session = self.client.session
+        session[CAPTCHA_NUM1_KEY] = 5
+        session[CAPTCHA_NUM2_KEY] = 3
+        session[CAPTCHA_ANS_KEY] = 8
+        session.save()
+
+        post_data = {
+            "name": "Spam Bot",
+            "email": "bot@example.com",
+            "message": "Buy cheap stuff!",
+            "website": "http://spam.com",  # filled honeypot
+            "captcha": "8",
+        }
+
+        response = self.client.post(reverse("base:contact"), data=post_data)
+
+        # Confirm the form submission redirected back to the home page silently
+        self.assertRedirects(response, reverse("base:home"))
+
+        # Check that no email was sent
+        self.assertEqual(len(mail.outbox), 0)
+
+        # Check that the success message was added
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]), "Your message was sent successfully.\nThank you!"
+        )
+        self.assertEqual(messages[0].level_tag, "success")
+
     @override_settings(
         RATELIMIT_ENABLE=False,
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
