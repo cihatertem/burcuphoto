@@ -1,6 +1,8 @@
 from io import BytesIO
 
+from django.contrib.messages import get_messages
 from django.core import mail
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
@@ -100,6 +102,76 @@ class ContactViewTest(TestCase):
         self.assertEqual(email.subject, "Web Site Visitor")
         self.assertIn("Hello, this is a test.", email.body)
         self.assertEqual(email.reply_to, ["test@example.com"])
+
+    @override_settings(
+        RATELIMIT_ENABLE=False,
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
+    def test_contact_post_incorrect_captcha(self):
+        """Test that submitting the contact form with an incorrect captcha redirects with an error."""
+        session = self.client.session
+        session[CAPTCHA_NUM1_KEY] = 5
+        session[CAPTCHA_NUM2_KEY] = 3
+        session[CAPTCHA_ANS_KEY] = 8
+        session.save()
+
+        post_data = {
+            "name": "Test User",
+            "email": "test@example.com",
+            "message": "Hello, this is a test.",
+            "website": "",  # empty for honeypot
+            "captcha": "9",  # incorrect captcha
+        }
+
+        response = self.client.post(reverse("base:contact"), data=post_data)
+
+        # Confirm the form submission redirected back to the contact page
+        self.assertRedirects(response, reverse("base:contact"))
+
+        # Check that no email was sent
+        self.assertEqual(len(mail.outbox), 0)
+
+        # Check that the error message was added
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Captcha incorrect. Please try again.")
+        self.assertEqual(messages[0].level_tag, "error")
+
+    @override_settings(RATELIMIT_ENABLE=True)
+    def test_contact_rate_limit(self):
+        """Test that submitting the form too many times triggers the rate limit."""
+        # Ensure cache is clear so rate limits are reset
+        cache.clear()
+
+        post_data = {
+            "name": "Test User",
+            "email": "test@example.com",
+            "message": "Hello, this is a test.",
+            "website": "",
+            "captcha": "8",
+        }
+
+        # The limit is 2/m, so the first two requests should go through
+        self.client.post(
+            reverse("base:contact"), data=post_data, REMOTE_ADDR="127.0.0.1"
+        )
+        self.client.post(
+            reverse("base:contact"), data=post_data, REMOTE_ADDR="127.0.0.1"
+        )
+
+        # The 3rd request should be rate limited
+        response = self.client.post(
+            reverse("base:contact"),
+            data=post_data,
+            REMOTE_ADDR="127.0.0.1",
+            follow=True,
+        )
+
+        self.assertRedirects(response, reverse("base:contact"))
+        messages = [str(m) for m in response.context["messages"]]
+        self.assertIn(
+            "Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.", messages
+        )
 
 
 class ImageTestMixin:

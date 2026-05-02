@@ -19,7 +19,7 @@
                     "{% static 'icons/arrow-left.svg' %}">Back</a>
             <h1 id="project-title" class="project-title"><em>{{ project.title }}</em></h1>
             <div class="photo-flow">
-                {% for portfolio in project.projectportfolio_set.all %}
+                {% for portfolio in portfolios %}
                     <img data-photoIndex="{{ forloop.counter }}" class="photo-flow-img" src="{{ portfolio.photo.url }}"
                          alt="{{ portfolio.alt }}">
                 {% endfor %}
@@ -34,7 +34,7 @@
         <div class="slider photo-zoom">
             <button href="" class="btn btn-slider-close">&#10005;</button>
             <div class="slider-wrapper photo-zoom-wrapper">
-                {% for portfolio in project.projectportfolio_set.all %}
+                {% for portfolio in portfolios %}
                     <div class="slider-slide photo-zoom-slide">
                         <img class="photo-zoom-img" src="{{ portfolio.photo.url }}"
                              alt="{{ portfolio.alt }}">

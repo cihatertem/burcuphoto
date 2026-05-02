@@ -62,6 +62,7 @@ class PortfolioDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["year"] = current_year()
+        context["portfolios"] = self.object.projectportfolio_set.all()
         return context
 
 
@@ -82,7 +83,10 @@ def _parse_int(value) -> int | None:
         if value in (None, ""):
             return None
         return int(value)
-    except TypeError, ValueError:
+    except (
+        TypeError,
+        ValueError,
+    ):
         return None
 
 
@@ -176,3 +180,8 @@ class DraftDetail(LoginRequiredMixin, YearContext, DetailView):
     queryset = Project.objects.filter(draft=True).prefetch_related(
         "projectportfolio_set"
     )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["portfolios"] = self.object.projectportfolio_set.all()
+        return context
