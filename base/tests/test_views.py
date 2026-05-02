@@ -86,6 +86,40 @@ class ContactViewTest(TestCase):
         RATELIMIT_ENABLE=False,
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     )
+    def test_contact_post_invalid_email(self):
+        """Test that submitting the contact form with an invalid email redirects with an error."""
+        session = self.client.session
+        session[CAPTCHA_NUM1_KEY] = 5
+        session[CAPTCHA_NUM2_KEY] = 3
+        session[CAPTCHA_ANS_KEY] = 8
+        session.save()
+
+        post_data = {
+            "name": "Test User",
+            "email": "invalid-email",
+            "message": "Hello, this is a test.",
+            "website": "",  # empty for honeypot
+            "captcha": "8",
+        }
+
+        response = self.client.post(reverse("base:contact"), data=post_data)
+
+        # Confirm the form submission redirected back to the contact page
+        self.assertRedirects(response, reverse("base:contact"))
+
+        # Check that no email was sent
+        self.assertEqual(len(mail.outbox), 0)
+
+        # Check that the error message was added
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Invalid email address.")
+        self.assertEqual(messages[0].level_tag, "error")
+
+    @override_settings(
+        RATELIMIT_ENABLE=False,
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
     def test_contact_post_honeypot(self):
         """Test that submitting the contact form with honeypot field filled redirects with success but sends no email."""
         session = self.client.session

@@ -5,7 +5,9 @@ import threading
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
+from django.core.validators import validate_email
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, ListView, TemplateView
@@ -126,6 +128,13 @@ class Contact(YearContext, TemplateView):
         # Captcha doğrula (session yoksa/bozuksa da False döner)
         if not captcha_is_valid(request):
             messages.error(request, "Captcha incorrect. Please try again.")
+            return redirect("base:contact")
+
+        # Validate the email address
+        try:
+            validate_email(email)
+        except ValidationError:
+            messages.error(request, "Invalid email address.")
             return redirect("base:contact")
 
         # Tek kullanımlık captcha: doğrulandıktan sonra session'dan sil
