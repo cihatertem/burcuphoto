@@ -1,6 +1,8 @@
+import base64
 import os
 import secrets
 import threading
+from io import BytesIO
 
 from django.conf import settings
 from django.contrib import messages
@@ -12,6 +14,7 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, ListView, TemplateView
 from django_ratelimit.decorators import ratelimit
+from PIL import Image, ImageDraw
 
 from .models import Project
 from .utils import client_ip_key, current_year, get_client_ip
@@ -83,6 +86,32 @@ def _parse_int(value) -> int | None:
         return None
 
 
+def _generate_captcha_image_base64(n1: int, n2: int) -> str:
+    image = Image.new("RGB", (60, 20), color=(255, 255, 255))
+    draw = ImageDraw.Draw(image)
+
+    text = f"{n1} + {n2} ="
+    draw.text((5, 5), text, fill=(0, 0, 0))
+
+    # Scale it up
+    image = image.resize((120, 40), Image.Resampling.NEAREST)
+
+    # Draw noise on the larger image
+    draw = ImageDraw.Draw(image)
+    for _ in range(5):
+        draw.line(
+            [
+                (secrets.randbelow(120), secrets.randbelow(40)),
+                (secrets.randbelow(120), secrets.randbelow(40)),
+            ],
+            fill=(100, 100, 100),
+        )
+
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode()
+
+
 def captcha_is_valid(request) -> bool:
     expected = _parse_int(request.session.get(CAPTCHA_ANS_KEY))
     got = _parse_int(request.POST.get("captcha"))
@@ -103,8 +132,9 @@ class Contact(YearContext, TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["num1"] = self.request.session.get(CAPTCHA_NUM1_KEY)
-        ctx["num2"] = self.request.session.get(CAPTCHA_NUM2_KEY)
+        n1 = self.request.session.get(CAPTCHA_NUM1_KEY, 0)
+        n2 = self.request.session.get(CAPTCHA_NUM2_KEY, 0)
+        ctx["captcha_image_b64"] = _generate_captcha_image_base64(n1, n2)
         return ctx
 
     def post(self, request, *args, **kwargs):
