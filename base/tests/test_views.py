@@ -1,4 +1,6 @@
+import base64
 from io import BytesIO
+from unittest.mock import patch
 
 from django.contrib.messages import get_messages
 from django.core import mail
@@ -14,6 +16,7 @@ from base.views import (
     CAPTCHA_NUM1_KEY,
     CAPTCHA_NUM2_KEY,
     _generate_captcha,
+    _generate_captcha_image_base64,
     _parse_int,
     captcha_is_valid,
 )
@@ -40,6 +43,22 @@ class CaptchaTests(TestCase):
         self.assertTrue(1 <= n1 <= 10)
         self.assertTrue(1 <= n2 <= 10)
         self.assertEqual(ans, n1 + n2)
+
+    @patch("base.views.secrets.randbelow", side_effect=[0] * 20)
+    def test_generate_captcha_image_base64_returns_png_image(self, _mock_randbelow):
+        captcha_image_b64 = _generate_captcha_image_base64(5, 3)
+
+        image_bytes = base64.b64decode(captcha_image_b64, validate=True)
+        self.assertTrue(image_bytes.startswith(b"\x89PNG\r\n\x1a\n"))
+
+        with Image.open(BytesIO(image_bytes)) as image:
+            self.assertEqual(image.format, "PNG")
+            self.assertEqual(image.mode, "RGB")
+            self.assertEqual(image.size, (120, 40))
+
+            colors = image.getcolors(maxcolors=120 * 40)
+            self.assertIsNotNone(colors)
+            self.assertGreater(len(colors), 1)
 
     def test_parse_int(self):
         self.assertEqual(_parse_int("123"), 123)
@@ -82,6 +101,29 @@ class CaptchaTests(TestCase):
 
 
 class ContactViewTest(TestCase):
+    @patch("base.views.secrets.randbelow", side_effect=[4, 2, *([0] * 20)])
+    def test_contact_get_generates_captcha_and_renders_image(self, _mock_randbelow):
+        response = self.client.get(reverse("base:contact"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session[CAPTCHA_NUM1_KEY], 5)
+        self.assertEqual(self.client.session[CAPTCHA_NUM2_KEY], 3)
+        self.assertEqual(self.client.session[CAPTCHA_ANS_KEY], 8)
+
+        captcha_image_b64 = response.context["captcha_image_b64"]
+        image_bytes = base64.b64decode(captcha_image_b64, validate=True)
+        with Image.open(BytesIO(image_bytes)) as image:
+            self.assertEqual(image.format, "PNG")
+            self.assertEqual(image.size, (120, 40))
+
+        html = response.content.decode()
+        self.assertIn(
+            f'src="data:image/png;base64,{captcha_image_b64}"',
+            html,
+        )
+        self.assertIn('alt="CAPTCHA Image"', html)
+        self.assertNotIn("5 + 3", html)
+
     @override_settings(
         RATELIMIT_ENABLE=False,
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
