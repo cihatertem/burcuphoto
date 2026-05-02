@@ -1,3 +1,4 @@
+import os
 import sys
 import uuid
 
@@ -19,7 +20,7 @@ def process_image_field(image_field, max_size=780):
             return InMemoryUploadedFile(
                 output,
                 "ImageField",
-                "%s.jpg" % image_field.name.split(".")[0],
+                "%s.jpg" % os.path.splitext(image_field.name)[0],
                 "image/jpeg",
                 sys.getsizeof(output),
                 None,

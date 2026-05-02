@@ -2,12 +2,69 @@ from io import BytesIO
 
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, override_settings
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from PIL import Image
 
 from base.models import Project, ProjectPortfolio
-from base.views import CAPTCHA_ANS_KEY, CAPTCHA_NUM1_KEY, CAPTCHA_NUM2_KEY
+from base.views import (
+    CAPTCHA_ANS_KEY,
+    CAPTCHA_NUM1_KEY,
+    CAPTCHA_NUM2_KEY,
+    _generate_captcha,
+    _parse_int,
+    captcha_is_valid,
+)
+
+
+class CaptchaTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_generate_captcha(self):
+        request = self.factory.get("/")
+        # Manually add session to request
+        request.session = {}
+
+        _generate_captcha(request)
+
+        n1 = request.session.get(CAPTCHA_NUM1_KEY)
+        n2 = request.session.get(CAPTCHA_NUM2_KEY)
+        ans = request.session.get(CAPTCHA_ANS_KEY)
+
+        self.assertIsInstance(n1, int)
+        self.assertIsInstance(n2, int)
+        self.assertIsInstance(ans, int)
+        self.assertTrue(1 <= n1 <= 10)
+        self.assertTrue(1 <= n2 <= 10)
+        self.assertEqual(ans, n1 + n2)
+
+    def test_parse_int(self):
+        self.assertEqual(_parse_int("123"), 123)
+        self.assertEqual(_parse_int(123), 123)
+        self.assertIsNone(_parse_int("abc"))
+        self.assertIsNone(_parse_int(""))
+        self.assertIsNone(_parse_int(None))
+
+    def test_captcha_is_valid_success(self):
+        request = self.factory.post("/", {"captcha": "15"})
+        request.session = {CAPTCHA_ANS_KEY: 15}
+        self.assertTrue(captcha_is_valid(request))
+
+    def test_captcha_is_valid_fail_wrong_answer(self):
+        request = self.factory.post("/", {"captcha": "10"})
+        request.session = {CAPTCHA_ANS_KEY: 15}
+        self.assertFalse(captcha_is_valid(request))
+
+    def test_captcha_is_valid_fail_missing_post_data(self):
+        request = self.factory.post("/")
+        request.session = {CAPTCHA_ANS_KEY: 15}
+        self.assertFalse(captcha_is_valid(request))
+
+    def test_captcha_is_valid_fail_missing_session_data(self):
+        request = self.factory.post("/", {"captcha": "15"})
+        request.session = {}
+        self.assertFalse(captcha_is_valid(request))
 
 
 class ContactViewTest(TestCase):

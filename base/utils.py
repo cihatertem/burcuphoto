@@ -1,5 +1,6 @@
 import ipaddress
 from datetime import date
+from functools import lru_cache
 from http import HTTPStatus
 from io import BytesIO
 
@@ -38,19 +39,42 @@ def photo_resizer(image: Image.Image, size: int) -> BytesIO:
     return output
 
 
+@lru_cache(maxsize=1)
+def _get_trusted_networks_optimized(trusted_nets_tuple):
+    trusted_ips = set()
+    trusted_subnets = []
+    for net in trusted_nets_tuple:
+        if net.prefixlen == net.max_prefixlen:
+            trusted_ips.add(net.network_address)
+        else:
+            trusted_subnets.append(net)
+    return trusted_ips, trusted_subnets
+
+
+@lru_cache(maxsize=128)
+def _parse_ip(ip_str):
+    return ipaddress.ip_address(ip_str)
+
+
 def get_client_ip(request) -> str | None:
     remote = request.META.get("REMOTE_ADDR")
     if not remote:
         return None
 
     try:
-        ra = ipaddress.ip_address(remote)
+        ra = _parse_ip(remote)
     except ValueError:
         return remote
 
     trusted_nets = getattr(settings, "TRUSTED_PROXY_NETS", None) or []
+    if not trusted_nets:
+        return remote
 
-    if trusted_nets and any(ra in net for net in trusted_nets):
+    trusted_ips, trusted_subnets = _get_trusted_networks_optimized(tuple(trusted_nets))
+
+    is_ra_trusted = ra in trusted_ips or any(ra in net for net in trusted_subnets)
+
+    if is_ra_trusted:
         xff = request.META.get("HTTP_X_FORWARDED_FOR")
         if xff:
             last_valid_ip = None
@@ -68,15 +92,11 @@ def get_client_ip(request) -> str | None:
                     continue
                 last_valid_ip = ip_str
                 try:
-                    ip_obj = ipaddress.ip_address(ip_str)
+                    ip_obj = _parse_ip(ip_str)
 
-                    is_trusted = False
-                    for net in trusted_nets:
-                        if ip_obj in net:
-                            is_trusted = True
-                            break
-
-                    if is_trusted:
+                    if ip_obj in trusted_ips or any(
+                        ip_obj in net for net in trusted_subnets
+                    ):
                         continue
 
                     return ip_str
