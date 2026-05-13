@@ -42,8 +42,8 @@ class PortfolioList(YearContext, ListView):
     template_name = "base/portfolio_list.html"
     model = Project
 
-    def get_queryset(self, **kwargs):
-        queryset = super().get_queryset(**kwargs)
+    def get_queryset(self):
+        queryset = super().get_queryset()
         return queryset.filter(draft=False).prefetch_related("projectportfolio_set")
 
 
@@ -51,8 +51,8 @@ class PortfolioDetail(YearContext, DetailView):
     template_name = "base/portfolio_detail.html"
     model = Project
 
-    def get_queryset(self, **kwargs):
-        queryset = super().get_queryset(**kwargs)
+    def get_queryset(self):
+        queryset = super().get_queryset()
         return queryset.filter(draft=False).prefetch_related("projectportfolio_set")
 
     def get_context_data(self, **kwargs):

@@ -462,6 +462,29 @@ class PortfolioListTest(ImageTestMixin, TestCase):
         self.assertIn(self.published_project, response.context["object_list"])
         self.assertNotIn(self.draft_project, response.context["object_list"])
 
+    def test_get_queryset_queries_count(self):
+        # Create some portfolios to ensure they are fetched
+        ProjectPortfolio.objects.create(
+            project=self.published_project,
+            photo=self._create_image(10, 10),
+            index=1,
+        )
+        ProjectPortfolio.objects.create(
+            project=self.published_project,
+            photo=self._create_image(10, 10),
+            index=2,
+        )
+
+        with self.assertNumQueries(2):
+            view = PortfolioList()
+            view.kwargs = {}
+            qs = view.get_queryset()
+            # Evaluate the queryset to trigger the DB queries
+            projects = list(qs)
+            # Access related data to ensure no extra queries are fired
+            for project in projects:
+                list(project.projectportfolio_set.all())
+
 
 class PortfolioDetailTest(ImageTestMixin, TestCase):
     def setUp(self):
@@ -529,6 +552,29 @@ class PortfolioDetailTest(ImageTestMixin, TestCase):
         self.assertIn("portfolios", context)
         portfolios = context["portfolios"]
         self.assertEqual(list(portfolios), [portfolio1, portfolio2])
+
+    def test_get_queryset_queries_count(self):
+        # Create some portfolios to ensure they are fetched
+        ProjectPortfolio.objects.create(
+            project=self.published_project,
+            photo=self._create_image(10, 10),
+            index=1,
+        )
+        ProjectPortfolio.objects.create(
+            project=self.published_project,
+            photo=self._create_image(10, 10),
+            index=2,
+        )
+
+        with self.assertNumQueries(2):
+            view = PortfolioDetail()
+            view.kwargs = {"slug": "published-project-detail"}
+            qs = view.get_queryset()
+            # Evaluate the queryset to trigger the DB queries
+            projects = list(qs)
+            # Access related data to ensure no extra queries are fired
+            for project in projects:
+                list(project.projectportfolio_set.all())
 
 
 class DraftDetailTest(ImageTestMixin, TestCase):
