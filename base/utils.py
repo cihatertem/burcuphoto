@@ -56,6 +56,42 @@ def _parse_ip(ip_str):
     return ipaddress.ip_address(ip_str)
 
 
+def _is_ip_trusted(ip_obj, trusted_ips, trusted_subnets) -> bool:
+    if ip_obj in trusted_ips:
+        return True
+    for net in trusted_subnets:
+        if ip_obj in net:
+            return True
+    return False
+
+
+def _get_ip_from_xff(xff, trusted_ips, trusted_subnets) -> str | None:
+    last_valid_ip = None
+    end = len(xff)
+    while end > 0:
+        start = xff.rfind(",", 0, end)
+        if start == -1:
+            ip_str = xff[:end].strip()
+            end = 0
+        else:
+            ip_str = xff[start + 1 : end].strip()
+            end = start
+
+        if not ip_str:
+            continue
+
+        last_valid_ip = ip_str
+        try:
+            ip_obj = _parse_ip(ip_str)
+            if _is_ip_trusted(ip_obj, trusted_ips, trusted_subnets):
+                continue
+            return ip_str
+        except ValueError:
+            return ip_str
+
+    return last_valid_ip
+
+
 def get_client_ip(request) -> str | None:
     remote = request.META.get("REMOTE_ADDR")
     if not remote:
@@ -72,41 +108,14 @@ def get_client_ip(request) -> str | None:
 
     trusted_ips, trusted_subnets = _get_trusted_networks_optimized(tuple(trusted_nets))
 
-    is_ra_trusted = ra in trusted_ips or any(ra in net for net in trusted_subnets)
+    if not _is_ip_trusted(ra, trusted_ips, trusted_subnets):
+        return remote
 
-    if is_ra_trusted:
-        xff = request.META.get("HTTP_X_FORWARDED_FOR")
-        if xff:
-            last_valid_ip = None
-            end = len(xff)
-            while end > 0:
-                start = xff.rfind(",", 0, end)
-                if start == -1:
-                    ip_str = xff[:end].strip()
-                    end = 0
-                else:
-                    ip_str = xff[start + 1 : end].strip()
-                    end = start
+    xff = request.META.get("HTTP_X_FORWARDED_FOR")
+    if not xff:
+        return remote
 
-                if not ip_str:
-                    continue
-                last_valid_ip = ip_str
-                try:
-                    ip_obj = _parse_ip(ip_str)
-
-                    if ip_obj in trusted_ips or any(
-                        ip_obj in net for net in trusted_subnets
-                    ):
-                        continue
-
-                    return ip_str
-                except ValueError:
-                    return ip_str
-
-            if last_valid_ip:
-                return last_valid_ip
-
-    return remote
+    return _get_ip_from_xff(xff, trusted_ips, trusted_subnets) or remote
 
 
 def client_ip_key(group, request):
