@@ -489,6 +489,17 @@ class PortfolioListTest(ImageTestMixin, TestCase):
             for project in projects:
                 list(project.projectportfolio_set.all())
 
+    def test_portfolio_list_view_template(self):
+        response = self.client.get(reverse("base:portfolio"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "base/portfolio_list.html")
+
+    def test_portfolio_list_view_context(self):
+        response = self.client.get(reverse("base:portfolio"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("year", response.context)
+        self.assertEqual(response.context["year"], current_year())
+
 
 class PortfolioDetailTest(ImageTestMixin, TestCase):
     def setUp(self):
