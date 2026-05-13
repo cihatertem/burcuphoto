@@ -1,7 +1,6 @@
 import base64
 import os
 import secrets
-import threading
 from io import BytesIO
 
 from django.conf import settings

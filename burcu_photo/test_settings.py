@@ -13,6 +13,7 @@ EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 RATELIMIT_ENABLE = False
 os.environ["EMAIL_RECEIVER_ONE"] = "receiver1@example.com"
 os.environ["EMAIL_RECEIVER_TWO"] = "receiver2@example.com"
+os.environ["ADMIN_ADDRESS"] = "test-admin/"
 
 DATABASES = {
     "default": {
@@ -82,6 +83,7 @@ STORAGES = {
 MEDIA_ROOT = BASE_DIR / "test_media/"
 
 import shutil
+
 from django.test.runner import DiscoverRunner
 
 

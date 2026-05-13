@@ -15,6 +15,8 @@ from base.views import (
     CAPTCHA_ANS_KEY,
     CAPTCHA_NUM1_KEY,
     CAPTCHA_NUM2_KEY,
+    PortfolioDetail,
+    PortfolioList,
     _generate_captcha,
     _generate_captcha_image_base64,
     _parse_int,
@@ -398,3 +400,76 @@ class ProjectPortfolioModelTest(ImageTestMixin, TestCase):
         with Image.open(portfolio.photo) as img:
             self.assertEqual(img.width, 500)
             self.assertEqual(img.height, 500)
+
+
+class PortfolioListTest(ImageTestMixin, TestCase):
+    def setUp(self):
+        self.draft_project = Project.objects.create(
+            title="Draft Project",
+            slug="draft-project",
+            draft=True,
+            featured_photo=self._create_image(100, 100),
+        )
+        self.published_project = Project.objects.create(
+            title="Published Project",
+            slug="published-project",
+            draft=False,
+            featured_photo=self._create_image(100, 100),
+        )
+
+    def test_get_queryset_filters_drafts_and_prefetches(self):
+        view = PortfolioList()
+        view.kwargs = {}
+        qs = view.get_queryset()
+
+        self.assertEqual(qs.count(), 1)
+        self.assertIn(self.published_project, qs)
+        self.assertNotIn(self.draft_project, qs)
+        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
+
+        # also test view via client
+        response = self.client.get(reverse("base:portfolio"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.published_project, response.context["object_list"])
+        self.assertNotIn(self.draft_project, response.context["object_list"])
+
+
+class PortfolioDetailTest(ImageTestMixin, TestCase):
+    def setUp(self):
+        self.draft_project = Project.objects.create(
+            title="Draft Project Detail",
+            slug="draft-project-detail",
+            draft=True,
+            featured_photo=self._create_image(100, 100),
+        )
+        self.published_project = Project.objects.create(
+            title="Published Project Detail",
+            slug="published-project-detail",
+            draft=False,
+            featured_photo=self._create_image(100, 100),
+        )
+
+    def test_get_queryset_filters_drafts_and_prefetches(self):
+        view = PortfolioDetail()
+        view.kwargs = {"slug": "published-project-detail"}
+        qs = view.get_queryset()
+
+        self.assertEqual(qs.count(), 1)
+        self.assertIn(self.published_project, qs)
+        self.assertNotIn(self.draft_project, qs)
+        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
+
+        # also test view via client
+        response = self.client.get(
+            reverse(
+                "base:portfolio_detail", kwargs={"slug": "published-project-detail"}
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["object"], self.published_project)
+
+        # draft project should return 404
+        response_draft = self.client.get(
+            reverse("base:portfolio_detail", kwargs={"slug": "draft-project-detail"})
+        )
+        self.assertEqual(response_draft.status_code, 404)
