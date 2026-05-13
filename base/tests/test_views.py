@@ -163,6 +163,42 @@ class ContactViewTest(TestCase):
         RATELIMIT_ENABLE=False,
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     )
+    def test_contact_post_email_html_injection(self):
+        """Test that submitting the contact form with HTML tags prevents HTML injection."""
+        session = self.client.session
+        session[CAPTCHA_NUM1_KEY] = 5
+        session[CAPTCHA_NUM2_KEY] = 3
+        session[CAPTCHA_ANS_KEY] = 8
+        session.save()
+
+        post_data = {
+            "name": "<script>alert('name')</script>",
+            "email": "test@example.com",
+            "message": "<b>Hello</b>, this is a test.",
+            "website": "",  # empty for honeypot
+            "captcha": "8",
+        }
+
+        response = self.client.post(reverse("base:contact"), data=post_data)
+
+        # Confirm the form submission succeeded
+        self.assertRedirects(response, reverse("base:home"))
+
+        # Verify email was constructed correctly
+        from django.core.mail import outbox
+
+        self.assertEqual(len(outbox), 1)
+        self.assertIn(
+            "&lt;script&gt;alert(&#x27;name&#x27;)&lt;/script&gt;", outbox[0].body
+        )
+        self.assertIn("&lt;b&gt;Hello&lt;/b&gt;", outbox[0].body)
+        self.assertNotIn("<script>", outbox[0].body)
+        self.assertNotIn("<b>", outbox[0].body)
+
+    @override_settings(
+        RATELIMIT_ENABLE=False,
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
     def test_contact_post_email_header_injection(self):
         """Test that submitting the contact form with newlines in the email field prevents header injection."""
         session = self.client.session
@@ -184,6 +220,7 @@ class ContactViewTest(TestCase):
         # that the exception handling works as intended in the view.
         with patch("base.views.EmailMessage.send") as mock_send:
             from django.core.mail import BadHeaderError
+
             mock_send.side_effect = BadHeaderError("Invalid header found.")
             response = self.client.post(reverse("base:contact"), data=post_data)
 
@@ -630,14 +667,18 @@ class PortfolioDetailTest(ImageTestMixin, TestCase):
 
     def test_portfolio_detail_view_template(self):
         response = self.client.get(
-            reverse("base:portfolio_detail", kwargs={"slug": "published-project-detail"})
+            reverse(
+                "base:portfolio_detail", kwargs={"slug": "published-project-detail"}
+            )
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "base/portfolio_detail.html")
 
     def test_portfolio_detail_view_context(self):
         response = self.client.get(
-            reverse("base:portfolio_detail", kwargs={"slug": "published-project-detail"})
+            reverse(
+                "base:portfolio_detail", kwargs={"slug": "published-project-detail"}
+            )
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("year", response.context)

@@ -11,6 +11,7 @@ from django.core.mail import BadHeaderError, EmailMessage
 from django.core.validators import validate_email
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
+from django.utils.html import escape
 from django.views.generic import DetailView, ListView, TemplateView
 from django_ratelimit.decorators import ratelimit
 from PIL import Image, ImageDraw
@@ -177,8 +178,8 @@ class Contact(YearContext, TemplateView):
             msg = EmailMessage(
                 subject="Web Site Visitor",
                 body=(
-                    f"From {name}, {email}\n\n"
-                    f"{body}\n\n"
+                    f"From {escape(name)}, {escape(email)}\n\n"
+                    f"{escape(body)}\n\n"
                     f"IP: {ip_address}\n"
                     f"Site: www.burcuatak.com\n"
                 ),
