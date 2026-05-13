@@ -18,6 +18,7 @@ from base.views import (
     CAPTCHA_NUM2_KEY,
     Contact,
     DraftDetail,
+    DraftList,
     PortfolioDetail,
     PortfolioList,
     YearContext,
@@ -579,6 +580,69 @@ class PortfolioDetailTest(ImageTestMixin, TestCase):
                 list(project.projectportfolio_set.all())
 
 
+class DraftListTest(ImageTestMixin, TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+
+        self.user = User.objects.create_user(username="testuser", password="password")
+
+        self.draft_project = Project.objects.create(
+            title="Draft Project",
+            slug="draft-project",
+            draft=True,
+            featured_photo=self._create_image(100, 100),
+        )
+        self.published_project = Project.objects.create(
+            title="Published Project",
+            slug="published-project",
+            draft=False,
+            featured_photo=self._create_image(100, 100),
+        )
+
+    def test_get_queryset_filters_drafts_and_prefetches(self):
+        view = DraftList()
+        view.kwargs = {}
+        qs = view.get_queryset()
+
+        self.assertEqual(qs.count(), 1)
+        self.assertIn(self.draft_project, qs)
+        self.assertNotIn(self.published_project, qs)
+        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
+
+        # test via client authenticated
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(reverse("base:draft"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.draft_project, response.context["object_list"])
+        self.assertNotIn(self.published_project, response.context["object_list"])
+        self.assertTemplateUsed(response, "base/portfolio_list.html")
+
+    def test_draft_list_unauthenticated(self):
+        response = self.client.get(reverse("base:draft"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+
+    def test_get_queryset_queries_count(self):
+        ProjectPortfolio.objects.create(
+            project=self.draft_project,
+            photo=self._create_image(10, 10),
+            index=1,
+        )
+        ProjectPortfolio.objects.create(
+            project=self.draft_project,
+            photo=self._create_image(10, 10),
+            index=2,
+        )
+
+        with self.assertNumQueries(2):
+            view = DraftList()
+            view.kwargs = {}
+            qs = view.get_queryset()
+            projects = list(qs)
+            for project in projects:
+                portfolios = list(project.projectportfolio_set.all())
+
+
 class DraftDetailTest(ImageTestMixin, TestCase):
     def setUp(self):
         from django.contrib.auth.models import User
@@ -647,7 +711,7 @@ class DraftDetailTest(ImageTestMixin, TestCase):
 class YearContextTest(TestCase):
     def test_get_context_data(self):
         ctx = YearContext()
-        ctx.request = RequestFactory().get('/')
+        ctx.request = RequestFactory().get("/")
         context = ctx.get_context_data()
         self.assertIn("year", context)
         self.assertEqual(context["year"], current_year())
@@ -668,4 +732,3 @@ class AboutViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("year", response.context)
         self.assertEqual(response.context["year"], current_year())
-
