@@ -15,6 +15,7 @@ from base.views import (
     CAPTCHA_ANS_KEY,
     CAPTCHA_NUM1_KEY,
     CAPTCHA_NUM2_KEY,
+    DraftDetail,
     PortfolioDetail,
     PortfolioList,
     _generate_captcha,
@@ -473,3 +474,68 @@ class PortfolioDetailTest(ImageTestMixin, TestCase):
             reverse("base:portfolio_detail", kwargs={"slug": "draft-project-detail"})
         )
         self.assertEqual(response_draft.status_code, 404)
+
+
+class DraftDetailTest(ImageTestMixin, TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+
+        self.user = User.objects.create_user(username="testuser", password="password")
+
+        self.draft_project = Project.objects.create(
+            title="Draft Project Detail",
+            slug="draft-project-detail",
+            draft=True,
+            featured_photo=self._create_image(100, 100),
+        )
+        self.published_project = Project.objects.create(
+            title="Published Project Detail",
+            slug="published-project-detail",
+            draft=False,
+            featured_photo=self._create_image(100, 100),
+        )
+        self.portfolio1 = ProjectPortfolio.objects.create(
+            project=self.draft_project,
+            photo=self._create_image(10, 10),
+            index=1,
+        )
+        self.portfolio2 = ProjectPortfolio.objects.create(
+            project=self.draft_project,
+            photo=self._create_image(10, 10),
+            index=2,
+        )
+
+    def test_get_context_data_includes_portfolios(self):
+        view = DraftDetail()
+        view.object = self.draft_project
+        context = view.get_context_data()
+        self.assertIn("portfolios", context)
+        self.assertEqual(
+            list(context["portfolios"]), [self.portfolio1, self.portfolio2]
+        )
+
+    def test_draft_detail_view_authenticated(self):
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(
+            reverse("base:draft_detail", kwargs={"slug": "draft-project-detail"})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("portfolios", response.context)
+        self.assertEqual(
+            list(response.context["portfolios"]), [self.portfolio1, self.portfolio2]
+        )
+        self.assertEqual(response.context["object"], self.draft_project)
+
+    def test_draft_detail_view_unauthenticated(self):
+        response = self.client.get(
+            reverse("base:draft_detail", kwargs={"slug": "draft-project-detail"})
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+
+    def test_draft_detail_view_published_project_returns_404(self):
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(
+            reverse("base:draft_detail", kwargs={"slug": "published-project-detail"})
+        )
+        self.assertEqual(response.status_code, 404)
