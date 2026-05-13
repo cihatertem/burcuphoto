@@ -13,6 +13,7 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
 from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic.base import ContextMixin
 from django_ratelimit.decorators import ratelimit
 from PIL import Image, ImageDraw
 
@@ -28,7 +29,6 @@ CONTACT_RATE_LIMIT_KEY = "ip"
 
 
 # Create your views here.
-from django.views.generic.base import ContextMixin
 
 
 class YearContext(ContextMixin):
@@ -175,22 +175,7 @@ class Contact(YearContext, TemplateView):
         ip_address = get_client_ip(request)
 
         try:
-            msg = EmailMessage(
-                subject="Web Site Visitor",
-                body=(
-                    f"From {escape(name)}, {escape(email)}\n\n"
-                    f"{escape(body)}\n\n"
-                    f"IP: {ip_address}\n"
-                    f"Site: www.burcuatak.com\n"
-                ),
-                from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
-                to=[
-                    os.getenv("EMAIL_RECEIVER_ONE"),
-                    os.getenv("EMAIL_RECEIVER_TWO"),
-                ],
-                reply_to=[email] if email else None,
-            )
-            msg.send(fail_silently=False)
+            self._send_contact_email(name, email, body, ip_address)
         except BadHeaderError:
             messages.error(request, "Invalid header found.")
             return redirect("base:contact")
@@ -200,6 +185,26 @@ class Contact(YearContext, TemplateView):
             "Your message was sent successfully.\nWe will touch you back soon.",
         )
         return redirect("base:home")
+
+    def _send_contact_email(
+        self, name: str, email: str, body: str, ip_address: str
+    ) -> None:
+        msg = EmailMessage(
+            subject="Web Site Visitor",
+            body=(
+                f"From {escape(name)}, {escape(email)}\n\n"
+                f"{escape(body)}\n\n"
+                f"IP: {ip_address}\n"
+                f"Site: www.burcuatak.com\n"
+            ),
+            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
+            to=[
+                os.getenv("EMAIL_RECEIVER_ONE"),
+                os.getenv("EMAIL_RECEIVER_TWO"),
+            ],
+            reply_to=[email] if email else None,
+        )
+        msg.send(fail_silently=False)
 
 
 class DraftList(LoginRequiredMixin, YearContext, ListView):
