@@ -591,6 +591,22 @@ class PortfolioDetailTest(ImageTestMixin, TestCase):
             for project in projects:
                 list(project.projectportfolio_set.all())
 
+    def test_portfolio_detail_view_template(self):
+        response = self.client.get(
+            reverse("base:portfolio_detail", kwargs={"slug": "published-project-detail"})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "base/portfolio_detail.html")
+
+    def test_portfolio_detail_view_context(self):
+        response = self.client.get(
+            reverse("base:portfolio_detail", kwargs={"slug": "published-project-detail"})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("year", response.context)
+        self.assertEqual(response.context["year"], current_year())
+        self.assertIn("portfolios", response.context)
+
 
 class DraftListTest(ImageTestMixin, TestCase):
     def setUp(self):
