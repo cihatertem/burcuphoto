@@ -19,6 +19,7 @@ from base.views import (
     Contact,
     DraftDetail,
     DraftList,
+    HomeView,
     PortfolioDetail,
     PortfolioList,
     YearContext,
@@ -729,6 +730,23 @@ class AboutViewTest(TestCase):
 
     def test_about_view_context(self):
         response = self.client.get(reverse("base:about"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("year", response.context)
+        self.assertEqual(response.context["year"], current_year())
+
+
+class HomeViewTest(TestCase):
+    def test_home_view_status_code(self):
+        response = self.client.get(reverse("base:home"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_home_view_template(self):
+        response = self.client.get(reverse("base:home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "base/home.html")
+
+    def test_home_view_context(self):
+        response = self.client.get(reverse("base:home"))
         self.assertEqual(response.status_code, 200)
         self.assertIn("year", response.context)
         self.assertEqual(response.context["year"], current_year())
