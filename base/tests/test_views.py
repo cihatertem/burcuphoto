@@ -673,6 +673,16 @@ class DraftDetailTest(ImageTestMixin, TestCase):
             index=2,
         )
 
+    def test_get_queryset_filters_drafts_and_prefetches(self):
+        view = DraftDetail()
+        view.kwargs = {"slug": "draft-project-detail"}
+        qs = view.get_queryset()
+
+        self.assertEqual(qs.count(), 1)
+        self.assertIn(self.draft_project, qs)
+        self.assertNotIn(self.published_project, qs)
+        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
+
     def test_get_context_data_includes_portfolios(self):
         view = DraftDetail()
         view.object = self.draft_project
@@ -693,6 +703,16 @@ class DraftDetailTest(ImageTestMixin, TestCase):
             list(response.context["portfolios"]), [self.portfolio1, self.portfolio2]
         )
         self.assertEqual(response.context["object"], self.draft_project)
+
+    def test_get_queryset_queries_count(self):
+        # We already have self.portfolio1 and self.portfolio2 related to self.draft_project
+        with self.assertNumQueries(2):
+            view = DraftDetail()
+            view.kwargs = {"slug": "draft-project-detail"}
+            qs = view.get_queryset()
+            projects = list(qs)
+            for project in projects:
+                portfolios = list(project.projectportfolio_set.all())
 
     def test_draft_detail_view_unauthenticated(self):
         response = self.client.get(
