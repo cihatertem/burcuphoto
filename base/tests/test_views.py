@@ -15,6 +15,7 @@ from base.views import (
     CAPTCHA_ANS_KEY,
     CAPTCHA_NUM1_KEY,
     CAPTCHA_NUM2_KEY,
+    Contact,
     DraftDetail,
     PortfolioDetail,
     PortfolioList,
@@ -104,6 +105,33 @@ class CaptchaTests(TestCase):
 
 
 class ContactViewTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    @patch("base.views._generate_captcha_image_base64")
+    def test_contact_get_context_data(self, mock_generate):
+        mock_generate.return_value = "fake_base64"
+        view = Contact()
+        view.request = self.factory.get("/")
+        view.request.session = {CAPTCHA_NUM1_KEY: 5, CAPTCHA_NUM2_KEY: 3}
+
+        ctx = view.get_context_data()
+
+        mock_generate.assert_called_once_with(5, 3)
+        self.assertEqual(ctx["captcha_image_b64"], "fake_base64")
+
+    @patch("base.views._generate_captcha_image_base64")
+    def test_contact_get_context_data_missing_session_keys(self, mock_generate):
+        mock_generate.return_value = "fake_base64_0"
+        view = Contact()
+        view.request = self.factory.get("/")
+        view.request.session = {}
+
+        ctx = view.get_context_data()
+
+        mock_generate.assert_called_once_with(0, 0)
+        self.assertEqual(ctx["captcha_image_b64"], "fake_base64_0")
+
     @patch("base.views.secrets.randbelow", side_effect=[4, 2, *([0] * 20)])
     def test_contact_get_generates_captcha_and_renders_image(self, _mock_randbelow):
         response = self.client.get(reverse("base:contact"))
