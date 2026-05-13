@@ -503,6 +503,33 @@ class PortfolioDetailTest(ImageTestMixin, TestCase):
         )
         self.assertEqual(response_draft.status_code, 404)
 
+    def test_get_context_data_includes_portfolios(self):
+        # Create related portfolio photos
+        portfolio1 = ProjectPortfolio.objects.create(
+            project=self.published_project,
+            photo=self._create_image(100, 100),
+            alt="photo 1",
+            index=1,
+        )
+        portfolio2 = ProjectPortfolio.objects.create(
+            project=self.published_project,
+            photo=self._create_image(100, 100),
+            alt="photo 2",
+            index=2,
+        )
+
+        view = PortfolioDetail()
+        request = RequestFactory().get("/")
+        view.request = request
+        view.object = self.published_project
+        view.kwargs = {"slug": "published-project-detail"}
+
+        context = view.get_context_data()
+
+        self.assertIn("portfolios", context)
+        portfolios = context["portfolios"]
+        self.assertEqual(list(portfolios), [portfolio1, portfolio2])
+
 
 class DraftDetailTest(ImageTestMixin, TestCase):
     def setUp(self):
