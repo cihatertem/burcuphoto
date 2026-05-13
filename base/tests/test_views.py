@@ -11,6 +11,7 @@ from django.urls import reverse
 from PIL import Image
 
 from base.models import Project, ProjectPortfolio
+from base.utils import current_year
 from base.views import (
     CAPTCHA_ANS_KEY,
     CAPTCHA_NUM1_KEY,
@@ -640,3 +641,21 @@ class DraftDetailTest(ImageTestMixin, TestCase):
             reverse("base:draft_detail", kwargs={"slug": "published-project-detail"})
         )
         self.assertEqual(response.status_code, 404)
+
+
+class AboutViewTest(TestCase):
+    def test_about_view_status_code(self):
+        response = self.client.get(reverse("base:about"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_about_view_template(self):
+        response = self.client.get(reverse("base:about"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "base/about.html")
+
+    def test_about_view_context(self):
+        response = self.client.get(reverse("base:about"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("year", response.context)
+        self.assertEqual(response.context["year"], current_year())
+
