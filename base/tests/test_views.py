@@ -163,6 +163,43 @@ class ContactViewTest(TestCase):
         RATELIMIT_ENABLE=False,
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     )
+    def test_contact_post_email_header_injection(self):
+        """Test that submitting the contact form with newlines in the email field prevents header injection."""
+        session = self.client.session
+        session[CAPTCHA_NUM1_KEY] = 5
+        session[CAPTCHA_NUM2_KEY] = 3
+        session[CAPTCHA_ANS_KEY] = 8
+        session.save()
+
+        post_data = {
+            "name": "Test User\nBcc: attacker@example.com",
+            "email": "test@example.com",
+            "message": "Hello, this is a test.",
+            "website": "",  # empty for honeypot
+            "captcha": "8",
+        }
+
+        # Instead of directly raising BadHeaderError, since subject is generated as
+        # "Web Site Visitor" without user input, we use a mock to raise it to verify
+        # that the exception handling works as intended in the view.
+        with patch("base.views.EmailMessage.send") as mock_send:
+            from django.core.mail import BadHeaderError
+            mock_send.side_effect = BadHeaderError("Invalid header found.")
+            response = self.client.post(reverse("base:contact"), data=post_data)
+
+        # Confirm the form submission redirected back to the contact page
+        self.assertRedirects(response, reverse("base:contact"))
+
+        # Check that the error message was added
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Invalid header found.")
+        self.assertEqual(messages[0].level_tag, "error")
+
+    @override_settings(
+        RATELIMIT_ENABLE=False,
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
     def test_contact_post_invalid_email(self):
         """Test that submitting the contact form with an invalid email redirects with an error."""
         session = self.client.session

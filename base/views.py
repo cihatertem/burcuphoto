@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
-from django.core.mail import EmailMessage
+from django.core.mail import BadHeaderError, EmailMessage
 from django.core.validators import validate_email
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -173,22 +173,26 @@ class Contact(YearContext, TemplateView):
 
         ip_address = get_client_ip(request)
 
-        msg = EmailMessage(
-            subject="Web Site Visitor",
-            body=(
-                f"From {name}, {email}\n\n"
-                f"{body}\n\n"
-                f"IP: {ip_address}\n"
-                f"Site: www.burcuatak.com\n"
-            ),
-            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
-            to=[
-                os.getenv("EMAIL_RECEIVER_ONE"),
-                os.getenv("EMAIL_RECEIVER_TWO"),
-            ],
-            reply_to=[email] if email else None,
-        )
-        msg.send(fail_silently=False)
+        try:
+            msg = EmailMessage(
+                subject="Web Site Visitor",
+                body=(
+                    f"From {name}, {email}\n\n"
+                    f"{body}\n\n"
+                    f"IP: {ip_address}\n"
+                    f"Site: www.burcuatak.com\n"
+                ),
+                from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
+                to=[
+                    os.getenv("EMAIL_RECEIVER_ONE"),
+                    os.getenv("EMAIL_RECEIVER_TWO"),
+                ],
+                reply_to=[email] if email else None,
+            )
+            msg.send(fail_silently=False)
+        except BadHeaderError:
+            messages.error(request, "Invalid header found.")
+            return redirect("base:contact")
 
         messages.success(
             request,
