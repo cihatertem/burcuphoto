@@ -20,6 +20,7 @@ from base.views import (
     DraftDetail,
     PortfolioDetail,
     PortfolioList,
+    YearContext,
     _generate_captcha,
     _generate_captcha_image_base64,
     _parse_int,
@@ -641,6 +642,15 @@ class DraftDetailTest(ImageTestMixin, TestCase):
             reverse("base:draft_detail", kwargs={"slug": "published-project-detail"})
         )
         self.assertEqual(response.status_code, 404)
+
+
+class YearContextTest(TestCase):
+    def test_get_context_data(self):
+        ctx = YearContext()
+        ctx.request = RequestFactory().get('/')
+        context = ctx.get_context_data()
+        self.assertIn("year", context)
+        self.assertEqual(context["year"], current_year())
 
 
 class AboutViewTest(TestCase):
