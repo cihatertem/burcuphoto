@@ -61,12 +61,11 @@ class ProjectSitemapTests(ImageTestMixin, TestCase):
     def test_project_sitemap_items(self):
         sitemap = ProjectSitemap()
         items = sitemap.items()
-        # Currently, ProjectSitemap returns ALL projects, including drafts.
-        # This test documents current behavior.
-        self.assertEqual(items.count(), 3)
+        # ProjectSitemap only returns non-draft projects.
+        self.assertEqual(items.count(), 2)
         self.assertIn(self.project1, items)
         self.assertIn(self.project2, items)
-        self.assertIn(self.draft_project, items)
+        self.assertNotIn(self.draft_project, items)
 
     def test_project_sitemap_location(self):
         sitemap = ProjectSitemap()

@@ -19,7 +19,6 @@ from base.views import (
     Contact,
     DraftDetail,
     DraftList,
-    HomeView,
     PortfolioDetail,
     PortfolioList,
     YearContext,

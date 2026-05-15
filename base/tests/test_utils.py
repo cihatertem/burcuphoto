@@ -257,17 +257,17 @@ class HealthCheckMiddlewareTests(TestCase):
 
     def test_ping_returns_pong(self):
         request = self.factory.get("/ping")
-        # MiddlewareMixin uses process_request
-        response = self.middleware.process_request(request)
+        response = self.middleware(request)
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content), {"response": "pong!"})
 
     def test_other_path_not_intercepted(self):
         request = self.factory.get("/some-other-path")
-        response = self.middleware.process_request(request)
-        # It should return None so that the request continues down the chain
-        self.assertIsNone(response)
+        response = self.middleware(request)
+        # It should return the response from the chain
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(json.loads(response.content), {"response": "chain"})
 
     def test_integration_ping(self):
         client = Client()

@@ -6,14 +6,18 @@ from io import BytesIO
 
 from django.conf import settings
 from django.http import JsonResponse
-from django.utils.deprecation import MiddlewareMixin
 from PIL import Image, ImageOps
 
 
-class HealthCheckMiddleware(MiddlewareMixin):
-    def process_request(self, request):
+class HealthCheckMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
         if request.META["PATH_INFO"] == "/ping":
             return JsonResponse({"response": "pong!"}, status=HTTPStatus.OK)
+
+        return self.get_response(request)
 
 
 def project_directory_path(instance, filename: str) -> str:

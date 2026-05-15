@@ -4,7 +4,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from PIL import Image
 
-from base.models import Project
+from base.models import Project, ProjectPortfolio
 
 
 class ProjectModelTest(TestCase):
@@ -69,3 +69,16 @@ class ProjectModelTest(TestCase):
         self.assertEqual(
             project.project_link, "https://burcuatak.com/portfolio/published-project/"
         )
+
+    def test_project_str(self):
+        """Test the string representation of the Project model."""
+        project = Project(title="Test Project Title")
+        self.assertEqual(str(project), "Test Project Title")
+
+
+class ProjectPortfolioModelTest(TestCase):
+    def test_project_portfolio_str(self):
+        """Test the string representation of the ProjectPortfolio model."""
+        project = Project(slug="test-slug")
+        portfolio = ProjectPortfolio(project=project)
+        self.assertEqual(str(portfolio), "test-slug")
