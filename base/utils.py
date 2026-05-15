@@ -34,11 +34,13 @@ def current_year() -> int:
 
 def photo_resizer(image: Image.Image, size: int) -> BytesIO:
     output = BytesIO()
+    if hasattr(image, "draft"):
+        image.draft("RGB", (size, size))
+    image = ImageOps.exif_transpose(image)
     if image.mode in ("RGBA", "P", "LA"):
         image = image.convert("RGB")
     image.thumbnail((size, size))
-    image = ImageOps.exif_transpose(image)
-    image.save(output, format="JPEG", quality=100)
+    image.save(output, format="JPEG", quality=85, optimize=True)
     output.seek(0)
     return output
 
@@ -69,6 +71,21 @@ def _is_ip_trusted(ip_obj, trusted_ips, trusted_subnets) -> bool:
     return False
 
 
+def _is_trusted_proxy_ip(ip_str: str, trusted_ips, trusted_subnets) -> bool:
+    try:
+        ip_obj = _parse_ip(ip_str)
+        return _is_ip_trusted(ip_obj, trusted_ips, trusted_subnets)
+    except ValueError:
+        return False
+
+
+def _get_trusted_proxies():
+    trusted_nets = getattr(settings, "TRUSTED_PROXY_NETS", None) or []
+    if not trusted_nets:
+        return None, None
+    return _get_trusted_networks_optimized(tuple(trusted_nets))
+
+
 def _get_ip_from_xff(xff, trusted_ips, trusted_subnets) -> str | None:
     last_valid_ip = None
     end = len(xff)
@@ -85,13 +102,9 @@ def _get_ip_from_xff(xff, trusted_ips, trusted_subnets) -> str | None:
             continue
 
         last_valid_ip = ip_str
-        try:
-            ip_obj = _parse_ip(ip_str)
-            if _is_ip_trusted(ip_obj, trusted_ips, trusted_subnets):
-                continue
-            return ip_str
-        except ValueError:
-            return ip_str
+        if _is_trusted_proxy_ip(ip_str, trusted_ips, trusted_subnets):
+            continue
+        return ip_str
 
     return last_valid_ip
 
@@ -101,18 +114,11 @@ def get_client_ip(request) -> str | None:
     if not remote:
         return None
 
-    try:
-        ra = _parse_ip(remote)
-    except ValueError:
+    trusted_ips, trusted_subnets = _get_trusted_proxies()
+    if trusted_ips is None:
         return remote
 
-    trusted_nets = getattr(settings, "TRUSTED_PROXY_NETS", None) or []
-    if not trusted_nets:
-        return remote
-
-    trusted_ips, trusted_subnets = _get_trusted_networks_optimized(tuple(trusted_nets))
-
-    if not _is_ip_trusted(ra, trusted_ips, trusted_subnets):
+    if not _is_trusted_proxy_ip(remote, trusted_ips, trusted_subnets):
         return remote
 
     xff = request.META.get("HTTP_X_FORWARDED_FOR")

@@ -22,7 +22,7 @@ def process_image_field(image_field, max_size=780):
                 "ImageField",
                 "%s.jpg" % os.path.splitext(image_field.name)[0],
                 "image/jpeg",
-                sys.getsizeof(output),
+                output.getbuffer().nbytes,
                 None,
             )
     return image_field
