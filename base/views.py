@@ -1,6 +1,7 @@
 import base64
 import os
 import secrets
+import threading
 from io import BytesIO
 
 from django.conf import settings
@@ -114,6 +115,15 @@ def _generate_captcha_image_base64(n1: int, n2: int) -> str:
     return base64.b64encode(buffered.getvalue()).decode()
 
 
+class EmailThread(threading.Thread):
+    def __init__(self, email_message):
+        self.email_message = email_message
+        threading.Thread.__init__(self)
+
+    def run(self):
+        self.email_message.send(fail_silently=False)
+
+
 def captcha_is_valid(request) -> bool:
     expected = _parse_int(request.session.get(CAPTCHA_ANS_KEY))
     got = _parse_int(request.POST.get("captcha"))
@@ -191,6 +201,10 @@ class Contact(YearContext, TemplateView):
     def _send_contact_email(
         self, name: str, email: str, body: str, ip_address: str
     ) -> None:
+        # Prevent email header injection synchronously
+        if email and ("\n" in email or "\r" in email):
+            raise BadHeaderError("Invalid header found.")
+
         msg = EmailMessage(
             subject="Web Site Visitor",
             body=(
@@ -206,7 +220,7 @@ class Contact(YearContext, TemplateView):
             ],
             reply_to=[email] if email else None,
         )
-        msg.send(fail_silently=False)
+        EmailThread(msg).start()
 
 
 class DraftList(LoginRequiredMixin, YearContext, ListView):

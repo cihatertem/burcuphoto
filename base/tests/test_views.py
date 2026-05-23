@@ -178,7 +178,15 @@ class ContactViewTest(TestCase):
             "captcha": "8",
         }
 
-        response = self.client.post(reverse("base:contact"), data=post_data)
+        # Patch the start method of EmailThread to directly call run, making it synchronous for the test
+        with patch("base.views.EmailThread.start", autospec=True) as mock_start:
+
+            def side_effect(self_instance):
+                self_instance.run()
+
+            mock_start.side_effect = side_effect
+
+            response = self.client.post(reverse("base:contact"), data=post_data)
 
         # Confirm the form submission succeeded
         self.assertRedirects(response, reverse("base:home"))
@@ -214,10 +222,11 @@ class ContactViewTest(TestCase):
             "captcha": "8",
         }
 
+        # Validate_email blocks test\n@example.com.
         # Instead of directly raising BadHeaderError, since subject is generated as
         # "Web Site Visitor" without user input, we use a mock to raise it to verify
         # that the exception handling works as intended in the view.
-        with patch("base.views.EmailMessage.send") as mock_send:
+        with patch.object(Contact, "_send_contact_email") as mock_send:
             from django.core.mail import BadHeaderError
 
             mock_send.side_effect = BadHeaderError("Invalid header found.")
@@ -306,8 +315,8 @@ class ContactViewTest(TestCase):
         RATELIMIT_ENABLE=False,
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     )
-    def test_contact_post_sends_email_synchronously(self):
-        """Test that posting to the Contact view sends an email synchronously without using a thread."""
+    def test_contact_post_sends_email_asynchronously(self):
+        """Test that posting to the Contact view sends an email asynchronously using a thread."""
         session = self.client.session
         session[CAPTCHA_NUM1_KEY] = 5
         session[CAPTCHA_NUM2_KEY] = 3
@@ -322,7 +331,15 @@ class ContactViewTest(TestCase):
             "captcha": "8",
         }
 
-        response = self.client.post(reverse("base:contact"), data=post_data)
+        # Patch the start method of EmailThread to directly call run, making it synchronous for the test
+        with patch("base.views.EmailThread.start", autospec=True) as mock_start:
+
+            def side_effect(self_instance):
+                self_instance.run()
+
+            mock_start.side_effect = side_effect
+
+            response = self.client.post(reverse("base:contact"), data=post_data)
 
         # Confirm the form submission redirected successfully
         self.assertRedirects(response, reverse("base:home"))

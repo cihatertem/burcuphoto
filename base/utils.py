@@ -130,4 +130,6 @@ def get_client_ip(request) -> str | None:
 
 def client_ip_key(group, request):
     # request None olmasın, ip yoksa sabit değer ver
+    if request is None:
+        return "unknown"
     return get_client_ip(request) or "unknown"

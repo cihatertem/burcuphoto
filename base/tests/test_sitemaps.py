@@ -1,8 +1,10 @@
+from datetime import timedelta
 from io import BytesIO
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from PIL import Image
 
 from base.models import Project
@@ -78,8 +80,24 @@ class ProjectSitemapTests(ImageTestMixin, TestCase):
         self.assertEqual(sitemap.lastmod(self.project1), self.project1.updated)
 
     def test_project_sitemap_get_latest_lastmod(self):
+        now = timezone.now()
+        Project.objects.filter(pk=self.project2.pk).update(
+            updated=now - timedelta(days=2)
+        )
+        Project.objects.filter(pk=self.project1.pk).update(
+            updated=now - timedelta(days=1)
+        )
+        Project.objects.filter(pk=self.draft_project.pk).update(updated=now)
+
+        self.project1.refresh_from_db()
+
         sitemap = ProjectSitemap()
-        self.assertEqual(sitemap.get_latest_lastmod(), self.project2.updated)
+        self.assertEqual(sitemap.get_latest_lastmod(), self.project1.updated)
+
+    def test_project_sitemap_get_latest_lastmod_empty(self):
+        Project.objects.filter(draft=False).delete()
+        sitemap = ProjectSitemap()
+        self.assertIsNone(sitemap.get_latest_lastmod())
 
 
 class SitemapViewTests(ImageTestMixin, TestCase):

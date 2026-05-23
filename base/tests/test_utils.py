@@ -226,6 +226,9 @@ class ClientIpKeyTests(TestCase):
             del request.META["REMOTE_ADDR"]
         self.assertEqual(client_ip_key(None, request), "unknown")
 
+    def test_with_none_request(self):
+        self.assertEqual(client_ip_key(None, None), "unknown")
+
 
 class CurrentYearTests(TestCase):
     @patch("base.utils.date")
