@@ -10,6 +10,7 @@ from PIL import Image
 
 from base.utils import (
     HealthCheckMiddleware,
+    _get_ip_from_xff,
     client_ip_key,
     current_year,
     get_client_ip,
@@ -106,6 +107,14 @@ class GetClientIPTests(TestCase):
                 "/", REMOTE_ADDR="127.0.0.1", HTTP_X_FORWARDED_FOR="5.6.7.8"
             )
             self.assertEqual(get_client_ip(request), "127.0.0.1")
+
+    def test_get_ip_from_xff_empty_strings(self):
+        # Direct tests for the _get_ip_from_xff function edge cases
+        trusted_ips, trusted_subnets = set(), []
+        self.assertIsNone(_get_ip_from_xff("", trusted_ips, trusted_subnets))
+        self.assertIsNone(_get_ip_from_xff("   ", trusted_ips, trusted_subnets))
+        self.assertIsNone(_get_ip_from_xff(",,", trusted_ips, trusted_subnets))
+        self.assertIsNone(_get_ip_from_xff(" , , ", trusted_ips, trusted_subnets))
 
 
 class PhotoResizerTests(TestCase):

@@ -1,4 +1,3 @@
-import os
 from unittest.mock import mock_open, patch
 
 from django.test import TestCase

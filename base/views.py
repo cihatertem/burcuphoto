@@ -35,6 +35,13 @@ class YearContext(ContextMixin):
     extra_context = {"year": current_year()}
 
 
+class PortfolioContextMixin(ContextMixin):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["portfolios"] = self.object.projectportfolio_set.all()
+        return context
+
+
 class HomeView(YearContext, TemplateView):
     template_name = "base/home.html"
 
@@ -48,18 +55,13 @@ class PortfolioList(YearContext, ListView):
         return queryset.filter(draft=False).prefetch_related("projectportfolio_set")
 
 
-class PortfolioDetail(YearContext, DetailView):
+class PortfolioDetail(YearContext, PortfolioContextMixin, DetailView):
     template_name = "base/portfolio_detail.html"
     model = Project
 
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(draft=False).prefetch_related("projectportfolio_set")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["portfolios"] = self.object.projectportfolio_set.all()
-        return context
 
 
 class About(YearContext, TemplateView):
@@ -214,13 +216,8 @@ class DraftList(LoginRequiredMixin, YearContext, ListView):
     )
 
 
-class DraftDetail(LoginRequiredMixin, YearContext, DetailView):
+class DraftDetail(LoginRequiredMixin, YearContext, PortfolioContextMixin, DetailView):
     template_name = "base/portfolio_detail.html"
     queryset = Project.objects.filter(draft=True).prefetch_related(
         "projectportfolio_set"
     )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["portfolios"] = self.object.projectportfolio_set.all()
-        return context

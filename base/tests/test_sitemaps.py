@@ -73,6 +73,14 @@ class ProjectSitemapTests(ImageTestMixin, TestCase):
         expected_url = reverse("base:portfolio_detail", args=[self.project1.slug])
         self.assertEqual(location, expected_url)
 
+    def test_project_sitemap_lastmod(self):
+        sitemap = ProjectSitemap()
+        self.assertEqual(sitemap.lastmod(self.project1), self.project1.updated)
+
+    def test_project_sitemap_get_latest_lastmod(self):
+        sitemap = ProjectSitemap()
+        self.assertEqual(sitemap.get_latest_lastmod(), self.project2.updated)
+
 
 class SitemapViewTests(ImageTestMixin, TestCase):
     def setUp(self):
