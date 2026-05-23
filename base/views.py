@@ -1,9 +1,5 @@
-import base64
 import os
-import secrets
 import threading
-from functools import lru_cache
-from io import BytesIO
 
 from django.conf import settings
 from django.contrib import messages
@@ -17,14 +13,17 @@ from django.utils.html import escape
 from django.views.generic import DetailView, ListView, TemplateView
 from django.views.generic.base import ContextMixin
 from django_ratelimit.decorators import ratelimit
-from PIL import Image, ImageDraw
 
+from .captcha import (
+    CAPTCHA_ANS_KEY,
+    CAPTCHA_NUM1_KEY,
+    CAPTCHA_NUM2_KEY,
+    _generate_captcha,
+    _generate_captcha_image_base64,
+    captcha_is_valid,
+)
 from .models import Project
 from .utils import client_ip_key, current_year, get_client_ip
-
-CAPTCHA_NUM1_KEY = "contact_captcha_num1"
-CAPTCHA_NUM2_KEY = "contact_captcha_num2"
-CAPTCHA_ANS_KEY = "contact_captcha_answer"
 
 CONTACT_RATE_LIMIT = "2/m"
 CONTACT_RATE_LIMIT_KEY = "ip"
@@ -70,53 +69,6 @@ class About(YearContext, TemplateView):
     template_name = "base/about.html"
 
 
-def _generate_captcha(request) -> None:
-    n1 = secrets.randbelow(10) + 1
-    n2 = secrets.randbelow(10) + 1
-    request.session[CAPTCHA_NUM1_KEY] = n1
-    request.session[CAPTCHA_NUM2_KEY] = n2
-    request.session[CAPTCHA_ANS_KEY] = n1 + n2
-
-
-def _parse_int(value) -> int | None:
-    try:
-        if value in (None, ""):
-            return None
-        return int(value)
-    except (
-        TypeError,
-        ValueError,
-    ):
-        return None
-
-
-@lru_cache(maxsize=128)
-def _generate_captcha_image_base64(n1: int, n2: int) -> str:
-    image = Image.new("RGB", (60, 20), color=(255, 255, 255))
-    draw = ImageDraw.Draw(image)
-
-    text = f"{n1} + {n2} ="
-    draw.text((5, 5), text, fill=(0, 0, 0))
-
-    # Scale it up
-    image = image.resize((120, 40), Image.Resampling.NEAREST)
-
-    # Draw noise on the larger image
-    draw = ImageDraw.Draw(image)
-    for _ in range(5):
-        draw.line(
-            [
-                (secrets.randbelow(120), secrets.randbelow(40)),
-                (secrets.randbelow(120), secrets.randbelow(40)),
-            ],
-            fill=(100, 100, 100),
-        )
-
-    buffered = BytesIO()
-    image.save(buffered, format="PNG")
-    return base64.b64encode(buffered.getvalue()).decode()
-
-
 class EmailThread(threading.Thread):
     def __init__(self, email_message):
         self.email_message = email_message
@@ -124,12 +76,6 @@ class EmailThread(threading.Thread):
 
     def run(self):
         self.email_message.send(fail_silently=False)
-
-
-def captcha_is_valid(request) -> bool:
-    expected = _parse_int(request.session.get(CAPTCHA_ANS_KEY))
-    got = _parse_int(request.POST.get("captcha"))
-    return expected is not None and got is not None and got == expected
 
 
 @method_decorator(
