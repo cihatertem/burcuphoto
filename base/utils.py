@@ -34,12 +34,26 @@ def current_year() -> int:
 
 def photo_resizer(image: Image.Image, size: int) -> BytesIO:
     output = BytesIO()
+
+    # 1. Decode the minimum necessary pixels for JPEGs
     if hasattr(image, "draft"):
         image.draft("RGB", (size, size))
-    image = ImageOps.exif_transpose(image)
+
+    # 2. Convert to RGB before thumbnailing to prevent low-quality resizing
+    # (e.g. thumbnailing 'P' mode palette images degrades quality)
     if image.mode in ("RGBA", "P", "LA"):
         image = image.convert("RGB")
+
+    # 3. Shrink the image FIRST.
+    # Because thumbnail() uses a square bounding box (size, size), the order
+    # of transpose vs thumbnail does not alter the final aspect ratio or dimensions.
+    # Transposing a 4000x3000 image is highly CPU/Memory intensive.
+    # Transposing a 780x780 image is almost instantaneous.
     image.thumbnail((size, size))
+
+    # 4. Apply EXIF transpose to the tiny thumbnail
+    image = ImageOps.exif_transpose(image)
+
     image.save(output, format="JPEG", quality=85, optimize=True)
     output.seek(0)
     return output
