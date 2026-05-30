@@ -737,7 +737,7 @@ class DraftListTest(ImageTestMixin, TestCase):
             featured_photo=self._create_image(100, 100),
         )
 
-    def test_get_queryset_filters_drafts_and_prefetches(self):
+    def test_get_queryset_filters_drafts(self):
         view = DraftList()
         view.kwargs = {}
         qs = view.get_queryset()
@@ -745,7 +745,6 @@ class DraftListTest(ImageTestMixin, TestCase):
         self.assertEqual(qs.count(), 1)
         self.assertIn(self.draft_project, qs)
         self.assertNotIn(self.published_project, qs)
-        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
 
         # test via client authenticated
         self.client.login(username="testuser", password="password")

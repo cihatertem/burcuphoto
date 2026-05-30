@@ -173,9 +173,7 @@ class Contact(YearContext, TemplateView):
 
 class DraftList(LoginRequiredMixin, YearContext, ListView):
     template_name = "base/portfolio_list.html"
-    queryset = Project.objects.filter(draft=True).prefetch_related(
-        "projectportfolio_set"
-    )
+    queryset = Project.objects.filter(draft=True)
 
 
 class DraftDetail(LoginRequiredMixin, YearContext, PortfolioContextMixin, DetailView):
