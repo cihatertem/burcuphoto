@@ -556,7 +556,7 @@ class PortfolioListTest(ImageTestMixin, TestCase):
             featured_photo=self._create_image(100, 100),
         )
 
-    def test_get_queryset_filters_drafts_and_prefetches(self):
+    def test_get_queryset_filters_drafts(self):
         view = PortfolioList()
         view.kwargs = {}
         qs = view.get_queryset()
@@ -564,7 +564,7 @@ class PortfolioListTest(ImageTestMixin, TestCase):
         self.assertEqual(qs.count(), 1)
         self.assertIn(self.published_project, qs)
         self.assertNotIn(self.draft_project, qs)
-        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
+        self.assertNotIn("projectportfolio_set", qs._prefetch_related_lookups)
 
         # also test view via client
         response = self.client.get(reverse("base:portfolio"))
@@ -585,15 +585,12 @@ class PortfolioListTest(ImageTestMixin, TestCase):
             index=2,
         )
 
-        with self.assertNumQueries(2):
+        with self.assertNumQueries(1):
             view = PortfolioList()
             view.kwargs = {}
             qs = view.get_queryset()
             # Evaluate the queryset to trigger the DB queries
-            projects = list(qs)
-            # Access related data to ensure no extra queries are fired
-            for project in projects:
-                list(project.projectportfolio_set.all())
+            list(qs)
 
     def test_portfolio_list_view_template(self):
         response = self.client.get(reverse("base:portfolio"))
