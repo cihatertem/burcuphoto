@@ -78,6 +78,105 @@ class ContactViewTest(TestCase):
         RATELIMIT_ENABLE=False,
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     )
+    @patch("os.getenv")
+    def test_contact_post_email_receiver_env_fallback(self, mock_getenv):
+        """Test that if EMAIL_RECEIVER_ONE and EMAIL_RECEIVER_TWO are missing, the email still initializes and is sent."""
+        # mock os.getenv to return None for email receivers, otherwise default to actual os.environ
+        mock_getenv.side_effect = lambda key: (
+            None if "EMAIL_RECEIVER" in key else os.environ.get(key)
+        )
+
+        session = self.client.session
+        session[CAPTCHA_NUM1_KEY] = 5
+        session[CAPTCHA_NUM2_KEY] = 3
+        session[CAPTCHA_ANS_KEY] = 8
+        session.save()
+
+        post_data = {
+            "name": "Env Test User",
+            "email": "envtest@example.com",
+            "message": "Testing env fallback.",
+            "website": "",  # empty for honeypot
+            "captcha": "8",
+        }
+
+        with patch("base.views.EmailThread.start", autospec=True) as mock_start:
+
+            def side_effect(self_instance):
+                self_instance.run()
+
+            mock_start.side_effect = side_effect
+
+            response = self.client.post(reverse("base:contact"), data=post_data)
+
+        # Confirm the form submission redirected successfully
+        self.assertRedirects(response, reverse("base:home"))
+
+        # If both env vars are None, EmailMessage.to is [None, None].
+        # msg.recipients() filters out empty values, so it will be an empty list.
+        # EmailMessage.send() returns 0 and does not use the connection if there are no recipients.
+        # Therefore, mail.outbox will be empty.
+        self.assertEqual(len(mail.outbox), 0)
+
+        # Check that the success message was added
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "Your message was sent successfully.\nWe will touch you back soon.",
+        )
+        self.assertEqual(messages[0].level_tag, "success")
+
+    @override_settings(
+        RATELIMIT_ENABLE=False,
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
+    @patch("os.getenv")
+    def test_contact_post_email_receiver_env_partial_fallback(self, mock_getenv):
+        """Test that if only one EMAIL_RECEIVER is present, the email is sent to that receiver."""
+        mock_getenv.side_effect = lambda key: (
+            "admin@example.com"
+            if key == "EMAIL_RECEIVER_ONE"
+            else (None if key == "EMAIL_RECEIVER_TWO" else os.environ.get(key))
+        )
+
+        session = self.client.session
+        session[CAPTCHA_NUM1_KEY] = 5
+        session[CAPTCHA_NUM2_KEY] = 3
+        session[CAPTCHA_ANS_KEY] = 8
+        session.save()
+
+        post_data = {
+            "name": "Env Test User 2",
+            "email": "envtest2@example.com",
+            "message": "Testing env fallback partial.",
+            "website": "",  # empty for honeypot
+            "captcha": "8",
+        }
+
+        with patch("base.views.EmailThread.start", autospec=True) as mock_start:
+
+            def side_effect(self_instance):
+                self_instance.run()
+
+            mock_start.side_effect = side_effect
+
+            response = self.client.post(reverse("base:contact"), data=post_data)
+
+        # Confirm the form submission redirected successfully
+        self.assertRedirects(response, reverse("base:home"))
+
+        # Check that exactly one email was sent
+        self.assertEqual(len(mail.outbox), 1)
+
+        email = mail.outbox[0]
+        self.assertEqual(email.subject, "Web Site Visitor")
+        self.assertEqual(email.to, ["admin@example.com", None])
+
+    @override_settings(
+        RATELIMIT_ENABLE=False,
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
     def test_contact_post_email_html_injection(self):
         """Test that submitting the contact form with HTML tags prevents HTML injection."""
         session = self.client.session
@@ -261,6 +360,7 @@ class ContactViewTest(TestCase):
         self.assertRedirects(response, reverse("base:home"))
 
         # Check that exactly one email was sent
+
         self.assertEqual(len(mail.outbox), 1)
 
         email = mail.outbox[0]

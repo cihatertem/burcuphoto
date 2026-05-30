@@ -55,6 +55,13 @@ class GetClientIPTests(TestCase):
         self.assertEqual(get_client_ip(request), "5.6.7.8")
 
     @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network("127.0.0.1/32")])
+    def test_trusted_proxy_empty_xff(self):
+        request = self.factory.get(
+            "/", REMOTE_ADDR="127.0.0.1", HTTP_X_FORWARDED_FOR=""
+        )
+        self.assertEqual(get_client_ip(request), "127.0.0.1")
+
+    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network("127.0.0.1/32")])
     def test_trusted_proxy_with_multiple_xff(self):
         # The rightmost non-trusted IP should be returned
         request = self.factory.get(
