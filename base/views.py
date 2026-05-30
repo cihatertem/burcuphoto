@@ -43,26 +43,26 @@ class PortfolioContextMixin(ContextMixin):
         return context
 
 
+class PortfolioQuerySetMixin:
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(draft=False).prefetch_related("projectportfolio_set")
+
+
 class HomeView(YearContext, TemplateView):
     template_name = "base/home.html"
 
 
-class PortfolioList(YearContext, ListView):
+class PortfolioList(YearContext, PortfolioQuerySetMixin, ListView):
     template_name = "base/portfolio_list.html"
     model = Project
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(draft=False).prefetch_related("projectportfolio_set")
 
-
-class PortfolioDetail(YearContext, PortfolioContextMixin, DetailView):
+class PortfolioDetail(
+    YearContext, PortfolioContextMixin, PortfolioQuerySetMixin, DetailView
+):
     template_name = "base/portfolio_detail.html"
     model = Project
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(draft=False).prefetch_related("projectportfolio_set")
 
 
 class About(YearContext, TemplateView):

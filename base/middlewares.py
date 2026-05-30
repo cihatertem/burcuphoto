@@ -1,6 +1,4 @@
-import ipaddress
-
-from django.conf import settings
+from base.utils import _get_trusted_proxies, _is_trusted_proxy_ip
 
 
 class TrustedProxyMiddleware:
@@ -21,13 +19,8 @@ class TrustedProxyMiddleware:
         if not remote:
             return False
 
-        trusted_nets = getattr(settings, "TRUSTED_PROXY_NETS", None) or []
-        if not trusted_nets:
+        trusted_ips, trusted_subnets = _get_trusted_proxies()
+        if trusted_ips is None:
             return False
 
-        try:
-            address = ipaddress.ip_address(remote)
-        except ValueError:
-            return False
-
-        return any(address in net for net in trusted_nets)
+        return _is_trusted_proxy_ip(remote, trusted_ips, trusted_subnets)
