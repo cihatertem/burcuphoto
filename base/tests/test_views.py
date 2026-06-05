@@ -91,6 +91,8 @@ class ContactViewTest(TestCase):
     @patch("os.getenv")
     def test_contact_post_email_receiver_env_fallback(self, mock_getenv):
         """Test that if EMAIL_RECEIVER_ONE and EMAIL_RECEIVER_TWO are missing, the email still initializes and is sent."""
+        import os
+
         # mock os.getenv to return None for email receivers, otherwise default to actual os.environ
         mock_getenv.side_effect = lambda key: (
             None if "EMAIL_RECEIVER" in key else os.environ.get(key)
@@ -144,6 +146,8 @@ class ContactViewTest(TestCase):
     @patch("os.getenv")
     def test_contact_post_email_receiver_env_partial_fallback(self, mock_getenv):
         """Test that if only one EMAIL_RECEIVER is present, the email is sent to that receiver."""
+        import os
+
         mock_getenv.side_effect = lambda key: (
             "admin@example.com"
             if key == "EMAIL_RECEIVER_ONE"
@@ -784,7 +788,7 @@ class DraftListTest(ImageTestMixin, TestCase):
             qs = view.get_queryset()
             projects = list(qs)
             for project in projects:
-                portfolios = list(project.projectportfolio_set.all())
+                list(project.projectportfolio_set.all())
 
 
 class DraftDetailTest(ImageTestMixin, TestCase):
@@ -855,7 +859,7 @@ class DraftDetailTest(ImageTestMixin, TestCase):
             qs = view.get_queryset()
             projects = list(qs)
             for project in projects:
-                portfolios = list(project.projectportfolio_set.all())
+                list(project.projectportfolio_set.all())
 
     def test_draft_detail_view_unauthenticated(self):
         response = self.client.get(

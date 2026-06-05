@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('base', '0005_alter_projectportfolio_options'),
+        ("base", "0005_alter_projectportfolio_options"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='project',
-            name='draft',
+            model_name="project",
+            name="draft",
             field=models.BooleanField(default=True),
         ),
     ]

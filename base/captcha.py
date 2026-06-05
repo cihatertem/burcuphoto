@@ -32,11 +32,11 @@ def _parse_int(value) -> int | None:
 
 @lru_cache(maxsize=128)
 def _generate_captcha_image_base64(n1: int, n2: int) -> str:
-    image = Image.new("RGB", (60, 20), color=(255, 255, 255))
+    image = Image.new("L", (60, 20), color=255)
     draw = ImageDraw.Draw(image)
 
     text = f"{n1} + {n2} ="
-    draw.text((5, 5), text, fill=(0, 0, 0))
+    draw.text((5, 5), text, fill=0)
 
     # Scale it up
     image = image.resize((120, 40), Image.Resampling.NEAREST)
@@ -49,7 +49,7 @@ def _generate_captcha_image_base64(n1: int, n2: int) -> str:
                 (secrets.randbelow(120), secrets.randbelow(40)),
                 (secrets.randbelow(120), secrets.randbelow(40)),
             ],
-            fill=(100, 100, 100),
+            fill=100,
         )
 
     buffered = BytesIO()

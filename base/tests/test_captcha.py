@@ -47,7 +47,7 @@ class CaptchaTests(TestCase):
 
         with Image.open(BytesIO(image_bytes)) as image:
             self.assertEqual(image.format, "PNG")
-            self.assertEqual(image.mode, "RGB")
+            self.assertEqual(image.mode, "L")
             self.assertEqual(image.size, (120, 40))
 
             colors = image.getcolors(maxcolors=120 * 40)

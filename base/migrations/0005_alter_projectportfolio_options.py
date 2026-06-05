@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('base', '0004_alter_projectportfolio_index'),
+        ("base", "0004_alter_projectportfolio_index"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='projectportfolio',
-            options={'ordering': ('index',)},
+            name="projectportfolio",
+            options={"ordering": ("index",)},
         ),
     ]

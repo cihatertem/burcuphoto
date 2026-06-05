@@ -13,17 +13,20 @@ PHOTO_ALT_TEXT = _("Alt text for the photo.")
 
 def process_image_field(image_field, max_size=780):
     """Resizes an image field to max_size if it exceeds its dimensions."""
-    with Image.open(image_field) as image:
-        if image.height > max_size or image.width > max_size:
-            output = photo_resizer(image, max_size)
-            return InMemoryUploadedFile(
-                output,
-                "ImageField",
-                "%s.jpg" % os.path.splitext(image_field.name)[0],
-                "image/jpeg",
-                output.getbuffer().nbytes,
-                None,
-            )
+    try:
+        with Image.open(image_field) as image:
+            if image.height > max_size or image.width > max_size:
+                output = photo_resizer(image, max_size)
+                return InMemoryUploadedFile(
+                    output,
+                    "ImageField",
+                    "%s.jpg" % os.path.splitext(image_field.name)[0],
+                    "image/jpeg",
+                    output.getbuffer().nbytes,
+                    None,
+                )
+    except Exception:
+        pass
     return image_field
 
 

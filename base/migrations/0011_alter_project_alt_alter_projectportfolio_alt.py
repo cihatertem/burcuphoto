@@ -4,20 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('base', '0010_create_ratelimit_cache'),
+        ("base", "0010_create_ratelimit_cache"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='project',
-            name='alt',
-            field=models.CharField(blank=True, help_text='Alt text for the photo.', max_length=100, null=True),
+            model_name="project",
+            name="alt",
+            field=models.CharField(
+                blank=True,
+                help_text="Alt text for the photo.",
+                max_length=100,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='projectportfolio',
-            name='alt',
-            field=models.CharField(blank=True, help_text='Alt text for the photo.', max_length=100, null=True),
+            model_name="projectportfolio",
+            name="alt",
+            field=models.CharField(
+                blank=True,
+                help_text="Alt text for the photo.",
+                max_length=100,
+                null=True,
+            ),
         ),
     ]

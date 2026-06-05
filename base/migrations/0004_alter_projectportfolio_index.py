@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('base', '0003_projectportfolio_index'),
+        ("base", "0003_projectportfolio_index"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='projectportfolio',
-            name='index',
+            model_name="projectportfolio",
+            name="index",
             field=models.IntegerField(blank=True, default=0, null=True),
         ),
     ]

@@ -101,34 +101,51 @@ class Contact(YearContext, TemplateView):
         ctx["captcha_image_b64"] = _generate_captcha_image_base64(n1, n2)
         return ctx
 
+    def _is_rate_limited(self, request) -> bool:
+        if getattr(request, "limited", False):
+            messages.error(
+                request,
+                "Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.",
+            )
+            return True
+        return False
+
+    def _is_honeypot_filled(self, request, website: str) -> bool:
+        if website:
+            messages.success(request, "Your message was sent successfully.\nThank you!")
+            return True
+        return False
+
+    def _is_captcha_invalid(self, request) -> bool:
+        if not captcha_is_valid(request):
+            messages.error(request, "Captcha incorrect. Please try again.")
+            return True
+        return False
+
+    def _is_email_invalid(self, request, email: str) -> bool:
+        try:
+            validate_email(email)
+            return False
+        except ValidationError:
+            messages.error(request, "Invalid email address.")
+            return True
+
     def post(self, request, *args, **kwargs):
         name = request.POST.get("name", "").strip()
         email = request.POST.get("email", "").strip()
         body = request.POST.get("message", "").strip()
         website = request.POST.get("website", "").strip()  # honeypot
 
-        if getattr(request, "limited", False):
-            messages.error(
-                request,
-                "Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.",
-            )
+        if self._is_rate_limited(request):
             return redirect("base:contact")
 
-        # Honeypot doluysa bot kabul et ve sessizce başarılı gibi dön
-        if website:
-            messages.success(request, "Your message was sent successfully.\nThank you!")
+        if self._is_honeypot_filled(request, website):
             return redirect("base:home")
 
-        # Captcha doğrula (session yoksa/bozuksa da False döner)
-        if not captcha_is_valid(request):
-            messages.error(request, "Captcha incorrect. Please try again.")
+        if self._is_captcha_invalid(request):
             return redirect("base:contact")
 
-        # Validate the email address
-        try:
-            validate_email(email)
-        except ValidationError:
-            messages.error(request, "Invalid email address.")
+        if self._is_email_invalid(request, email):
             return redirect("base:contact")
 
         # Tek kullanımlık captcha: doğrulandıktan sonra session'dan sil

@@ -5,7 +5,42 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from PIL import Image
 
-from base.models import Project, ProjectPortfolio
+from base.models import Project, ProjectPortfolio, process_image_field
+
+
+class ProcessImageFieldTest(TestCase):
+    def _create_image(self, width, height, filename="test.jpg"):
+        """Creates a dummy image and returns it as a SimpleUploadedFile."""
+        file = BytesIO()
+        image = Image.new("RGB", (width, height), "white")
+        image.save(file, "jpeg")
+        file.seek(0)
+        return SimpleUploadedFile(filename, file.read(), content_type="image/jpeg")
+
+    def test_process_large_image(self):
+        """Test processing an image larger than max_size."""
+        img = self._create_image(1000, 1000)
+        result = process_image_field(img)
+        with Image.open(result) as processed_img:
+            self.assertEqual(processed_img.width, 780)
+            self.assertEqual(processed_img.height, 780)
+
+    def test_process_small_image(self):
+        """Test processing an image smaller than max_size."""
+        img = self._create_image(500, 500)
+        result = process_image_field(img)
+        self.assertEqual(result, img)
+
+    def test_process_none(self):
+        """Test processing None input."""
+        result = process_image_field(None)
+        self.assertIsNone(result)
+
+    def test_process_non_image(self):
+        """Test processing non-image input."""
+        txt = SimpleUploadedFile("test.txt", b"hello", content_type="text/plain")
+        result = process_image_field(txt)
+        self.assertEqual(result, txt)
 
 
 class ProjectModelTest(TestCase):
