@@ -75,6 +75,20 @@ class ProjectSitemapTests(ImageTestMixin, TestCase):
         expected_url = reverse("base:portfolio_detail", args=[self.project1.slug])
         self.assertEqual(location, expected_url)
 
+    def test_project_sitemap_location_invalid_item(self):
+        sitemap = ProjectSitemap()
+
+        # Test with an object that has no 'slug' attribute
+        class InvalidItem:
+            pass
+
+        with self.assertRaises(AttributeError):
+            sitemap.location(InvalidItem())
+
+        # Test with None
+        with self.assertRaises(AttributeError):
+            sitemap.location(None)
+
     def test_project_sitemap_lastmod(self):
         sitemap = ProjectSitemap()
         self.assertEqual(sitemap.lastmod(self.project1), self.project1.updated)

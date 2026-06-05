@@ -11,6 +11,7 @@ from PIL import Image
 from base.utils import (
     HealthCheckMiddleware,
     _get_ip_from_xff,
+    _get_trusted_networks_optimized,
     client_ip_key,
     current_year,
     get_client_ip,
@@ -18,6 +19,57 @@ from base.utils import (
     portfolio_directory_path,
     project_directory_path,
 )
+
+
+class GetTrustedNetworksOptimizedTests(TestCase):
+    def test_empty_tuple(self):
+        trusted_ips, trusted_subnets = _get_trusted_networks_optimized(())
+        self.assertEqual(trusted_ips, set())
+        self.assertEqual(trusted_subnets, [])
+
+    def test_single_ips(self):
+        nets = (
+            ipaddress.ip_network("192.168.1.1/32"),
+            ipaddress.ip_network("10.0.0.1/32"),
+            ipaddress.ip_network("::1/128"),
+        )
+        trusted_ips, trusted_subnets = _get_trusted_networks_optimized(nets)
+        expected_ips = {
+            ipaddress.ip_address("192.168.1.1"),
+            ipaddress.ip_address("10.0.0.1"),
+            ipaddress.ip_address("::1"),
+        }
+        self.assertEqual(trusted_ips, expected_ips)
+        self.assertEqual(trusted_subnets, [])
+
+    def test_subnets(self):
+        nets = (
+            ipaddress.ip_network("192.168.1.0/24"),
+            ipaddress.ip_network("10.0.0.0/8"),
+            ipaddress.ip_network("2001:db8::/32"),
+        )
+        trusted_ips, trusted_subnets = _get_trusted_networks_optimized(nets)
+        self.assertEqual(trusted_ips, set())
+        self.assertEqual(list(trusted_subnets), list(nets))
+
+    def test_mixed_ips_and_subnets(self):
+        nets = (
+            ipaddress.ip_network("192.168.1.1/32"),
+            ipaddress.ip_network("10.0.0.0/8"),
+            ipaddress.ip_network("::1/128"),
+            ipaddress.ip_network("2001:db8::/32"),
+        )
+        trusted_ips, trusted_subnets = _get_trusted_networks_optimized(nets)
+        expected_ips = {
+            ipaddress.ip_address("192.168.1.1"),
+            ipaddress.ip_address("::1"),
+        }
+        expected_subnets = [
+            ipaddress.ip_network("10.0.0.0/8"),
+            ipaddress.ip_network("2001:db8::/32"),
+        ]
+        self.assertEqual(trusted_ips, expected_ips)
+        self.assertEqual(list(trusted_subnets), expected_subnets)
 
 
 class GetClientIPTests(TestCase):

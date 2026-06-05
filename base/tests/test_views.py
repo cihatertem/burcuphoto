@@ -1,6 +1,6 @@
 import base64
 from io import BytesIO
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from django.contrib.messages import get_messages
 from django.core import mail
@@ -17,10 +17,20 @@ from base.views import (
     Contact,
     DraftDetail,
     DraftList,
+    EmailThread,
     PortfolioDetail,
     PortfolioList,
     YearContext,
 )
+
+
+class EmailThreadTest(TestCase):
+    def test_run_sends_email(self):
+        """Test that EmailThread.run() calls send() on the email message."""
+        mock_email = Mock()
+        thread = EmailThread(mock_email)
+        thread.run()
+        mock_email.send.assert_called_once_with(fail_silently=False)
 
 
 class ContactViewTest(TestCase):

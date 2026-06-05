@@ -1,4 +1,5 @@
 from io import BytesIO
+from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -74,6 +75,25 @@ class ProjectModelTest(TestCase):
         """Test the string representation of the Project model."""
         project = Project(title="Test Project Title")
         self.assertEqual(str(project), "Test Project Title")
+
+    @patch("django.db.models.Model.save")
+    def test_project_save_kwargs(self, mock_super_save):
+        """Test that save kwargs are properly forwarded to the parent class."""
+        project = Project(title="Kwargs Project", slug="kwargs-project", draft=False)
+
+        project.save(
+            force_insert=True,
+            force_update=False,
+            using="default",
+            update_fields=["title"],
+        )
+
+        mock_super_save.assert_called_once_with(
+            force_insert=True,
+            force_update=False,
+            using="default",
+            update_fields=["title"],
+        )
 
 
 class ProjectPortfolioModelTest(TestCase):
