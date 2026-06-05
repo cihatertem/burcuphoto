@@ -1,24 +1,12 @@
 from datetime import timedelta
-from io import BytesIO
 
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
-from PIL import Image
 
 from base.models import Project
 from base.sitemaps import BaseSiteMap, ProjectSitemap
-
-
-class ImageTestMixin:
-    def _create_image(self, width, height, filename="test.jpg"):
-        """Creates a dummy image and returns it as a SimpleUploadedFile."""
-        file = BytesIO()
-        image = Image.new("RGB", (width, height), "white")
-        image.save(file, "jpeg")
-        file.seek(0)
-        return SimpleUploadedFile(filename, file.read(), content_type="image/jpeg")
+from base.tests.mixins import ImageTestMixin
 
 
 class BaseSiteMapTests(TestCase):

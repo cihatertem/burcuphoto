@@ -110,10 +110,10 @@ menuBtn.onclick = () => {
     navbar.classList.toggle("show");
 
     if (menuBtn.classList.length > 1) {
-        menuBtn.innerHTML = "✕";
+        menuBtn.textContent = "✕";
         menuBtn.style.transform = "rotate(360deg)";
     } else {
-        menuBtn.innerHTML = "☰";
+        menuBtn.textContent = "☰";
         menuBtn.style.transform = "rotate(-360deg)";
     }
 };

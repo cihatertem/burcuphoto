@@ -35,7 +35,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = get_secret("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ.get("DEBUG", "0")))
+DEBUG = os.environ.get("DEBUG", "0") == "1"
 
 default_hosts = "localhost,127.0.0.1,[::1]" if DEBUG else ""
 ALLOWED_HOSTS = [

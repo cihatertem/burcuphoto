@@ -1,4 +1,3 @@
-from io import BytesIO
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -6,17 +5,10 @@ from django.test import TestCase
 from PIL import Image
 
 from base.models import Project, ProjectPortfolio, process_image_field
+from base.tests.mixins import ImageTestMixin
 
 
-class ProcessImageFieldTest(TestCase):
-    def _create_image(self, width, height, filename="test.jpg"):
-        """Creates a dummy image and returns it as a SimpleUploadedFile."""
-        file = BytesIO()
-        image = Image.new("RGB", (width, height), "white")
-        image.save(file, "jpeg")
-        file.seek(0)
-        return SimpleUploadedFile(filename, file.read(), content_type="image/jpeg")
-
+class ProcessImageFieldTest(ImageTestMixin, TestCase):
     def test_process_large_image(self):
         """Test processing an image larger than max_size."""
         img = self._create_image(1000, 1000)
@@ -43,15 +35,7 @@ class ProcessImageFieldTest(TestCase):
         self.assertEqual(result, txt)
 
 
-class ProjectModelTest(TestCase):
-    def _create_image(self, width, height, filename="test.jpg"):
-        """Creates a dummy image and returns it as a SimpleUploadedFile."""
-        file = BytesIO()
-        image = Image.new("RGB", (width, height), "white")
-        image.save(file, "jpeg")
-        file.seek(0)
-        return SimpleUploadedFile(filename, file.read(), content_type="image/jpeg")
-
+class ProjectModelTest(ImageTestMixin, TestCase):
     def test_project_save_image_resizing(self):
         """Test that images larger than 780px are resized to 780px when saved."""
         large_image = self._create_image(1000, 1000)
@@ -131,15 +115,7 @@ class ProjectModelTest(TestCase):
         )
 
 
-class ProjectPortfolioModelTest(TestCase):
-    def _create_image(self, width, height, filename="test.jpg"):
-        """Creates a dummy image and returns it as a SimpleUploadedFile."""
-        file = BytesIO()
-        image = Image.new("RGB", (width, height), "white")
-        image.save(file, "jpeg")
-        file.seek(0)
-        return SimpleUploadedFile(filename, file.read(), content_type="image/jpeg")
-
+class ProjectPortfolioModelTest(ImageTestMixin, TestCase):
     def test_project_portfolio_save_image_resizing(self):
         """Test that images larger than 780px are resized to 780px when saved."""
         large_image = self._create_image(1000, 1000)

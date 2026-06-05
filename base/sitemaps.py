@@ -1,4 +1,5 @@
 from django.contrib.sitemaps import Sitemap
+from django.core.cache import cache
 from django.db import models
 from django.urls import reverse
 
@@ -39,6 +40,10 @@ class ProjectSitemap(Sitemap):
         return item.updated
 
     def get_latest_lastmod(self):
-        return Project.objects.filter(draft=False).aggregate(
-            latest=models.Max("updated")
-        )["latest"]
+        return cache.get_or_set(
+            "project_sitemap_lastmod",
+            lambda: Project.objects.filter(draft=False).aggregate(
+                latest=models.Max("updated")
+            )["latest"],
+            3600,
+        )

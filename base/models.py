@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from django.core.cache import cache
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -71,12 +72,17 @@ class Project(models.Model):
         elif not self.draft:
             self.project_link = f"https://burcuatak.com/portfolio/{self.slug}/"
 
+        cache.delete("project_sitemap_lastmod")
         return super().save(
             force_insert=force_insert,
             force_update=force_update,
             using=using,
             update_fields=update_fields,
         )
+
+    def delete(self, *args, **kwargs):
+        cache.delete("project_sitemap_lastmod")
+        return super().delete(*args, **kwargs)
 
 
 class ProjectPortfolio(models.Model):

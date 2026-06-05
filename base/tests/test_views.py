@@ -5,13 +5,13 @@ from unittest.mock import Mock, patch
 from django.contrib.messages import get_messages
 from django.core import mail
 from django.core.cache import cache
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from PIL import Image
 
 from base.captcha import CAPTCHA_ANS_KEY, CAPTCHA_NUM1_KEY, CAPTCHA_NUM2_KEY
 from base.models import Project, ProjectPortfolio
+from base.tests.mixins import ImageTestMixin
 from base.utils import current_year
 from base.views import (
     Contact,
@@ -451,16 +451,6 @@ class ContactViewTest(TestCase):
         self.assertIn(
             "Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.", messages
         )
-
-
-class ImageTestMixin:
-    def _create_image(self, width, height, filename="test.jpg"):
-        """Creates a dummy image and returns it as a SimpleUploadedFile."""
-        file = BytesIO()
-        image = Image.new("RGB", (width, height), "white")
-        image.save(file, "jpeg")
-        file.seek(0)
-        return SimpleUploadedFile(filename, file.read(), content_type="image/jpeg")
 
 
 class ProjectModelTest(ImageTestMixin, TestCase):
