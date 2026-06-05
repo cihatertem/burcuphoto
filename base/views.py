@@ -1,5 +1,5 @@
+import concurrent.futures
 import os
-import threading
 
 from django.conf import settings
 from django.contrib import messages
@@ -73,13 +73,7 @@ class About(YearContext, TemplateView):
     template_name = "base/about.html"
 
 
-class EmailThread(threading.Thread):
-    def __init__(self, email_message):
-        self.email_message = email_message
-        threading.Thread.__init__(self)
-
-    def run(self):
-        self.email_message.send(fail_silently=False)
+email_executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
 
 
 @method_decorator(
@@ -189,7 +183,7 @@ class Contact(YearContext, TemplateView):
             ],
             reply_to=[email] if email else None,
         )
-        EmailThread(msg).start()
+        email_executor.submit(msg.send, fail_silently=False)
 
 
 class DraftList(LoginRequiredMixin, YearContext, ListView):

@@ -1,6 +1,6 @@
 import base64
 from io import BytesIO
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from django.contrib.messages import get_messages
 from django.core import mail
@@ -17,20 +17,10 @@ from base.views import (
     Contact,
     DraftDetail,
     DraftList,
-    EmailThread,
     PortfolioDetail,
     PortfolioList,
     YearContext,
 )
-
-
-class EmailThreadTest(TestCase):
-    def test_run_sends_email(self):
-        """Test that EmailThread.run() calls send() on the email message."""
-        mock_email = Mock()
-        thread = EmailThread(mock_email)
-        thread.run()
-        mock_email.send.assert_called_once_with(fail_silently=False)
 
 
 class ContactViewTest(TestCase):
@@ -112,12 +102,12 @@ class ContactViewTest(TestCase):
             "captcha": "8",
         }
 
-        with patch("base.views.EmailThread.start", autospec=True) as mock_start:
+        with patch("base.views.email_executor.submit", autospec=True) as mock_submit:
 
-            def side_effect(self_instance):
-                self_instance.run()
+            def side_effect(func, *args, **kwargs):
+                return func(*args, **kwargs)
 
-            mock_start.side_effect = side_effect
+            mock_submit.side_effect = side_effect
 
             response = self.client.post(reverse("base:contact"), data=post_data)
 
@@ -168,12 +158,12 @@ class ContactViewTest(TestCase):
             "captcha": "8",
         }
 
-        with patch("base.views.EmailThread.start", autospec=True) as mock_start:
+        with patch("base.views.email_executor.submit", autospec=True) as mock_submit:
 
-            def side_effect(self_instance):
-                self_instance.run()
+            def side_effect(func, *args, **kwargs):
+                return func(*args, **kwargs)
 
-            mock_start.side_effect = side_effect
+            mock_submit.side_effect = side_effect
 
             response = self.client.post(reverse("base:contact"), data=post_data)
 
@@ -207,13 +197,13 @@ class ContactViewTest(TestCase):
             "captcha": "8",
         }
 
-        # Patch the start method of EmailThread to directly call run, making it synchronous for the test
-        with patch("base.views.EmailThread.start", autospec=True) as mock_start:
+        # Patch the submit method to directly execute the function synchronously for the test
+        with patch("base.views.email_executor.submit", autospec=True) as mock_submit:
 
-            def side_effect(self_instance):
-                self_instance.run()
+            def side_effect(func, *args, **kwargs):
+                return func(*args, **kwargs)
 
-            mock_start.side_effect = side_effect
+            mock_submit.side_effect = side_effect
 
             response = self.client.post(reverse("base:contact"), data=post_data)
 
@@ -360,13 +350,13 @@ class ContactViewTest(TestCase):
             "captcha": "8",
         }
 
-        # Patch the start method of EmailThread to directly call run, making it synchronous for the test
-        with patch("base.views.EmailThread.start", autospec=True) as mock_start:
+        # Patch the submit method to directly execute the function synchronously for the test
+        with patch("base.views.email_executor.submit", autospec=True) as mock_submit:
 
-            def side_effect(self_instance):
-                self_instance.run()
+            def side_effect(func, *args, **kwargs):
+                return func(*args, **kwargs)
 
-            mock_start.side_effect = side_effect
+            mock_submit.side_effect = side_effect
 
             response = self.client.post(reverse("base:contact"), data=post_data)
 
