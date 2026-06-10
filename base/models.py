@@ -100,6 +100,9 @@ class ProjectPortfolio(models.Model):
 
     class Meta:
         ordering = ("index",)
+        indexes = [
+            models.Index(fields=("project", "index")),
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

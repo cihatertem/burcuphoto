@@ -39,7 +39,10 @@ class YearContext(ContextMixin):
 class PortfolioContextMixin(ContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["portfolios"] = self.object.projectportfolio_set.all()
+        prefetched_objects_cache = getattr(self.object, "_prefetched_objects_cache", {})
+        context["portfolios"] = prefetched_objects_cache.get(
+            "projectportfolio_set", self.object.projectportfolio_set.all()
+        )
         return context
 
 
@@ -193,6 +196,4 @@ class DraftList(LoginRequiredMixin, YearContext, ListView):
 
 class DraftDetail(LoginRequiredMixin, YearContext, PortfolioContextMixin, DetailView):
     template_name = "base/portfolio_detail.html"
-    queryset = Project.objects.filter(draft=True).prefetch_related(
-        "projectportfolio_set"
-    )
+    queryset = Project.objects.filter(draft=True).prefetch_related("projectportfolio_set")
