@@ -167,10 +167,6 @@ class Contact(YearContext, TemplateView):
     def _send_contact_email(
         self, name: str, email: str, body: str, ip_address: str
     ) -> None:
-        # Prevent email header injection synchronously
-        if email and ("\n" in email or "\r" in email):
-            raise BadHeaderError("Invalid header found.")
-
         msg = EmailMessage(
             subject="Web Site Visitor",
             body=(
@@ -186,6 +182,8 @@ class Contact(YearContext, TemplateView):
             ],
             reply_to=[email] if email else None,
         )
+        # Prevent email header injection synchronously by validating headers in the main thread
+        msg.message()
         email_executor.submit(msg.send, fail_silently=False)
 
 
