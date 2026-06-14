@@ -167,6 +167,20 @@ class GetClientIPTests(TestCase):
             )
             self.assertEqual(get_client_ip(request), "127.0.0.1")
 
+    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network("127.0.0.1/32")])
+    def test_get_client_ip_with_multiple_malformed_xff_ips(self):
+        request = self.factory.get(
+            "/", REMOTE_ADDR="127.0.0.1", HTTP_X_FORWARDED_FOR=" , , "
+        )
+        self.assertEqual(get_client_ip(request), "127.0.0.1")
+
+    @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network("192.168.1.1/32")])
+    def test_untrusted_proxy(self):
+        request = self.factory.get(
+            "/", REMOTE_ADDR="127.0.0.1", HTTP_X_FORWARDED_FOR="5.6.7.8"
+        )
+        self.assertEqual(get_client_ip(request), "127.0.0.1")
+
     def test_get_ip_from_xff_empty_strings(self):
         # Direct tests for the _get_ip_from_xff function edge cases
         trusted_ips, trusted_subnets = set(), []

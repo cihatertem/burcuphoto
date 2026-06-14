@@ -597,6 +597,14 @@ class PortfolioListTest(ImageTestMixin, TestCase):
         self.assertIn("year", response.context)
         self.assertEqual(response.context["year"], current_year())
 
+    def test_empty_list(self):
+        # Delete all projects to test the empty list scenario
+        Project.objects.all().delete()
+
+        response = self.client.get(reverse("base:portfolio"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["object_list"]), [])
+
 
 class PortfolioDetailTest(ImageTestMixin, TestCase):
     def setUp(self):
