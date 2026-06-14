@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -95,6 +96,33 @@ class ProjectSitemapTests(ImageTestMixin, TestCase):
 
         sitemap = ProjectSitemap()
         self.assertEqual(sitemap.get_latest_lastmod(), self.project1.updated)
+
+    def test_project_sitemap_get_latest_lastmod_cache_miss(self):
+        now = timezone.now()
+        Project.objects.filter(pk=self.project2.pk).update(
+            updated=now - timedelta(days=2)
+        )
+        Project.objects.filter(pk=self.project1.pk).update(
+            updated=now - timedelta(days=1)
+        )
+        Project.objects.filter(pk=self.draft_project.pk).update(updated=now)
+
+        self.project1.refresh_from_db()
+
+        # Ensure the cache is clear
+        cache.delete("project_sitemap_lastmod")
+        self.assertIsNone(cache.get("project_sitemap_lastmod"))
+
+        # Trigger cache miss and generation
+        sitemap = ProjectSitemap()
+        latest_lastmod = sitemap.get_latest_lastmod()
+
+        # Assert returned value is correct
+        self.assertEqual(latest_lastmod, self.project1.updated)
+
+        # Assert cache is now populated with the expected value
+        cached_value = cache.get("project_sitemap_lastmod")
+        self.assertEqual(cached_value, self.project1.updated)
 
     def test_project_sitemap_get_latest_lastmod_empty(self):
         Project.objects.filter(draft=False).delete()

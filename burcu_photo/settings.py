@@ -14,6 +14,7 @@ import ipaddress
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.csp import CSP
 
 
@@ -35,7 +36,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = get_secret("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "0") == "1"
+_debug = os.environ.get("DEBUG", "0")
+if _debug not in ("0", "1"):
+    raise ImproperlyConfigured("DEBUG environment variable must be '0' or '1'")
+DEBUG = _debug == "1"
 
 default_hosts = "localhost,127.0.0.1,[::1]" if DEBUG else ""
 ALLOWED_HOSTS = [
@@ -261,31 +265,11 @@ if not DEBUG:
         SECURE_HSTS_INCLUDE_SUBDOMAINS = False
         SECURE_HSTS_PRELOAD = False
     else:
-        SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_SECURE_HSTS_SECONDS", "31536000"))
-        SECURE_HSTS_INCLUDE_SUBDOMAINS = (
-            os.getenv("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", "1") == "1"
-        )
-        SECURE_HSTS_PRELOAD = os.getenv("DJANGO_SECURE_HSTS_PRELOAD", "1") == "1"
-
-# ==============================================================================
-# CONTENT SECURITY POLICY (CSP) SETTINGS (Django 6 Native)
-# ==============================================================================
-# Stable Layer: Direct conversion of Traefik rules
-# CSP_REPORT_ONLY = True
-# CSP_DEFAULT_SRC = ("'self'",)
-# CSP_SCRIPT_SRC = ("'self'", "https://static.burcuatak.com", "https:")
-# CSP_OBJECT_SRC = ("'self'",)
-# CSP_STYLE_SRC = ("'self'", "https:", "data:")
-# CSP_IMG_SRC = ("'self'", "https:", "data:")
-# CSP_MEDIA_SRC = ("'self'",)
-# CSP_FRAME_SRC = ("'self'",)
-# CSP_FONT_SRC = ("'self'", "https:", "data:")
-# CSP_CONNECT_SRC = ("'self'", "https:", "data:")
-# CSP_FRAME_ANCESTORS = ("'self'",)
+        SECURE_HSTS_SECONDS = 31536000
+        SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+        SECURE_HSTS_PRELOAD = True
 
 
-# Cutting-edge Layer: Tightened policy using Nonces
-# Change to SECURE_CSP after monitoring reports
 SECURE_CSP = {
     "default-src": [CSP.SELF],
     "script-src": [

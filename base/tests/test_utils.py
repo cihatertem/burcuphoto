@@ -340,8 +340,21 @@ class HealthCheckMiddlewareTests(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(json.loads(response.content), {"response": "chain"})
 
+    def test_ping_post_returns_pong(self):
+        request = self.factory.post("/ping")
+        response = self.middleware(request)
+        self.assertIsInstance(response, JsonResponse)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content), {"response": "pong!"})
+
     def test_integration_ping(self):
         client = Client()
         response = client.get("/ping")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"response": "pong!"})
+
+    def test_integration_ping_post(self):
+        client = Client()
+        response = client.post("/ping")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"response": "pong!"})

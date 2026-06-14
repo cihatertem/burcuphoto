@@ -34,6 +34,14 @@ class ProcessImageFieldTest(ImageTestMixin, TestCase):
         result = process_image_field(txt)
         self.assertEqual(result, txt)
 
+    @patch("base.models.Image.open")
+    def test_process_corrupt_image(self, mock_image_open):
+        """Test processing a corrupt image is gracefully handled."""
+        mock_image_open.side_effect = Exception("Corrupt image")
+        img = self._create_image(500, 500)
+        result = process_image_field(img)
+        self.assertEqual(result, img)
+
 
 class ProjectModelTest(ImageTestMixin, TestCase):
     def test_project_save_image_resizing(self):

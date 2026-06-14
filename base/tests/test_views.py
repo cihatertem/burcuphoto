@@ -558,7 +558,7 @@ class PortfolioListTest(ImageTestMixin, TestCase):
         self.assertEqual(qs.count(), 1)
         self.assertIn(self.published_project, qs)
         self.assertNotIn(self.draft_project, qs)
-        self.assertNotIn("projectportfolio_set", qs._prefetch_related_lookups)
+        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
 
         # also test view via client
         response = self.client.get(reverse("base:portfolio"))
@@ -579,7 +579,7 @@ class PortfolioListTest(ImageTestMixin, TestCase):
             index=2,
         )
 
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             view = PortfolioList()
             view.kwargs = {}
             qs = view.get_queryset()
@@ -687,6 +687,7 @@ class PortfolioDetailTest(ImageTestMixin, TestCase):
             # Access related data to ensure no extra queries are fired
             for project in projects:
                 list(project.projectportfolio_set.all())
+        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
 
     def test_portfolio_detail_view_template(self):
         response = self.client.get(
@@ -769,6 +770,7 @@ class DraftListTest(ImageTestMixin, TestCase):
             projects = list(qs)
             for project in projects:
                 list(project.projectportfolio_set.all())
+        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
 
 
 class DraftDetailTest(ImageTestMixin, TestCase):
@@ -840,6 +842,7 @@ class DraftDetailTest(ImageTestMixin, TestCase):
             projects = list(qs)
             for project in projects:
                 list(project.projectportfolio_set.all())
+        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
 
     def test_draft_detail_view_unauthenticated(self):
         response = self.client.get(
