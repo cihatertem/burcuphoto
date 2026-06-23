@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from PIL import Image
@@ -121,6 +122,30 @@ class ProjectModelTest(ImageTestMixin, TestCase):
             using="default",
             update_fields=["title"],
         )
+
+    def test_project_delete_clears_cache(self):
+        """Test that deleting a project clears the project_sitemap_lastmod cache."""
+        project = Project.objects.create(
+            title="Delete Me", slug="delete-me", draft=False
+        )
+        cache.set("project_sitemap_lastmod", "some_value")
+        self.assertEqual(cache.get("project_sitemap_lastmod"), "some_value")
+
+        project.delete()
+
+        self.assertIsNone(cache.get("project_sitemap_lastmod"))
+        self.assertFalse(Project.objects.filter(slug="delete-me").exists())
+
+    @patch("django.db.models.Model.delete")
+    def test_project_delete_kwargs(self, mock_super_delete):
+        """Test that delete kwargs are properly forwarded to the parent class."""
+        project = Project(
+            title="Kwargs Delete Project", slug="kwargs-delete-project", draft=False
+        )
+
+        project.delete(keep_parents=True)
+
+        mock_super_delete.assert_called_once_with(keep_parents=True)
 
 
 class ProjectPortfolioModelTest(ImageTestMixin, TestCase):

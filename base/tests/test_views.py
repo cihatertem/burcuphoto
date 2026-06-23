@@ -3,8 +3,10 @@ from io import BytesIO
 from unittest.mock import patch
 
 from django.contrib.messages import get_messages
+from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core import mail
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from PIL import Image
@@ -259,6 +261,27 @@ class ContactViewTest(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), "Invalid header found.")
         self.assertEqual(messages[0].level_tag, "error")
+
+    @patch("base.views.validate_email")
+    def test_is_email_invalid_raises_validation_error(self, mock_validate_email):
+        """Test that _is_email_invalid returns True and adds an error message when a ValidationError occurs."""
+        mock_validate_email.side_effect = ValidationError("Invalid email")
+
+        view = Contact()
+        request = self.factory.get("/")
+        setattr(request, "session", "session")
+        messages = FallbackStorage(request)
+        setattr(request, "_messages", messages)
+
+        result = view._is_email_invalid(request, "invalid-email")
+
+        self.assertTrue(result)
+        mock_validate_email.assert_called_once_with("invalid-email")
+
+        messages_list = list(messages)
+        self.assertEqual(len(messages_list), 1)
+        self.assertEqual(str(messages_list[0]), "Invalid email address.")
+        self.assertEqual(messages_list[0].level_tag, "error")
 
     @override_settings(
         RATELIMIT_ENABLE=False,
