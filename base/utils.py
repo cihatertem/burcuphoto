@@ -5,7 +5,8 @@ from http import HTTPStatus
 from io import BytesIO
 
 from django.conf import settings
-from django.http import JsonResponse
+from django.core.exceptions import DisallowedHost
+from django.http import HttpResponseBadRequest, JsonResponse
 from PIL import Image, ImageOps
 
 
@@ -15,6 +16,10 @@ class HealthCheckMiddleware:
 
     def __call__(self, request):
         if request.META["PATH_INFO"] == "/ping":
+            try:
+                request.get_host()
+            except DisallowedHost:
+                return HttpResponseBadRequest()
             return JsonResponse({"response": "pong!"}, status=HTTPStatus.OK)
 
         return self.get_response(request)

@@ -581,7 +581,6 @@ class PortfolioListTest(ImageTestMixin, TestCase):
         self.assertEqual(qs.count(), 1)
         self.assertIn(self.published_project, qs)
         self.assertNotIn(self.draft_project, qs)
-        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
 
         # also test view via client
         response = self.client.get(reverse("base:portfolio"))
@@ -602,7 +601,7 @@ class PortfolioListTest(ImageTestMixin, TestCase):
             index=2,
         )
 
-        with self.assertNumQueries(2):
+        with self.assertNumQueries(1):
             view = PortfolioList()
             view.kwargs = {}
             qs = view.get_queryset()
@@ -794,14 +793,11 @@ class DraftListTest(ImageTestMixin, TestCase):
             index=2,
         )
 
-        with self.assertNumQueries(2):
+        with self.assertNumQueries(1):
             view = DraftList()
             view.kwargs = {}
             qs = view.get_queryset()
-            projects = list(qs)
-            for project in projects:
-                list(project.projectportfolio_set.all())
-        self.assertIn("projectportfolio_set", qs._prefetch_related_lookups)
+            list(qs)
 
 
 class DraftDetailTest(ImageTestMixin, TestCase):

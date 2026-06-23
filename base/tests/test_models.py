@@ -24,24 +24,30 @@ class ProcessImageFieldTest(ImageTestMixin, TestCase):
         result = process_image_field(img)
         self.assertEqual(result, img)
 
-    def test_process_none(self):
+    @patch("base.models.logger.warning")
+    def test_process_none(self, mock_logger):
         """Test processing None input."""
         result = process_image_field(None)
         self.assertIsNone(result)
+        mock_logger.assert_called_once()
 
-    def test_process_non_image(self):
+    @patch("base.models.logger.warning")
+    def test_process_non_image(self, mock_logger):
         """Test processing non-image input."""
         txt = SimpleUploadedFile("test.txt", b"hello", content_type="text/plain")
         result = process_image_field(txt)
         self.assertEqual(result, txt)
+        mock_logger.assert_called_once()
 
+    @patch("base.models.logger.warning")
     @patch("base.models.Image.open")
-    def test_process_corrupt_image(self, mock_image_open):
+    def test_process_corrupt_image(self, mock_image_open, mock_logger):
         """Test processing a corrupt image is gracefully handled."""
-        mock_image_open.side_effect = Exception("Corrupt image")
+        mock_image_open.side_effect = OSError("Corrupt image")
         img = self._create_image(500, 500)
         result = process_image_field(img)
         self.assertEqual(result, img)
+        mock_logger.assert_called_once()
 
 
 class ProjectModelTest(ImageTestMixin, TestCase):

@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 
@@ -10,6 +11,8 @@ from PIL import Image
 from base.utils import photo_resizer, portfolio_directory_path, project_directory_path
 
 PHOTO_ALT_TEXT = _("Alt text for the photo.")
+
+logger = logging.getLogger(__name__)
 
 
 def process_image_field(image_field, max_size=780):
@@ -26,8 +29,8 @@ def process_image_field(image_field, max_size=780):
                     output.getbuffer().nbytes,
                     None,
                 )
-    except Exception:
-        pass
+    except (AttributeError, TypeError, ValueError, OSError) as e:
+        logger.warning("Failed to process image field: %s", e)
     return image_field
 
 

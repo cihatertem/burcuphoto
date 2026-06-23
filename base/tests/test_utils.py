@@ -354,6 +354,11 @@ class HealthCheckMiddlewareTests(TestCase):
         self.assertIsInstance(response, JsonResponse)
         self.assertEqual(json.loads(response.content), {"response": "chain"})
 
+    def test_ping_invalid_host(self):
+        request = self.factory.get("/ping", HTTP_HOST="badhost.com")
+        response = self.middleware(request)
+        self.assertEqual(response.status_code, 400)
+
     def test_ping_post_returns_pong(self):
         request = self.factory.post("/ping")
         response = self.middleware(request)

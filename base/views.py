@@ -49,7 +49,7 @@ class PortfolioContextMixin(ContextMixin):
 class PortfolioQuerySetMixin:
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(draft=False).prefetch_related("projectportfolio_set")
+        return queryset.filter(draft=False)
 
 
 class HomeView(YearContext, TemplateView):
@@ -189,9 +189,7 @@ class Contact(YearContext, TemplateView):
 
 class DraftList(LoginRequiredMixin, YearContext, ListView):
     template_name = "base/portfolio_list.html"
-    queryset = Project.objects.filter(draft=True).prefetch_related(
-        "projectportfolio_set"
-    )
+    queryset = Project.objects.filter(draft=True)
 
 
 class DraftDetail(LoginRequiredMixin, YearContext, PortfolioContextMixin, DetailView):
