@@ -12,6 +12,7 @@ from base.utils import (
     HealthCheckMiddleware,
     _get_ip_from_xff,
     _get_trusted_networks_optimized,
+    _get_trusted_proxies,
     client_ip_key,
     current_year,
     get_client_ip,
@@ -70,6 +71,31 @@ class GetTrustedNetworksOptimizedTests(TestCase):
         ]
         self.assertEqual(trusted_ips, expected_ips)
         self.assertEqual(list(trusted_subnets), expected_subnets)
+
+
+class GetTrustedProxiesTests(TestCase):
+    def test_trusted_proxy_nets_not_set(self):
+        with self.settings(TRUSTED_PROXY_NETS=None):
+            trusted_ips, trusted_subnets = _get_trusted_proxies()
+            self.assertIsNone(trusted_ips)
+            self.assertIsNone(trusted_subnets)
+
+    @override_settings(TRUSTED_PROXY_NETS=[])
+    def test_trusted_proxy_nets_empty(self):
+        trusted_ips, trusted_subnets = _get_trusted_proxies()
+        self.assertIsNone(trusted_ips)
+        self.assertIsNone(trusted_subnets)
+
+    @override_settings(
+        TRUSTED_PROXY_NETS=[
+            ipaddress.ip_network("192.168.1.1/32"),
+            ipaddress.ip_network("10.0.0.0/8"),
+        ]
+    )
+    def test_trusted_proxy_nets_with_values(self):
+        trusted_ips, trusted_subnets = _get_trusted_proxies()
+        self.assertEqual(trusted_ips, {ipaddress.ip_address("192.168.1.1")})
+        self.assertEqual(trusted_subnets, [ipaddress.ip_network("10.0.0.0/8")])
 
 
 class GetClientIPTests(TestCase):

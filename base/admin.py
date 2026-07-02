@@ -8,7 +8,6 @@ from .models import Project, ProjectPortfolio
 
 # Register your models here.
 class ProjectPortfolioAdmin(admin.StackedInline):
-    __slot__ = "model"
     model = ProjectPortfolio
 
 

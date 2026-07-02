@@ -8,9 +8,8 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 
 admin_url = os.getenv("ADMIN_ADDRESS", "admin/")
-debug_mode = os.environ.get("DEBUG", "0") == "1" or settings.DEBUG
 
-if not debug_mode and admin_url in ["admin/", "admin"]:
+if not settings.DEBUG and admin_url in ["admin/", "admin"]:
     raise ImproperlyConfigured(
         "ADMIN_ADDRESS must be set to a custom, unpredictable path in production."
     )

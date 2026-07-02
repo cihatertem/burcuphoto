@@ -151,9 +151,10 @@ class Contact(YearContext, TemplateView):
         request.session.pop(CAPTCHA_NUM2_KEY, None)
 
         ip_address = get_client_ip(request)
+        site_domain = request.get_host()
 
         try:
-            self._send_contact_email(name, email, body, ip_address)
+            self._send_contact_email(name, email, body, ip_address, site_domain)
         except BadHeaderError:
             messages.error(request, "Invalid header found.")
             return redirect("base:contact")
@@ -165,7 +166,7 @@ class Contact(YearContext, TemplateView):
         return redirect("base:home")
 
     def _send_contact_email(
-        self, name: str, email: str, body: str, ip_address: str
+        self, name: str, email: str, body: str, ip_address: str, site_domain: str
     ) -> None:
         msg = EmailMessage(
             subject="Web Site Visitor",
@@ -173,7 +174,7 @@ class Contact(YearContext, TemplateView):
                 f"From {escape(name)}, {escape(email)}\n\n"
                 f"{escape(body)}\n\n"
                 f"IP: {ip_address}\n"
-                f"Site: www.burcuatak.com\n"
+                f"Site: {site_domain}\n"
             ),
             from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
             to=[
