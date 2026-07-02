@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import ipaddress
 from datetime import date
 from functools import lru_cache
@@ -152,3 +154,15 @@ def client_ip_key(group, request):
     if request is None:
         return "unknown"
     return get_client_ip(request) or "unknown"
+
+
+class RateLimitHMAC:
+    def __init__(self, value: bytes):
+        self.value = value
+
+    def hexdigest(self) -> str:
+        return hmac.new(
+            key=settings.SECRET_KEY.encode("utf-8"),
+            msg=self.value,
+            digestmod=hashlib.sha256,
+        ).hexdigest()

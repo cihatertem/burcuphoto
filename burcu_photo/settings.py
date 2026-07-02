@@ -231,6 +231,7 @@ CACHES = {
 }
 
 RATELIMIT_USE_CACHE = "default"
+RATELIMIT_HASH_ALGORITHM = "base.utils.RateLimitHMAC"
 
 if not DEBUG:
     _raw = os.getenv("TRUSTED_PROXY_NETS", "")

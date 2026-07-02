@@ -14,6 +14,7 @@ from base.utils import (
     _get_ip_from_xff,
     _get_trusted_networks_optimized,
     _get_trusted_proxies,
+    _is_trusted_proxy_ip,
     client_ip_key,
     current_year,
     get_client_ip,
@@ -97,6 +98,13 @@ class GetTrustedProxiesTests(TestCase):
         trusted_ips, trusted_subnets = _get_trusted_proxies()
         self.assertEqual(trusted_ips, {ipaddress.ip_address("192.168.1.1")})
         self.assertEqual(trusted_subnets, [ipaddress.ip_network("10.0.0.0/8")])
+
+
+class IsTrustedProxyIpTests(TestCase):
+    @patch("base.utils._parse_ip", side_effect=ValueError)
+    def test_value_error_returns_false(self, mock_parse_ip):
+        result = _is_trusted_proxy_ip("invalid_ip", set(), [])
+        self.assertFalse(result)
 
 
 class GetClientIPTests(TestCase):
