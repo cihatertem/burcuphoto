@@ -39,10 +39,13 @@ class YearContext(ContextMixin):
 class PortfolioContextMixin(ContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        prefetched_objects_cache = getattr(self.object, "_prefetched_objects_cache", {})
-        context["portfolios"] = prefetched_objects_cache.get(
-            "projectportfolio_set", self.object.projectportfolio_set.all()
-        )
+        if "projectportfolio_set" not in getattr(
+            self.object, "_prefetched_objects_cache", {}
+        ):
+            from django.db.models import prefetch_related_objects
+
+            prefetch_related_objects([self.object], "projectportfolio_set")
+        context["portfolios"] = self.object.projectportfolio_set.all()
         return context
 
 

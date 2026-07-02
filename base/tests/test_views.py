@@ -686,7 +686,10 @@ class PortfolioDetailTest(ImageTestMixin, TestCase):
         view = PortfolioDetail()
         request = RequestFactory().get("/")
         view.request = request
-        view.object = self.published_project
+        # We must use the prefetch_related for context
+        view.object = Project.objects.prefetch_related("projectportfolio_set").get(
+            pk=self.published_project.pk
+        )
         view.kwargs = {"slug": "published-project-detail"}
 
         context = view.get_context_data()
@@ -841,7 +844,9 @@ class DraftDetailTest(ImageTestMixin, TestCase):
 
     def test_get_context_data_includes_portfolios(self):
         view = DraftDetail()
-        view.object = self.draft_project
+        view.object = Project.objects.prefetch_related("projectportfolio_set").get(
+            pk=self.draft_project.pk
+        )
         context = view.get_context_data()
         self.assertIn("portfolios", context)
         self.assertEqual(

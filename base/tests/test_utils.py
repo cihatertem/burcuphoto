@@ -4,6 +4,7 @@ from datetime import date
 from io import BytesIO
 from unittest.mock import patch
 
+from django.core.exceptions import DisallowedHost
 from django.http import JsonResponse
 from django.test import Client, RequestFactory, TestCase, override_settings
 from PIL import Image
@@ -382,6 +383,14 @@ class HealthCheckMiddlewareTests(TestCase):
 
     def test_ping_invalid_host(self):
         request = self.factory.get("/ping", HTTP_HOST="badhost.com")
+        response = self.middleware(request)
+        self.assertEqual(response.status_code, 400)
+
+    @patch.object(
+        RequestFactory().get("/ping").__class__, "get_host", side_effect=DisallowedHost
+    )
+    def test_ping_disallowed_host_exception(self, mock_get_host):
+        request = self.factory.get("/ping")
         response = self.middleware(request)
         self.assertEqual(response.status_code, 400)
 
