@@ -14,7 +14,9 @@ from base.utils import (
     _get_ip_from_xff,
     _get_trusted_networks_optimized,
     _get_trusted_proxies,
+    _is_ip_trusted,
     _is_trusted_proxy_ip,
+    _parse_ip,
     client_ip_key,
     current_year,
     get_client_ip,
@@ -22,6 +24,75 @@ from base.utils import (
     portfolio_directory_path,
     project_directory_path,
 )
+
+
+class ParseIpTests(TestCase):
+    def test_valid_ipv4(self):
+        """Test parsing a valid IPv4 address."""
+        ip = _parse_ip("192.168.1.1")
+        self.assertEqual(ip, ipaddress.IPv4Address("192.168.1.1"))
+
+    def test_valid_ipv6(self):
+        """Test parsing a valid IPv6 address."""
+        ip = _parse_ip("2001:db8::1")
+        self.assertEqual(ip, ipaddress.IPv6Address("2001:db8::1"))
+
+    def test_invalid_ip(self):
+        """Test parsing an invalid IP string raises ValueError."""
+        with self.assertRaises(ValueError):
+            _parse_ip("invalid-ip")
+
+    def test_lru_cache(self):
+        """Test that the LRU cache is working as expected."""
+        # Clear cache before testing to avoid interference from other tests
+        _parse_ip.cache_clear()
+
+        # Initial call
+        _parse_ip("10.0.0.1")
+        info = _parse_ip.cache_info()
+        self.assertEqual(info.hits, 0)
+        self.assertEqual(info.misses, 1)
+
+        # Cached call
+        _parse_ip("10.0.0.1")
+        info = _parse_ip.cache_info()
+        self.assertEqual(info.hits, 1)
+        self.assertEqual(info.misses, 1)
+
+
+class IsIpTrustedTests(TestCase):
+    def test_ip_in_trusted_ips(self):
+        ip_obj = ipaddress.ip_address("192.168.1.1")
+        trusted_ips = {
+            ipaddress.ip_address("192.168.1.1"),
+            ipaddress.ip_address("10.0.0.1"),
+        }
+        trusted_subnets = []
+        self.assertTrue(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+    def test_ip_in_trusted_subnets(self):
+        ip_obj = ipaddress.ip_address("192.168.1.50")
+        trusted_ips = set()
+        trusted_subnets = [ipaddress.ip_network("192.168.1.0/24")]
+        self.assertTrue(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+    def test_ip_not_in_trusted(self):
+        ip_obj = ipaddress.ip_address("8.8.8.8")
+        trusted_ips = {ipaddress.ip_address("192.168.1.1")}
+        trusted_subnets = [ipaddress.ip_network("10.0.0.0/8")]
+        self.assertFalse(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+    def test_empty_trusted_lists(self):
+        ip_obj = ipaddress.ip_address("192.168.1.1")
+        trusted_ips = set()
+        trusted_subnets = []
+        self.assertFalse(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+    def test_ipv6_in_trusted_subnets(self):
+        ip_obj = ipaddress.ip_address("2001:db8::1234")
+        trusted_ips = set()
+        trusted_subnets = [ipaddress.ip_network("2001:db8::/32")]
+        self.assertTrue(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
 
 
 class GetTrustedNetworksOptimizedTests(TestCase):
@@ -101,6 +172,21 @@ class GetTrustedProxiesTests(TestCase):
 
 
 class IsTrustedProxyIpTests(TestCase):
+    def test_ip_in_trusted_ips(self):
+        trusted_ips = {ipaddress.ip_address("192.168.1.1")}
+        self.assertTrue(_is_trusted_proxy_ip("192.168.1.1", trusted_ips, []))
+
+    def test_ip_in_trusted_subnets(self):
+        trusted_subnets = [ipaddress.ip_network("10.0.0.0/8")]
+        self.assertTrue(_is_trusted_proxy_ip("10.0.0.1", set(), trusted_subnets))
+
+    def test_ip_not_trusted(self):
+        trusted_ips = {ipaddress.ip_address("192.168.1.1")}
+        trusted_subnets = [ipaddress.ip_network("10.0.0.0/8")]
+        self.assertFalse(
+            _is_trusted_proxy_ip("172.16.0.1", trusted_ips, trusted_subnets)
+        )
+
     @patch("base.utils._parse_ip", side_effect=ValueError)
     def test_value_error_returns_false(self, mock_parse_ip):
         result = _is_trusted_proxy_ip("invalid_ip", set(), [])
