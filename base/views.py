@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.core.mail import BadHeaderError, EmailMessage
 from django.core.validators import validate_email
+from django.db.models import prefetch_related_objects
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.html import escape
@@ -42,8 +43,6 @@ class PortfolioContextMixin(ContextMixin):
         if "projectportfolio_set" not in getattr(
             self.object, "_prefetched_objects_cache", {}
         ):
-            from django.db.models import prefetch_related_objects
-
             prefetch_related_objects([self.object], "projectportfolio_set")
         context["portfolios"] = self.object.projectportfolio_set.all()
         return context

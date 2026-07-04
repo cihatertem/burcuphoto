@@ -11,6 +11,7 @@ from PIL import Image
 
 from base.utils import (
     HealthCheckMiddleware,
+    RateLimitHMAC,
     _get_ip_from_xff,
     _get_trusted_networks_optimized,
     _get_trusted_proxies,
@@ -506,3 +507,46 @@ class HealthCheckMiddlewareTests(TestCase):
         response = client.post("/ping")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"response": "pong!"})
+
+
+class RateLimitHMACTest(TestCase):
+    def test_hexdigest_returns_correct_hash(self):
+        # We just need to check if the generated hash correctly matches what hmac.new creates
+        import hashlib
+        import hmac
+
+        from django.conf import settings
+
+        value = b"127.0.0.1"
+        expected_digest = hmac.new(
+            key=settings.SECRET_KEY.encode("utf-8"),
+            msg=value,
+            digestmod=hashlib.sha256,
+        ).hexdigest()
+
+        rate_limit_hmac = RateLimitHMAC(value)
+        self.assertEqual(rate_limit_hmac.hexdigest(), expected_digest)
+
+    @override_settings(SECRET_KEY="test_secret")
+    def test_hexdigest_uses_secret_key(self):
+        import hashlib
+        import hmac
+
+        value = b"test_value"
+        expected_digest = hmac.new(
+            key=b"test_secret",
+            msg=value,
+            digestmod=hashlib.sha256,
+        ).hexdigest()
+
+        rate_limit_hmac = RateLimitHMAC(value)
+        self.assertEqual(rate_limit_hmac.hexdigest(), expected_digest)
+
+    def test_hexdigest_different_values_produce_different_hashes(self):
+        value1 = b"127.0.0.1"
+        value2 = b"192.168.1.1"
+
+        hmac1 = RateLimitHMAC(value1)
+        hmac2 = RateLimitHMAC(value2)
+
+        self.assertNotEqual(hmac1.hexdigest(), hmac2.hexdigest())

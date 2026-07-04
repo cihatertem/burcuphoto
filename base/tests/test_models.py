@@ -194,3 +194,23 @@ class ProjectPortfolioModelTest(ImageTestMixin, TestCase):
         project = Project(slug="test-slug")
         portfolio = ProjectPortfolio(project=project)
         self.assertEqual(str(portfolio), "test-slug")
+
+    @patch("django.db.models.Model.save")
+    def test_project_portfolio_save_kwargs(self, mock_super_save):
+        """Test that save kwargs are properly forwarded to the parent class."""
+        project = Project(slug="test-slug")
+        portfolio = ProjectPortfolio(project=project)
+
+        portfolio.save(
+            force_insert=True,
+            force_update=False,
+            using="default",
+            update_fields=["index"],
+        )
+
+        mock_super_save.assert_called_once_with(
+            force_insert=True,
+            force_update=False,
+            using="default",
+            update_fields=["index"],
+        )
