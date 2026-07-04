@@ -3,7 +3,7 @@ import os
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.core.mail import BadHeaderError, EmailMessage
 from django.core.validators import validate_email
@@ -190,13 +190,19 @@ class Contact(YearContext, TemplateView):
         email_executor.submit(msg.send, fail_silently=False)
 
 
-class DraftList(LoginRequiredMixin, YearContext, ListView):
+class DraftList(UserPassesTestMixin, YearContext, ListView):
     template_name = "base/portfolio_list.html"
     queryset = Project.objects.filter(draft=True)
 
+    def test_func(self):
+        return self.request.user.is_staff
 
-class DraftDetail(LoginRequiredMixin, YearContext, PortfolioContextMixin, DetailView):
+
+class DraftDetail(UserPassesTestMixin, YearContext, PortfolioContextMixin, DetailView):
     template_name = "base/portfolio_detail.html"
     queryset = Project.objects.filter(draft=True).prefetch_related(
         "projectportfolio_set"
     )
+
+    def test_func(self):
+        return self.request.user.is_staff

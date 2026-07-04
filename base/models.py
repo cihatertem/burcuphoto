@@ -72,7 +72,7 @@ class Project(models.Model):
 
         if self.draft:
             self.project_link = f"https://burcuatak.com/draft/{self.slug}/"
-        elif not self.draft:
+        else:
             self.project_link = f"https://burcuatak.com/portfolio/{self.slug}/"
 
         cache.delete("project_sitemap_lastmod")

@@ -6,10 +6,10 @@ from functools import lru_cache
 from http import HTTPStatus
 from io import BytesIO
 
-from PIL import Image, ImageOps
 from django.conf import settings
 from django.core.exceptions import DisallowedHost
 from django.http import HttpResponseBadRequest, JsonResponse
+from PIL import Image, ImageOps
 
 
 class HealthCheckMiddleware:
@@ -42,23 +42,20 @@ def current_year() -> int:
 def photo_resizer(image: Image.Image, size: int) -> BytesIO:
     output = BytesIO()
 
-    # 1. Decode the minimum necessary pixels for JPEGs
-    if hasattr(image, "draft"):
-        image.draft("RGB", (size, size))
-
-    # 2. Convert to RGB before thumbnailing to prevent low-quality resizing
+    # 1. Convert to RGB before thumbnailing to prevent low-quality resizing
     # (e.g. thumbnailing 'P' mode palette images degrades quality)
     if image.mode in ("RGBA", "P", "LA"):
         image = image.convert("RGB")
 
-    # 3. Shrink the image FIRST.
+    # 2. Shrink the image FIRST.
     # Because thumbnail() uses a square bounding box (size, size), the order
     # of transpose vs thumbnail does not alter the final aspect ratio or dimensions.
     # Transposing a 4000x3000 image is highly CPU/Memory intensive.
     # Transposing a 780x780 image is almost instantaneous.
+    # Note: thumbnail() natively handles draft() decoding for JPEGs automatically.
     image.thumbnail((size, size))
 
-    # 4. Apply EXIF transpose to the tiny thumbnail
+    # 3. Apply EXIF transpose to the tiny thumbnail
     image = ImageOps.exif_transpose(image)
 
     image.save(output, format="JPEG", quality=85, optimize=True)

@@ -747,7 +747,12 @@ class DraftListTest(ImageTestMixin, TestCase):
     def setUp(self):
         from django.contrib.auth.models import User
 
-        self.user = User.objects.create_user(username="testuser", password="password")
+        self.user = User.objects.create_user(
+            username="testuser", password="password", is_staff=True
+        )
+        self.non_staff_user = User.objects.create_user(
+            username="nonstaff", password="password"
+        )
 
         self.draft_project = Project.objects.create(
             title="Draft Project",
@@ -784,6 +789,11 @@ class DraftListTest(ImageTestMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response.url)
 
+    def test_draft_list_non_staff(self):
+        self.client.login(username="nonstaff", password="password")
+        response = self.client.get(reverse("base:draft"))
+        self.assertEqual(response.status_code, 403)
+
     def test_get_queryset_queries_count(self):
         ProjectPortfolio.objects.create(
             project=self.draft_project,
@@ -807,7 +817,12 @@ class DraftDetailTest(ImageTestMixin, TestCase):
     def setUp(self):
         from django.contrib.auth.models import User
 
-        self.user = User.objects.create_user(username="testuser", password="password")
+        self.user = User.objects.create_user(
+            username="testuser", password="password", is_staff=True
+        )
+        self.non_staff_user = User.objects.create_user(
+            username="nonstaff", password="password"
+        )
 
         self.draft_project = Project.objects.create(
             title="Draft Project Detail",
@@ -882,6 +897,13 @@ class DraftDetailTest(ImageTestMixin, TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response.url)
+
+    def test_draft_detail_view_non_staff(self):
+        self.client.login(username="nonstaff", password="password")
+        response = self.client.get(
+            reverse("base:draft_detail", kwargs={"slug": "draft-project-detail"})
+        )
+        self.assertEqual(response.status_code, 403)
 
     def test_draft_detail_view_published_project_returns_404(self):
         self.client.login(username="testuser", password="password")
