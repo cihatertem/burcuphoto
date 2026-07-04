@@ -16,19 +16,18 @@ logger = logging.getLogger(__name__)
 
 
 def process_image_field(image_field, max_size=780):
-    """Resizes an image field to max_size if it exceeds its dimensions."""
+    """Processes all images through photo_resizer to ensure re-encoding and EXIF data stripping, resizing if necessary."""
     try:
         with Image.open(image_field) as image:
-            if image.height > max_size or image.width > max_size:
-                output = photo_resizer(image, max_size)
-                return InMemoryUploadedFile(
-                    output,
-                    "ImageField",
-                    "%s.jpg" % os.path.splitext(image_field.name)[0],
-                    "image/jpeg",
-                    output.getbuffer().nbytes,
-                    None,
-                )
+            output = photo_resizer(image, max_size)
+            return InMemoryUploadedFile(
+                output,
+                "ImageField",
+                "%s.jpg" % os.path.splitext(image_field.name)[0],
+                "image/jpeg",
+                output.getbuffer().nbytes,
+                None,
+            )
     except (AttributeError, TypeError, ValueError, OSError) as e:
         logger.warning("Failed to process image field: %s", e)
     return image_field

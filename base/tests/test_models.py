@@ -22,7 +22,10 @@ class ProcessImageFieldTest(ImageTestMixin, TestCase):
         """Test processing an image smaller than max_size."""
         img = self._create_image(500, 500)
         result = process_image_field(img)
-        self.assertEqual(result, img)
+        self.assertNotEqual(result, img)  # Should return a new processed file
+        with Image.open(result) as processed_img:
+            self.assertEqual(processed_img.width, 500)
+            self.assertEqual(processed_img.height, 500)
 
     @patch("base.models.logger.warning")
     def test_process_none(self, mock_logger):
