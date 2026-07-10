@@ -29,6 +29,35 @@ class ContactViewTest(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
+    @patch("base.views.messages")
+    def test_is_rate_limited_true(self, mock_messages):
+        view = Contact()
+        from unittest.mock import Mock
+
+        request = Mock()
+        request.limited = True
+
+        result = view._is_rate_limited(request)
+
+        self.assertTrue(result)
+        mock_messages.error.assert_called_once_with(
+            request,
+            "Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.",
+        )
+
+    @patch("base.views.messages")
+    def test_is_rate_limited_false(self, mock_messages):
+        view = Contact()
+        from unittest.mock import Mock
+
+        request = Mock()
+        request.limited = False
+
+        result = view._is_rate_limited(request)
+
+        self.assertFalse(result)
+        mock_messages.error.assert_not_called()
+
     @patch("base.views._generate_captcha_image_base64")
     def test_contact_get_context_data(self, mock_generate):
         mock_generate.return_value = "fake_base64"
@@ -813,6 +842,7 @@ class DraftListTest(ImageTestMixin, TestCase):
     def setUp(self):
         from django.contrib.auth.models import User
 
+        self.factory = RequestFactory()
         self.user = User.objects.create_user(
             username="testuser", password="password", is_staff=True
         )
@@ -878,11 +908,22 @@ class DraftListTest(ImageTestMixin, TestCase):
             qs = view.get_queryset()
             list(qs)
 
+    def test_test_func(self):
+        view = DraftList()
+        view.request = self.factory.get("/")
+
+        view.request.user = self.user
+        self.assertTrue(view.test_func())
+
+        view.request.user = self.non_staff_user
+        self.assertFalse(view.test_func())
+
 
 class DraftDetailTest(ImageTestMixin, TestCase):
     def setUp(self):
         from django.contrib.auth.models import User
 
+        self.factory = RequestFactory()
         self.user = User.objects.create_user(
             username="testuser", password="password", is_staff=True
         )
@@ -970,6 +1011,16 @@ class DraftDetailTest(ImageTestMixin, TestCase):
             reverse("base:draft_detail", kwargs={"slug": "draft-project-detail"})
         )
         self.assertEqual(response.status_code, 403)
+
+    def test_test_func(self):
+        view = DraftDetail()
+        view.request = self.factory.get("/")
+
+        view.request.user = self.user
+        self.assertTrue(view.test_func())
+
+        view.request.user = self.non_staff_user
+        self.assertFalse(view.test_func())
 
     def test_draft_detail_view_published_project_returns_404(self):
         self.client.login(username="testuser", password="password")
