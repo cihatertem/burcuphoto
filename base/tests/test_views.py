@@ -399,6 +399,42 @@ class ContactViewTest(TestCase):
         RATELIMIT_ENABLE=False,
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     )
+    def test_contact_post_bad_header_error(self):
+        """Test that BadHeaderError raised in _send_contact_email correctly displays an error and redirects."""
+        session = self.client.session
+        session[CAPTCHA_NUM1_KEY] = 5
+        session[CAPTCHA_NUM2_KEY] = 3
+        session[CAPTCHA_ANS_KEY] = 8
+        session.save()
+
+        post_data = {
+            "name": "Test User",
+            "email": "test@example.com",
+            "message": "Hello, this is a test.",
+            "website": "",  # empty for honeypot
+            "captcha": "8",
+        }
+
+        from django.core.mail import BadHeaderError
+
+        with patch("base.views.Contact._send_contact_email") as mock_send_email:
+            mock_send_email.side_effect = BadHeaderError("Invalid header found.")
+
+            response = self.client.post(reverse("base:contact"), data=post_data)
+
+        # Confirm the form submission redirected back to the contact page
+        self.assertRedirects(response, reverse("base:contact"))
+
+        # Check that the error message was added
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Invalid header found.")
+        self.assertEqual(messages[0].level_tag, "error")
+
+    @override_settings(
+        RATELIMIT_ENABLE=False,
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
     def test_contact_post_incorrect_captcha(self):
         """Test that submitting the contact form with an incorrect captcha redirects with an error."""
         session = self.client.session
