@@ -84,5 +84,6 @@ GEMINI.md
 codex.patch
 *.old
 test.sh
+start_dev.sh
 aws_s3_migration.sh
 .codex

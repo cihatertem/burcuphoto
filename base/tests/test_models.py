@@ -132,6 +132,16 @@ class ProjectModelTest(ImageTestMixin, TestCase):
             update_fields=["title"],
         )
 
+    @patch("base.models.cache.delete")
+    def test_project_delete_calls_cache_delete(self, mock_cache_delete):
+        """Test that deleting a project explicitly calls cache.delete."""
+        project = Project.objects.create(
+            title="Delete Cache Mock", slug="delete-cache-mock", draft=False
+        )
+        mock_cache_delete.reset_mock()
+        project.delete()
+        mock_cache_delete.assert_called_once_with("project_sitemap_lastmod")
+
     def test_project_delete_clears_cache(self):
         """Test that deleting a project clears the project_sitemap_lastmod cache."""
         project = Project.objects.create(

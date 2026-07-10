@@ -429,6 +429,36 @@ class ContactViewTest(TestCase):
         self.assertEqual(str(messages[0]), "Captcha incorrect. Please try again.")
         self.assertEqual(messages[0].level_tag, "error")
 
+    @patch("base.views.captcha_is_valid")
+    @patch("base.views.messages.error")
+    def test_is_captcha_invalid_true(self, mock_messages_error, mock_captcha_is_valid):
+        """Test _is_captcha_invalid returns True and sets an error message when captcha is invalid."""
+        mock_captcha_is_valid.return_value = False
+        view = Contact()
+        request = self.factory.post("/")
+
+        result = view._is_captcha_invalid(request)
+
+        self.assertTrue(result)
+        mock_captcha_is_valid.assert_called_once_with(request)
+        mock_messages_error.assert_called_once_with(
+            request, "Captcha incorrect. Please try again."
+        )
+
+    @patch("base.views.captcha_is_valid")
+    @patch("base.views.messages.error")
+    def test_is_captcha_invalid_false(self, mock_messages_error, mock_captcha_is_valid):
+        """Test _is_captcha_invalid returns False and does not set a message when captcha is valid."""
+        mock_captcha_is_valid.return_value = True
+        view = Contact()
+        request = self.factory.post("/")
+
+        result = view._is_captcha_invalid(request)
+
+        self.assertFalse(result)
+        mock_captcha_is_valid.assert_called_once_with(request)
+        mock_messages_error.assert_not_called()
+
     @override_settings(RATELIMIT_ENABLE=True)
     def test_contact_rate_limit(self):
         """Test that submitting the form too many times triggers the rate limit."""

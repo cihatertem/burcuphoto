@@ -3,7 +3,7 @@ import os
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ValidationError
 from django.core.mail import BadHeaderError, EmailMessage
 from django.core.validators import validate_email
