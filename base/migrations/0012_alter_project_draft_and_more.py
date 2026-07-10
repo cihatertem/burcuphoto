@@ -4,19 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('base', '0011_alter_project_alt_alter_projectportfolio_alt'),
+        ("base", "0011_alter_project_alt_alter_projectportfolio_alt"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='project',
-            name='draft',
+            model_name="project",
+            name="draft",
             field=models.BooleanField(db_index=True, default=True),
         ),
         migrations.AddIndex(
-            model_name='projectportfolio',
-            index=models.Index(fields=['project', 'index'], name='base_projec_project_dc974c_idx'),
+            model_name="projectportfolio",
+            index=models.Index(
+                fields=["project", "index"], name="base_projec_project_dc974c_idx"
+            ),
         ),
     ]

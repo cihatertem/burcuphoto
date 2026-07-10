@@ -90,7 +90,8 @@ class Contact(YearContext, TemplateView):
 
     def get(self, request, *args, **kwargs):
         # Captcha sadece GET’te üretilir (POST’ta asla overwrite edilmez)
-        _generate_captcha(request)
+        if CAPTCHA_ANS_KEY not in request.session:
+            _generate_captcha(request)
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -192,7 +193,9 @@ class Contact(YearContext, TemplateView):
 
 class DraftList(UserPassesTestMixin, YearContext, ListView):
     template_name = "base/portfolio_list.html"
-    queryset = Project.objects.filter(draft=True)
+    queryset = Project.objects.filter(draft=True).prefetch_related(
+        "projectportfolio_set"
+    )
 
     def test_func(self):
         return self.request.user.is_staff

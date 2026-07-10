@@ -105,6 +105,19 @@ class ContactViewTest(TestCase):
         self.assertIn('alt="CAPTCHA Image"', html)
         self.assertNotIn("5 + 3", html)
 
+    @patch("base.views._generate_captcha")
+    def test_contact_get_does_not_regenerate_existing_captcha(
+        self, mock_generate_captcha
+    ):
+        session = self.client.session
+        session[CAPTCHA_ANS_KEY] = 8
+        session.save()
+
+        response = self.client.get(reverse("base:contact"))
+
+        self.assertEqual(response.status_code, 200)
+        mock_generate_captcha.assert_not_called()
+
     @override_settings(
         RATELIMIT_ENABLE=False,
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
@@ -902,7 +915,7 @@ class DraftListTest(ImageTestMixin, TestCase):
             index=2,
         )
 
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             view = DraftList()
             view.kwargs = {}
             qs = view.get_queryset()
