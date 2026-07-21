@@ -106,14 +106,7 @@ def _get_trusted_proxies():
 
 def _get_ip_from_xff(xff, trusted_ips, trusted_subnets) -> str | None:
     last_valid_ip = None
-    while xff:
-        parts = xff.rsplit(",", 1)
-        if len(parts) == 2:
-            xff, ip_str = parts
-        else:
-            ip_str = parts[0]
-            xff = ""
-
+    for ip_str in reversed(xff.split(",")):
         if ip_str := ip_str.strip():
             last_valid_ip = ip_str
             if not _is_trusted_proxy_ip(ip_str, trusted_ips, trusted_subnets):
