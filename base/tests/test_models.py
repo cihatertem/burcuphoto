@@ -166,6 +166,25 @@ class ProjectModelTest(ImageTestMixin, TestCase):
 
         mock_super_delete.assert_called_once_with(keep_parents=True)
 
+    @patch("django.db.models.Model.delete")
+    def test_project_delete_args(self, mock_super_delete):
+        """Test that delete args are properly forwarded to the parent class."""
+        project = Project.objects.create(
+            title="Args Delete Project", slug="args-delete-project", draft=False
+        )
+        project.delete("arg1")
+        mock_super_delete.assert_called_once_with("arg1")
+
+    @patch("django.db.models.Model.delete")
+    def test_project_delete_return_value(self, mock_super_delete):
+        """Test that delete return value is returned correctly."""
+        mock_super_delete.return_value = (1, {"base.Project": 1})
+        project = Project.objects.create(
+            title="Return Value Project", slug="return-val-project", draft=False
+        )
+        result = project.delete()
+        self.assertEqual(result, (1, {"base.Project": 1}))
+
 
 class ProjectPortfolioModelTest(ImageTestMixin, TestCase):
     def test_project_portfolio_save_image_resizing(self):

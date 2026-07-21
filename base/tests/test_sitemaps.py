@@ -13,19 +13,20 @@ from base.tests.mixins import ImageTestMixin
 class BaseSiteMapTests(TestCase):
     def test_base_sitemap_items(self):
         sitemap = BaseSiteMap()
-        items = sitemap.items()
         expected_items = [
             "base:home",
             "base:contact",
             "base:portfolio",
             "base:about",
         ]
-        self.assertEqual(list(items), expected_items)
+        self.assertEqual(sitemap.items(), expected_items)
 
     def test_base_sitemap_location(self):
         sitemap = BaseSiteMap()
         self.assertEqual(sitemap.location("base:home"), reverse("base:home"))
         self.assertEqual(sitemap.location("base:contact"), reverse("base:contact"))
+        self.assertEqual(sitemap.location("base:portfolio"), reverse("base:portfolio"))
+        self.assertEqual(sitemap.location("base:about"), reverse("base:about"))
 
 
 class ProjectSitemapTests(ImageTestMixin, TestCase):

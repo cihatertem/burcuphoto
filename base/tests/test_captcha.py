@@ -92,3 +92,13 @@ class CaptchaTests(TestCase):
         request = self.factory.post("/", {"captcha": "15"})
         request.session = {CAPTCHA_ANS_KEY: "abc"}
         self.assertFalse(captcha_is_valid(request))
+
+    def test_captcha_is_valid_fail_both_missing(self):
+        request = self.factory.post("/")
+        request.session = {}
+        self.assertFalse(captcha_is_valid(request))
+
+    def test_captcha_is_valid_fail_both_invalid(self):
+        request = self.factory.post("/", {"captcha": "def"})
+        request.session = {CAPTCHA_ANS_KEY: "abc"}
+        self.assertFalse(captcha_is_valid(request))
