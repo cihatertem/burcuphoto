@@ -105,6 +105,15 @@ class ProjectSitemapTests(ImageTestMixin, TestCase):
         with self.assertRaises(AttributeError):
             sitemap.location(None)
 
+    def test_project_sitemap_location_no_reverse_match(self):
+        sitemap = ProjectSitemap()
+
+        class InvalidSlugItem:
+            slug = "invalid/slug/that/wont/match"
+
+        with self.assertRaises(NoReverseMatch):
+            sitemap.location(InvalidSlugItem())
+
     def test_project_sitemap_lastmod(self):
         sitemap = ProjectSitemap()
         self.assertEqual(sitemap.lastmod(self.project1), self.project1.updated)

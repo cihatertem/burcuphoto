@@ -61,6 +61,50 @@ class ParseIpTests(TestCase):
         self.assertEqual(info.misses, 1)
 
 
+class GetTrustedNetworksOptimizedTests(TestCase):
+    def setUp(self):
+        _get_trusted_networks_optimized.cache_clear()
+
+    def test_separates_ips_and_subnets(self):
+        networks = (
+            ipaddress.ip_network("192.168.1.1/32"),
+            ipaddress.ip_network("10.0.0.0/24"),
+            ipaddress.ip_network("2001:db8::1/128"),
+            ipaddress.ip_network("2001:db8:1::/64"),
+        )
+        trusted_ips, trusted_subnets = _get_trusted_networks_optimized(networks)
+
+        self.assertEqual(
+            trusted_ips,
+            {
+                ipaddress.ip_address("192.168.1.1"),
+                ipaddress.ip_address("2001:db8::1"),
+            },
+        )
+        self.assertEqual(
+            trusted_subnets,
+            [
+                ipaddress.ip_network("10.0.0.0/24"),
+                ipaddress.ip_network("2001:db8:1::/64"),
+            ],
+        )
+
+    def test_lru_cache_behavior(self):
+        networks = (ipaddress.ip_network("192.168.1.1/32"),)
+
+        # Initial call
+        _get_trusted_networks_optimized(networks)
+        info = _get_trusted_networks_optimized.cache_info()
+        self.assertEqual(info.hits, 0)
+        self.assertEqual(info.misses, 1)
+
+        # Cached call
+        _get_trusted_networks_optimized(networks)
+        info = _get_trusted_networks_optimized.cache_info()
+        self.assertEqual(info.hits, 1)
+        self.assertEqual(info.misses, 1)
+
+
 class IsIpTrustedTests(TestCase):
     def test_ip_in_trusted_ips(self):
         ip_obj = ipaddress.ip_address("192.168.1.1")

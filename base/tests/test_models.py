@@ -113,6 +113,56 @@ class ProjectModelTest(ImageTestMixin, TestCase):
             self.assertEqual(img.width, 500)
             self.assertEqual(img.height, 500)
 
+    @patch("base.models.process_image_field")
+    def test_project_save_photo_update(self, mock_process_image_field):
+        """Test that updating featured_photo on an existing Project triggers process_image_field."""
+        initial_image = self._create_image(500, 500)
+
+        # Configure mock before create to avoid save error
+        mock_process_image_field.return_value = initial_image
+
+        project = Project.objects.create(
+            title="Initial Photo Project",
+            slug="initial-photo-project",
+            featured_photo=initial_image,
+        )
+
+        # Ensure the mock returns a valid object to avoid saving a MagicMock to ImageField
+        new_image = self._create_image(600, 600)
+        mock_process_image_field.return_value = new_image
+
+        mock_process_image_field.reset_mock()
+
+        # Re-fetch the model to properly set _initial_featured_photo as ImageFieldFile
+        project = Project.objects.get(id=project.id)
+        project.featured_photo = new_image
+        project.save()
+
+        mock_process_image_field.assert_called_once()
+
+    @patch("base.models.process_image_field")
+    def test_project_save_photo_unchanged(self, mock_process_image_field):
+        """Test that saving an existing Project without changing featured_photo does not trigger process_image_field."""
+        initial_image = self._create_image(500, 500)
+
+        # Configure mock before create to avoid save error
+        mock_process_image_field.return_value = initial_image
+
+        project = Project.objects.create(
+            title="Unchanged Photo Project",
+            slug="unchanged-photo-project",
+            featured_photo=initial_image,
+        )
+
+        mock_process_image_field.reset_mock()
+
+        # Re-fetch the model to properly set _initial_featured_photo as ImageFieldFile
+        project = Project.objects.get(id=project.id)
+        project.title = "Updated Title"
+        project.save()
+
+        mock_process_image_field.assert_not_called()
+
     def test_project_save_link_draft(self):
         """Test that project_link is correctly generated when draft is True."""
         small_image = self._create_image(500, 500)
@@ -251,6 +301,62 @@ class ProjectPortfolioModelTest(ImageTestMixin, TestCase):
         with Image.open(portfolio.photo) as img:
             self.assertEqual(img.width, 500)
             self.assertEqual(img.height, 500)
+
+    @patch("base.models.process_image_field")
+    def test_project_portfolio_save_photo_update(self, mock_process_image_field):
+        """Test that updating photo on an existing ProjectPortfolio triggers process_image_field."""
+        initial_image = self._create_image(500, 500)
+
+        # Configure mock before create to avoid save error
+        mock_process_image_field.return_value = initial_image
+
+        project = Project.objects.create(
+            title="Initial Photo Project",
+            slug="initial-photo-project",
+        )
+        portfolio = ProjectPortfolio.objects.create(
+            project=project,
+            photo=initial_image,
+        )
+
+        # Ensure the mock returns a valid object to avoid saving a MagicMock to ImageField
+        new_image = self._create_image(600, 600)
+        mock_process_image_field.return_value = new_image
+
+        mock_process_image_field.reset_mock()
+
+        # Re-fetch the model to properly set _initial_photo as ImageFieldFile
+        portfolio = ProjectPortfolio.objects.get(id=portfolio.id)
+        portfolio.photo = new_image
+        portfolio.save()
+
+        mock_process_image_field.assert_called_once()
+
+    @patch("base.models.process_image_field")
+    def test_project_portfolio_save_photo_unchanged(self, mock_process_image_field):
+        """Test that saving an existing ProjectPortfolio without changing photo does not trigger process_image_field."""
+        initial_image = self._create_image(500, 500)
+
+        # Configure mock before create to avoid save error
+        mock_process_image_field.return_value = initial_image
+
+        project = Project.objects.create(
+            title="Unchanged Photo Project",
+            slug="unchanged-photo-project",
+        )
+        portfolio = ProjectPortfolio.objects.create(
+            project=project,
+            photo=initial_image,
+        )
+
+        mock_process_image_field.reset_mock()
+
+        # Re-fetch the model to properly set _initial_photo as ImageFieldFile
+        portfolio = ProjectPortfolio.objects.get(id=portfolio.id)
+        portfolio.alt = "Updated Alt Text"
+        portfolio.save()
+
+        mock_process_image_field.assert_not_called()
 
     def test_project_portfolio_str(self):
         """Test the string representation of the ProjectPortfolio model."""
