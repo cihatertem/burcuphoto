@@ -59,13 +59,31 @@ class ProjectSitemapTests(ImageTestMixin, TestCase):
         )
 
     def test_project_sitemap_items(self):
+        # Manually update 'updated' to ensure deterministic ordering
+        now = timezone.now()
+        Project.objects.filter(pk=self.project1.pk).update(
+            updated=now - timedelta(days=2)
+        )
+        Project.objects.filter(pk=self.project2.pk).update(
+            updated=now - timedelta(days=1)
+        )
+
+        self.project1.refresh_from_db()
+        self.project2.refresh_from_db()
+
         sitemap = ProjectSitemap()
         items = sitemap.items()
-        # ProjectSitemap only returns non-draft projects.
-        self.assertEqual(items.count(), 2)
-        self.assertIn(self.project1, items)
-        self.assertIn(self.project2, items)
-        self.assertNotIn(self.draft_project, items)
+
+        # ProjectSitemap only returns non-draft projects and orders by updated
+        self.assertEqual(list(items), [self.project1, self.project2])
+
+        # Verify that .only("slug", "updated") logic deferred some fields
+        deferred = items[0].get_deferred_fields()
+        self.assertTrue(len(deferred) > 0)
+        self.assertIn("title", deferred)
+        self.assertIn("draft", deferred)
+        self.assertNotIn("slug", deferred)
+        self.assertNotIn("updated", deferred)
 
     def test_project_sitemap_location(self):
         sitemap = ProjectSitemap()

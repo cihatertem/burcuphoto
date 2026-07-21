@@ -52,6 +52,37 @@ class ProcessImageFieldTest(ImageTestMixin, TestCase):
         self.assertEqual(result, img)
         mock_logger.assert_called_once()
 
+    @patch("base.models.logger.warning")
+    @patch("base.models.Image.open")
+    def test_process_type_error(self, mock_image_open, mock_logger):
+        """Test processing graceful handle of TypeError."""
+        mock_image_open.side_effect = TypeError("Test TypeError")
+        img = self._create_image(500, 500)
+        result = process_image_field(img)
+        self.assertEqual(result, img)
+        mock_logger.assert_called_once()
+
+    @patch("base.models.logger.warning")
+    @patch("base.models.Image.open")
+    def test_process_value_error(self, mock_image_open, mock_logger):
+        """Test processing graceful handle of ValueError."""
+        mock_image_open.side_effect = ValueError("Test ValueError")
+        img = self._create_image(500, 500)
+        result = process_image_field(img)
+        self.assertEqual(result, img)
+        mock_logger.assert_called_once()
+
+    def test_process_renames_to_jpg(self):
+        """Test processing renames image to .jpg and changes content type."""
+        img = self._create_image(500, 500)
+        img.name = "test_image.png"
+        img.content_type = "image/png"
+
+        result = process_image_field(img)
+
+        self.assertTrue(result.name.endswith(".jpg"))
+        self.assertEqual(result.content_type, "image/jpeg")
+
 
 class ProjectModelTest(ImageTestMixin, TestCase):
     def test_project_save_image_resizing(self):

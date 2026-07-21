@@ -210,6 +210,10 @@ class GetClientIPTests(TestCase):
             del request.META["REMOTE_ADDR"]
         self.assertIsNone(get_client_ip(request))
 
+    def test_empty_remote_addr(self):
+        request = self.factory.get("/", REMOTE_ADDR="")
+        self.assertIsNone(get_client_ip(request))
+
     def test_invalid_remote_addr(self):
         request = self.factory.get("/", REMOTE_ADDR="invalid_ip")
         self.assertEqual(get_client_ip(request), "invalid_ip")
@@ -293,6 +297,13 @@ class GetClientIPTests(TestCase):
                 "/", REMOTE_ADDR="127.0.0.1", HTTP_X_FORWARDED_FOR="5.6.7.8"
             )
             self.assertEqual(get_client_ip(request), "127.0.0.1")
+
+    def test_trusted_proxy_nets_absent(self):
+        # Ensure it works when TRUSTED_PROXY_NETS is naturally absent from settings
+        request = self.factory.get(
+            "/", REMOTE_ADDR="127.0.0.1", HTTP_X_FORWARDED_FOR="5.6.7.8"
+        )
+        self.assertEqual(get_client_ip(request), "127.0.0.1")
 
     @override_settings(TRUSTED_PROXY_NETS=[ipaddress.ip_network("127.0.0.1/32")])
     def test_get_client_ip_with_multiple_malformed_xff_ips(self):
