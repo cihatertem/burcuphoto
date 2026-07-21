@@ -3,6 +3,7 @@ import os
 import uuid
 
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -17,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 def process_image_field(image_field, max_size=780):
     """Processes all images through photo_resizer to ensure re-encoding and EXIF data stripping, resizing if necessary."""
+    if not image_field:
+        return image_field
+
     try:
         with Image.open(image_field) as image:
             output = photo_resizer(image, max_size)
@@ -30,7 +34,7 @@ def process_image_field(image_field, max_size=780):
             )
     except (AttributeError, TypeError, ValueError, OSError) as e:
         logger.warning("Failed to process image field: %s", e)
-    return image_field
+        raise ValidationError(f"Failed to process image field: {e}")
 
 
 class Project(models.Model):

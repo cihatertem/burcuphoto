@@ -557,6 +557,28 @@ class ClientIpKeyTests(TestCase):
     def test_with_none_request(self):
         self.assertEqual(client_ip_key(None, None), "unknown")
 
+    @patch("base.utils.get_client_ip")
+    def test_get_client_ip_returns_none(self, mock_get_client_ip):
+        mock_get_client_ip.return_value = None
+        request = self.factory.get("/")
+        self.assertEqual(client_ip_key("contact", request), "unknown")
+        mock_get_client_ip.assert_called_once_with(request)
+
+    @patch("base.utils.get_client_ip")
+    def test_get_client_ip_returns_empty_string(self, mock_get_client_ip):
+        mock_get_client_ip.return_value = ""
+        request = self.factory.get("/")
+        self.assertEqual(client_ip_key("contact", request), "unknown")
+        mock_get_client_ip.assert_called_once_with(request)
+
+    @patch("base.utils.get_client_ip")
+    def test_with_group_param(self, mock_get_client_ip):
+        mock_get_client_ip.return_value = "5.6.7.8"
+        request = self.factory.get("/")
+        # Verify that group parameter is accepted and ignored in favor of the IP
+        self.assertEqual(client_ip_key("my_group", request), "5.6.7.8")
+        mock_get_client_ip.assert_called_once_with(request)
+
 
 class CurrentYearTests(TestCase):
     @patch("base.utils.date")

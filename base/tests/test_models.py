@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from PIL import Image
@@ -32,14 +33,14 @@ class ProcessImageFieldTest(ImageTestMixin, TestCase):
         """Test processing None input."""
         result = process_image_field(None)
         self.assertIsNone(result)
-        mock_logger.assert_called_once()
+        mock_logger.assert_not_called()
 
     @patch("base.models.logger.warning")
     def test_process_non_image(self, mock_logger):
         """Test processing non-image input."""
         txt = SimpleUploadedFile("test.txt", b"hello", content_type="text/plain")
-        result = process_image_field(txt)
-        self.assertEqual(result, txt)
+        with self.assertRaises(ValidationError):
+            process_image_field(txt)
         mock_logger.assert_called_once()
 
     @patch("base.models.logger.warning")
@@ -48,8 +49,8 @@ class ProcessImageFieldTest(ImageTestMixin, TestCase):
         """Test processing a corrupt image is gracefully handled."""
         mock_image_open.side_effect = OSError("Corrupt image")
         img = self._create_image(500, 500)
-        result = process_image_field(img)
-        self.assertEqual(result, img)
+        with self.assertRaises(ValidationError):
+            process_image_field(img)
         mock_logger.assert_called_once()
 
     @patch("base.models.logger.warning")
@@ -58,8 +59,8 @@ class ProcessImageFieldTest(ImageTestMixin, TestCase):
         """Test processing graceful handle of TypeError."""
         mock_image_open.side_effect = TypeError("Test TypeError")
         img = self._create_image(500, 500)
-        result = process_image_field(img)
-        self.assertEqual(result, img)
+        with self.assertRaises(ValidationError):
+            process_image_field(img)
         mock_logger.assert_called_once()
 
     @patch("base.models.logger.warning")
@@ -68,8 +69,8 @@ class ProcessImageFieldTest(ImageTestMixin, TestCase):
         """Test processing graceful handle of ValueError."""
         mock_image_open.side_effect = ValueError("Test ValueError")
         img = self._create_image(500, 500)
-        result = process_image_field(img)
-        self.assertEqual(result, img)
+        with self.assertRaises(ValidationError):
+            process_image_field(img)
         mock_logger.assert_called_once()
 
     def test_process_renames_to_jpg(self):

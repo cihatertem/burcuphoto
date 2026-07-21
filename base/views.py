@@ -193,9 +193,7 @@ class Contact(YearContext, TemplateView):
 
 class DraftList(UserPassesTestMixin, YearContext, ListView):
     template_name = "base/portfolio_list.html"
-    queryset = Project.objects.filter(draft=True).prefetch_related(
-        "projectportfolio_set"
-    )
+    queryset = Project.objects.filter(draft=True)
 
     def test_func(self):
         return self.request.user.is_staff

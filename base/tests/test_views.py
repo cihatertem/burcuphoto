@@ -915,7 +915,7 @@ class DraftListTest(ImageTestMixin, TestCase):
             index=2,
         )
 
-        with self.assertNumQueries(2):
+        with self.assertNumQueries(1):
             view = DraftList()
             view.kwargs = {}
             qs = view.get_queryset()
