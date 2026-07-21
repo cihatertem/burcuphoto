@@ -148,6 +148,11 @@ class GetTrustedNetworksOptimizedTests(TestCase):
 
 
 class GetTrustedProxiesTests(TestCase):
+    def test_get_trusted_proxies_without_settings(self):
+        trusted_ips, trusted_subnets = _get_trusted_proxies()
+        self.assertIsNone(trusted_ips)
+        self.assertIsNone(trusted_subnets)
+
     def test_trusted_proxy_nets_not_set(self):
         with self.settings(TRUSTED_PROXY_NETS=None):
             trusted_ips, trusted_subnets = _get_trusted_proxies()
@@ -303,6 +308,8 @@ class GetClientIPTests(TestCase):
         )
         self.assertEqual(get_client_ip(request), "127.0.0.1")
 
+
+class GetIpFromXffTests(TestCase):
     def test_get_ip_from_xff_empty_strings(self):
         # Direct tests for the _get_ip_from_xff function edge cases
         trusted_ips, trusted_subnets = set(), []
@@ -310,6 +317,77 @@ class GetClientIPTests(TestCase):
         self.assertIsNone(_get_ip_from_xff("   ", trusted_ips, trusted_subnets))
         self.assertIsNone(_get_ip_from_xff(",,", trusted_ips, trusted_subnets))
         self.assertIsNone(_get_ip_from_xff(" , , ", trusted_ips, trusted_subnets))
+
+    def test_single_ip(self):
+        trusted_ips, trusted_subnets = set(), []
+        self.assertEqual(
+            _get_ip_from_xff("1.2.3.4", trusted_ips, trusted_subnets), "1.2.3.4"
+        )
+        self.assertEqual(
+            _get_ip_from_xff(" 1.2.3.4 ", trusted_ips, trusted_subnets), "1.2.3.4"
+        )
+
+    def test_multiple_ips_all_untrusted(self):
+        trusted_ips, trusted_subnets = set(), []
+        # Since 5.6.7.8 is not a trusted proxy, it should break and return 5.6.7.8
+        self.assertEqual(
+            _get_ip_from_xff("1.2.3.4, 5.6.7.8", trusted_ips, trusted_subnets),
+            "5.6.7.8",
+        )
+
+    def test_multiple_ips_with_trusted_proxy(self):
+        trusted_ips, trusted_subnets = {ipaddress.ip_address("5.6.7.8")}, []
+        # 5.6.7.8 is trusted proxy, so it skips it and returns 1.2.3.4
+        self.assertEqual(
+            _get_ip_from_xff("1.2.3.4, 5.6.7.8", trusted_ips, trusted_subnets),
+            "1.2.3.4",
+        )
+
+        # 10.0.0.1 is trusted proxy, skips it. 5.6.7.8 is not trusted, breaks and returns 5.6.7.8.
+        trusted_ips = {ipaddress.ip_address("10.0.0.1")}
+        self.assertEqual(
+            _get_ip_from_xff(
+                "1.2.3.4, 5.6.7.8, 10.0.0.1", trusted_ips, trusted_subnets
+            ),
+            "5.6.7.8",
+        )
+
+    def test_multiple_ips_all_trusted_proxies(self):
+        trusted_ips = {
+            ipaddress.ip_address("5.6.7.8"),
+            ipaddress.ip_address("10.0.0.1"),
+        }
+        trusted_subnets = []
+        # Both are trusted, so it skips both and would return the left-most IP which is 1.2.3.4,
+        # since 1.2.3.4 is evaluated next. If it's not a proxy, it breaks and returns it.
+        self.assertEqual(
+            _get_ip_from_xff(
+                "1.2.3.4, 5.6.7.8, 10.0.0.1", trusted_ips, trusted_subnets
+            ),
+            "1.2.3.4",
+        )
+
+        # If ALL are trusted proxies, including 1.2.3.4, it returns the left-most.
+        trusted_ips.add(ipaddress.ip_address("1.2.3.4"))
+        self.assertEqual(
+            _get_ip_from_xff(
+                "1.2.3.4, 5.6.7.8, 10.0.0.1", trusted_ips, trusted_subnets
+            ),
+            "1.2.3.4",
+        )
+
+    def test_malformed_ips_in_xff(self):
+        trusted_ips = {ipaddress.ip_address("5.6.7.8")}
+        trusted_subnets = []
+        # Rightmost is valid trusted proxy, next is invalid IP.
+        # `_is_trusted_proxy_ip` handles ValueError and returns False, so the invalid IP is treated as untrusted.
+        # Thus, it returns the invalid IP string.
+        self.assertEqual(
+            _get_ip_from_xff(
+                "1.2.3.4, invalid_ip, 5.6.7.8", trusted_ips, trusted_subnets
+            ),
+            "invalid_ip",
+        )
 
 
 class PhotoResizerTests(TestCase):

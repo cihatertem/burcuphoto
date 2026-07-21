@@ -246,3 +246,62 @@ class ProjectPortfolioModelTest(ImageTestMixin, TestCase):
             using="default",
             update_fields=["index"],
         )
+
+    @patch("base.models.process_image_field")
+    def test_project_portfolio_save_no_photo_change_skips_processing(
+        self, mock_process_image_field
+    ):
+        """Test that saving without changing the photo skips process_image_field."""
+        small_image = self._create_image(500, 500)
+        project = Project.objects.create(
+            title="Test No Photo Change Project",
+            slug="test-no-photo-change",
+        )
+
+        mock_process_image_field.return_value = small_image
+        portfolio = ProjectPortfolio.objects.create(
+            project=project,
+            photo=small_image,
+        )
+
+        portfolio = ProjectPortfolio.objects.get(id=portfolio.id)
+
+        # Reset mock after initial creation
+        mock_process_image_field.reset_mock()
+
+        # Update a different field
+        portfolio.index = 1
+        portfolio.save()
+
+        # Ensure process_image_field is not called
+        mock_process_image_field.assert_not_called()
+
+    @patch("base.models.process_image_field")
+    def test_project_portfolio_save_photo_change_processes_image(
+        self, mock_process_image_field
+    ):
+        """Test that updating the photo calls process_image_field."""
+        small_image1 = self._create_image(500, 500)
+        project = Project.objects.create(
+            title="Test Photo Change Project",
+            slug="test-photo-change",
+        )
+
+        mock_process_image_field.return_value = small_image1
+        portfolio = ProjectPortfolio.objects.create(
+            project=project,
+            photo=small_image1,
+        )
+
+        portfolio = ProjectPortfolio.objects.get(id=portfolio.id)
+
+        # Update the photo field
+        small_image2 = self._create_image(600, 600)
+        mock_process_image_field.reset_mock()
+        mock_process_image_field.return_value = small_image2
+
+        portfolio.photo = small_image2
+        portfolio.save()
+
+        # Ensure process_image_field is called
+        mock_process_image_field.assert_called_once_with(small_image2)

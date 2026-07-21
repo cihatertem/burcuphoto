@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
+from django.urls.exceptions import NoReverseMatch
 from django.utils import timezone
 
 from base.models import Project
@@ -23,10 +24,17 @@ class BaseSiteMapTests(TestCase):
 
     def test_base_sitemap_location(self):
         sitemap = BaseSiteMap()
-        self.assertEqual(sitemap.location("base:home"), reverse("base:home"))
-        self.assertEqual(sitemap.location("base:contact"), reverse("base:contact"))
-        self.assertEqual(sitemap.location("base:portfolio"), reverse("base:portfolio"))
-        self.assertEqual(sitemap.location("base:about"), reverse("base:about"))
+        items = sitemap.items()
+
+        self.assertGreater(len(items), 0)
+
+        for item in items:
+            self.assertEqual(sitemap.location(item), reverse(item))
+
+    def test_base_sitemap_location_invalid_item(self):
+        sitemap = BaseSiteMap()
+        with self.assertRaises(NoReverseMatch):
+            sitemap.location("base:invalid_route")
 
 
 class ProjectSitemapTests(ImageTestMixin, TestCase):

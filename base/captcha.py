@@ -1,6 +1,5 @@
 import base64
 import secrets
-from functools import lru_cache
 from io import BytesIO
 
 from PIL import Image, ImageDraw
@@ -30,7 +29,6 @@ def _parse_int(value) -> int | None:
         return None
 
 
-@lru_cache(maxsize=128)
 def _generate_captcha_image_base64(n1: int, n2: int) -> str:
     image = Image.new("L", (60, 20), color=255)
     draw = ImageDraw.Draw(image)

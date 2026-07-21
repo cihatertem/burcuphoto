@@ -38,6 +38,14 @@ class CaptchaTests(TestCase):
         self.assertTrue(1 <= n2 <= 10)
         self.assertEqual(ans, n1 + n2)
 
+    def test_generate_captcha_image_base64_unique_images(self):
+        # Generate multiple images with the same arguments
+        img1 = _generate_captcha_image_base64(5, 3)
+        img2 = _generate_captcha_image_base64(5, 3)
+
+        # Verify they are different because of the random noise and lack of caching
+        self.assertNotEqual(img1, img2)
+
     @patch("base.captcha.secrets.randbelow", side_effect=[0] * 20)
     def test_generate_captcha_image_base64_returns_png_image(self, _mock_randbelow):
         captcha_image_b64 = _generate_captcha_image_base64(5, 3)
