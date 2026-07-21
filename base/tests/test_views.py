@@ -478,7 +478,7 @@ class ContactViewTest(TestCase):
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     )
     def test_contact_post_incorrect_captcha(self):
-        """Test that submitting the contact form with an incorrect captcha redirects with an error."""
+        """Test that submitting the contact form with an incorrect captcha redirects with an error and clears session."""
         session = self.client.session
         session[CAPTCHA_NUM1_KEY] = 5
         session[CAPTCHA_NUM2_KEY] = 3
@@ -507,17 +507,30 @@ class ContactViewTest(TestCase):
         self.assertEqual(str(messages[0]), "Captcha incorrect. Please try again.")
         self.assertEqual(messages[0].level_tag, "error")
 
+        # Check that session keys were cleared
+        self.assertNotIn(CAPTCHA_ANS_KEY, response.wsgi_request.session)
+        self.assertNotIn(CAPTCHA_NUM1_KEY, response.wsgi_request.session)
+        self.assertNotIn(CAPTCHA_NUM2_KEY, response.wsgi_request.session)
+
     @patch("base.views.captcha_is_valid")
     @patch("base.views.messages.error")
     def test_is_captcha_invalid_true(self, mock_messages_error, mock_captcha_is_valid):
-        """Test _is_captcha_invalid returns True and sets an error message when captcha is invalid."""
+        """Test _is_captcha_invalid returns True, sets an error message, and clears session when captcha is invalid."""
         mock_captcha_is_valid.return_value = False
         view = Contact()
         request = self.factory.post("/")
+        request.session = {
+            CAPTCHA_ANS_KEY: 8,
+            CAPTCHA_NUM1_KEY: 5,
+            CAPTCHA_NUM2_KEY: 3,
+        }
 
         result = view._is_captcha_invalid(request)
 
         self.assertTrue(result)
+        self.assertNotIn(CAPTCHA_ANS_KEY, request.session)
+        self.assertNotIn(CAPTCHA_NUM1_KEY, request.session)
+        self.assertNotIn(CAPTCHA_NUM2_KEY, request.session)
         mock_captcha_is_valid.assert_called_once_with(request)
         mock_messages_error.assert_called_once_with(
             request, "Captcha incorrect. Please try again."

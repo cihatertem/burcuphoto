@@ -119,6 +119,9 @@ class Contact(YearContext, TemplateView):
     def _is_captcha_invalid(self, request) -> bool:
         if not captcha_is_valid(request):
             messages.error(request, "Captcha incorrect. Please try again.")
+            request.session.pop(CAPTCHA_ANS_KEY, None)
+            request.session.pop(CAPTCHA_NUM1_KEY, None)
+            request.session.pop(CAPTCHA_NUM2_KEY, None)
             return True
         return False
 

@@ -61,6 +61,63 @@ class ParseIpTests(TestCase):
         self.assertEqual(info.misses, 1)
 
 
+
+class IsIpTrustedTests(TestCase):
+    def test_ip_in_trusted_ips(self):
+        ip_obj = ipaddress.ip_address("192.168.1.1")
+        trusted_ips = {
+            ipaddress.ip_address("192.168.1.1"),
+            ipaddress.ip_address("10.0.0.1"),
+        }
+        trusted_subnets = []
+        self.assertTrue(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+    def test_ip_in_trusted_subnets(self):
+        ip_obj = ipaddress.ip_address("192.168.1.50")
+        trusted_ips = set()
+        trusted_subnets = [ipaddress.ip_network("192.168.1.0/24")]
+        self.assertTrue(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+    def test_ip_not_in_trusted(self):
+        ip_obj = ipaddress.ip_address("8.8.8.8")
+        trusted_ips = {ipaddress.ip_address("192.168.1.1")}
+        trusted_subnets = [ipaddress.ip_network("10.0.0.0/8")]
+        self.assertFalse(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+    def test_empty_trusted_lists(self):
+        ip_obj = ipaddress.ip_address("192.168.1.1")
+        trusted_ips = set()
+        trusted_subnets = []
+        self.assertFalse(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+    def test_ipv6_in_trusted_subnets(self):
+        ip_obj = ipaddress.ip_address("2001:db8::1234")
+        trusted_ips = set()
+        trusted_subnets = [ipaddress.ip_network("2001:db8::/32")]
+        self.assertTrue(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+    def test_ip_in_subsequent_trusted_subnet(self):
+        ip_obj = ipaddress.ip_address("10.0.0.5")
+        trusted_ips = set()
+        trusted_subnets = [
+            ipaddress.ip_network("192.168.1.0/24"),
+            ipaddress.ip_network("10.0.0.0/8"),
+        ]
+        self.assertTrue(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+    def test_ipv4_in_ipv6_subnet(self):
+        ip_obj = ipaddress.ip_address("192.168.1.1")
+        trusted_ips = set()
+        trusted_subnets = [ipaddress.ip_network("2001:db8::/32")]
+        self.assertFalse(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+    def test_ipv6_in_ipv4_subnet(self):
+        ip_obj = ipaddress.ip_address("2001:db8::1")
+        trusted_ips = set()
+        trusted_subnets = [ipaddress.ip_network("192.168.1.0/24")]
+        self.assertFalse(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
+
+
 class GetTrustedNetworksOptimizedTests(TestCase):
     def setUp(self):
         _get_trusted_networks_optimized.cache_clear()
@@ -104,43 +161,6 @@ class GetTrustedNetworksOptimizedTests(TestCase):
         self.assertEqual(info.hits, 1)
         self.assertEqual(info.misses, 1)
 
-
-class IsIpTrustedTests(TestCase):
-    def test_ip_in_trusted_ips(self):
-        ip_obj = ipaddress.ip_address("192.168.1.1")
-        trusted_ips = {
-            ipaddress.ip_address("192.168.1.1"),
-            ipaddress.ip_address("10.0.0.1"),
-        }
-        trusted_subnets = []
-        self.assertTrue(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
-
-    def test_ip_in_trusted_subnets(self):
-        ip_obj = ipaddress.ip_address("192.168.1.50")
-        trusted_ips = set()
-        trusted_subnets = [ipaddress.ip_network("192.168.1.0/24")]
-        self.assertTrue(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
-
-    def test_ip_not_in_trusted(self):
-        ip_obj = ipaddress.ip_address("8.8.8.8")
-        trusted_ips = {ipaddress.ip_address("192.168.1.1")}
-        trusted_subnets = [ipaddress.ip_network("10.0.0.0/8")]
-        self.assertFalse(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
-
-    def test_empty_trusted_lists(self):
-        ip_obj = ipaddress.ip_address("192.168.1.1")
-        trusted_ips = set()
-        trusted_subnets = []
-        self.assertFalse(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
-
-    def test_ipv6_in_trusted_subnets(self):
-        ip_obj = ipaddress.ip_address("2001:db8::1234")
-        trusted_ips = set()
-        trusted_subnets = [ipaddress.ip_network("2001:db8::/32")]
-        self.assertTrue(_is_ip_trusted(ip_obj, trusted_ips, trusted_subnets))
-
-
-class GetTrustedNetworksOptimizedTests(TestCase):
     def test_empty_tuple(self):
         trusted_ips, trusted_subnets = _get_trusted_networks_optimized(())
         self.assertEqual(trusted_ips, set())
@@ -222,6 +242,11 @@ class GetTrustedProxiesTests(TestCase):
 
 
 class IsTrustedProxyIpTests(TestCase):
+    def setUp(self):
+        from base.utils import _parse_ip
+
+        _parse_ip.cache_clear()
+
     def test_ip_in_trusted_ips(self):
         trusted_ips = {ipaddress.ip_address("192.168.1.1")}
         self.assertTrue(_is_trusted_proxy_ip("192.168.1.1", trusted_ips, []))
@@ -236,6 +261,10 @@ class IsTrustedProxyIpTests(TestCase):
         self.assertFalse(
             _is_trusted_proxy_ip("172.16.0.1", trusted_ips, trusted_subnets)
         )
+
+    def test_invalid_ip_string_caught_as_value_error(self):
+        # Natively tests the ValueError block without mocking
+        self.assertFalse(_is_trusted_proxy_ip("not_an_ip", set(), []))
 
     @patch("base.utils._parse_ip", side_effect=ValueError)
     def test_value_error_returns_false(self, mock_parse_ip):
