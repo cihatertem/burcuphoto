@@ -61,7 +61,6 @@ class ParseIpTests(TestCase):
         self.assertEqual(info.misses, 1)
 
 
-
 class IsIpTrustedTests(TestCase):
     def test_ip_in_trusted_ips(self):
         ip_obj = ipaddress.ip_address("192.168.1.1")
@@ -630,6 +629,28 @@ class DirectoryPathTests(TestCase):
         path = project_directory_path(instance, "test.jpg")
         self.assertEqual(path, "projects/my-project/test.jpg")
 
+    def test_project_directory_path_unusual_filenames(self):
+        from unittest.mock import MagicMock
+
+        instance = MagicMock()
+        instance.slug = "my-project"
+
+        # Test spaces
+        path = project_directory_path(instance, "test file.jpg")
+        self.assertEqual(path, "projects/my-project/test file.jpg")
+
+        # Test special characters
+        path = project_directory_path(instance, "test@#file.jpg")
+        self.assertEqual(path, "projects/my-project/test@#file.jpg")
+
+        # Test unicode
+        path = project_directory_path(instance, "test_ünicode.jpg")
+        self.assertEqual(path, "projects/my-project/test_ünicode.jpg")
+
+        # Test multiple dots
+        path = project_directory_path(instance, "test.file.name.jpg")
+        self.assertEqual(path, "projects/my-project/test.file.name.jpg")
+
     def test_portfolio_directory_path(self):
         from unittest.mock import MagicMock
 
@@ -637,6 +658,28 @@ class DirectoryPathTests(TestCase):
         instance.project.slug = "my-project"
         path = portfolio_directory_path(instance, "test.jpg")
         self.assertEqual(path, "projects/my-project/photos/test.jpg")
+
+    def test_portfolio_directory_path_unusual_filenames(self):
+        from unittest.mock import MagicMock
+
+        instance = MagicMock()
+        instance.project.slug = "my-project"
+
+        # Test with spaces
+        path = portfolio_directory_path(instance, "test file.jpg")
+        self.assertEqual(path, "projects/my-project/photos/test file.jpg")
+
+        # Test with multiple dots
+        path = portfolio_directory_path(instance, "test.file.name.jpg")
+        self.assertEqual(path, "projects/my-project/photos/test.file.name.jpg")
+
+        # Test with no extension
+        path = portfolio_directory_path(instance, "testfile")
+        self.assertEqual(path, "projects/my-project/photos/testfile")
+
+        # Test with unicode
+        path = portfolio_directory_path(instance, "test_fïlè_😊.jpg")
+        self.assertEqual(path, "projects/my-project/photos/test_fïlè_😊.jpg")
 
 
 class HealthCheckMiddlewareTests(TestCase):

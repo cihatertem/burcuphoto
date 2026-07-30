@@ -45,9 +45,19 @@ class ProcessImageFieldTest(ImageTestMixin, TestCase):
 
     @patch("base.models.logger.warning")
     @patch("base.models.Image.open")
-    def test_process_corrupt_image(self, mock_image_open, mock_logger):
-        """Test processing a corrupt image is gracefully handled."""
-        mock_image_open.side_effect = OSError("Corrupt image")
+    def test_process_attribute_error(self, mock_image_open, mock_logger):
+        """Test processing graceful handle of AttributeError."""
+        mock_image_open.side_effect = AttributeError("Test AttributeError")
+        img = self._create_image(500, 500)
+        with self.assertRaises(ValidationError):
+            process_image_field(img)
+        mock_logger.assert_called_once()
+
+    @patch("base.models.logger.warning")
+    @patch("base.models.Image.open")
+    def test_process_os_error(self, mock_image_open, mock_logger):
+        """Test processing graceful handle of OSError."""
+        mock_image_open.side_effect = OSError("Test OSError")
         img = self._create_image(500, 500)
         with self.assertRaises(ValidationError):
             process_image_field(img)
