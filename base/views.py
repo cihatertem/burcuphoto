@@ -1,5 +1,6 @@
 import concurrent.futures
 import os
+from dataclasses import dataclass
 
 from django.conf import settings
 from django.contrib import messages
@@ -28,6 +29,15 @@ from .utils import client_ip_key, current_year, get_client_ip
 
 CONTACT_RATE_LIMIT = "2/m"
 CONTACT_RATE_LIMIT_KEY = "ip"
+
+
+@dataclass
+class ContactEmailData:
+    name: str
+    email: str
+    body: str
+    ip_address: str
+    site_domain: str
 
 
 # Create your views here.
@@ -159,8 +169,16 @@ class Contact(YearContext, TemplateView):
         ip_address = get_client_ip(request)
         site_domain = request.get_host()
 
+        email_data = ContactEmailData(
+            name=name,
+            email=email,
+            body=body,
+            ip_address=ip_address,
+            site_domain=site_domain,
+        )
+
         try:
-            self._send_contact_email(name, email, body, ip_address, site_domain)
+            self._send_contact_email(email_data)
         except BadHeaderError:
             messages.error(request, "Invalid header found.")
             return redirect("base:contact")
@@ -171,23 +189,21 @@ class Contact(YearContext, TemplateView):
         )
         return redirect("base:home")
 
-    def _send_contact_email(
-        self, name: str, email: str, body: str, ip_address: str, site_domain: str
-    ) -> None:
+    def _send_contact_email(self, data: "ContactEmailData") -> None:
         msg = EmailMessage(
             subject="Web Site Visitor",
             body=(
-                f"From {escape(name)}, {escape(email)}\n\n"
-                f"{escape(body)}\n\n"
-                f"IP: {ip_address}\n"
-                f"Site: {site_domain}\n"
+                f"From {escape(data.name)}, {escape(data.email)}\n\n"
+                f"{escape(data.body)}\n\n"
+                f"IP: {data.ip_address}\n"
+                f"Site: {data.site_domain}\n"
             ),
             from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
             to=[
                 os.getenv("EMAIL_RECEIVER_ONE"),
                 os.getenv("EMAIL_RECEIVER_TWO"),
             ],
-            reply_to=[email] if email else None,
+            reply_to=[data.email] if data.email else None,
         )
         # Prevent email header injection synchronously by validating headers in the main thread
         msg.message()
